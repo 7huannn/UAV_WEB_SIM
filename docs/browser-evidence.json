@@ -1,0 +1,193 @@
+{
+  "url": "http://localhost:4175",
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1600,
+    1000
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "profile": {
+    "quality": "Low",
+    "frames": 30,
+    "meanFps": 3.0406843566925463,
+    "medianFrameMs": 333.3000000000002,
+    "p95FrameMs": 350.10000000000036,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 16,
+    "bundle": "/assets/index-BlaCnUXk.js",
+    "clumpsReady": true
+  },
+  "performance": {
+    "fps": 3,
+    "drawCalls": 87,
+    "triangles": 271872,
+    "physicsHz": 83,
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "loading": false,
+    "error": null
+  },
+  "initial": {
+    "t": {
+      "mode": "Disarmed",
+      "armed": false,
+      "altitude": 0,
+      "position": [
+        -20,
+        0.32,
+        0
+      ],
+      "speed": 0.0011425207185476345,
+      "groundSpeed": 0,
+      "verticalSpeed": 0.0011425207185476345,
+      "roll": 0,
+      "pitch": 0,
+      "yaw": 0,
+      "rates": [
+        0,
+        0,
+        0
+      ],
+      "rpm": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thrust": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "wind": [
+        0.6632936007283144,
+        0.025936439370904188,
+        1.5065167399963908
+      ],
+      "progress": 0,
+      "time": 3.4640000000000026,
+      "droppedTime": 10.616053999999997,
+      "paused": false,
+      "missionPaused": false
+    },
+    "stats": {
+      "fps": 3,
+      "drawCalls": 87,
+      "triangles": 271872,
+      "physicsHz": 83,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "loading": false,
+      "error": null
+    }
+  },
+  "takeoff": {
+    "mode": "Position hold",
+    "armed": true,
+    "altitude": 5.003619036720137,
+    "position": [
+      -20.000030755356814,
+      5.323619036720137,
+      0.002059426201021447
+    ],
+    "speed": 0.007728092684724185,
+    "groundSpeed": 0.007666421470389511,
+    "verticalSpeed": -0.0009743707621014729,
+    "roll": 0.050657005862223346,
+    "pitch": -0.3139595360710638,
+    "yaw": -0.0002791659053270869,
+    "rates": [
+      -0.0031303751286977906,
+      -0.0000095911491234158,
+      0.0017555981166968364
+    ],
+    "rpm": [
+      4201.027191129359,
+      4200.882719205604,
+      4201.432131996775,
+      4201.52682417076
+    ],
+    "thrust": [
+      36.77238698838526,
+      36.76985785162954,
+      36.7794763783215,
+      36.78113427387419
+    ],
+    "wind": [
+      1.064252270738903,
+      -0.04798994042619307,
+      1.9059276020779403
+    ],
+    "progress": 0,
+    "time": 27.680000000002583,
+    "droppedTime": 33.015154,
+    "paused": false,
+    "missionPaused": false
+  },
+  "rainy": {
+    "wet": 0.9117977525632319,
+    "rain": true,
+    "wind": 6.803182875760708,
+    "roll": -1.0300303884719209
+  },
+  "mission": {
+    "mode": "Figure eight",
+    "armed": true,
+    "altitude": 4.9981779164611515,
+    "position": [
+      9.852720172622078,
+      5.318177916461152,
+      -5.799414958173525
+    ],
+    "speed": 2.2767160221469367,
+    "groundSpeed": 2.2767159962705725,
+    "verticalSpeed": 0.0003432583059075216,
+    "roll": 2.3014516793601976,
+    "pitch": 4.353191502534259,
+    "yaw": 8.195939838356123,
+    "rates": [
+      0.020768988727673472,
+      -0.002134285956036261,
+      -0.028084820516460416
+    ],
+    "rpm": [
+      4209.968003718102,
+      4209.7338769552525,
+      4208.959885757921,
+      4209.096677777205
+    ],
+    "thrust": [
+      36.92907479940288,
+      36.92496747872251,
+      36.9113908616068,
+      36.91379015543582
+    ],
+    "wind": [
+      0.723478374689367,
+      0.04738647676832311,
+      1.352600445437958
+    ],
+    "progress": 0.349069517897859,
+    "time": 178.69599999994634,
+    "droppedTime": 67.363554,
+    "paused": false,
+    "missionPaused": false
+  },
+  "checks": [
+    "Initial WebGL2 scene, textures and original GLB loaded",
+    "Takeoff button drives motor-based climb and stable 5m hover",
+    "Keyboard movement and yaw go through the physical controller after a button click",
+    "Follow and FPV cameras track the physical aircraft",
+    "Weather selector blends cloud/rain, wets concrete and physically disturbs aircraft",
+    "Autonomous mission completes a full lap, staying inside the court",
+    "Mission pause holds the current position and stops route progress",
+    "Markers, collider overlay and graphics quality controls work",
+    "Global pause stops simulated time",
+    "Land button descends and disarms on physical ground contact",
+    "Reset returns to H at rest",
+    "Reference and keyboard-help dialogs open and close",
+    "390px mobile layout has accessible flight/mission controls and no horizontal overflow"
+  ],
+  "errors": [],
+  "requests": [],
+  "note": "Physics forward-stepped through the actual fixed-step integrator for long flight scenarios. Screenshots are actual live browser renders. Software SwiftShader performance is not a hardware GPU benchmark."
+}

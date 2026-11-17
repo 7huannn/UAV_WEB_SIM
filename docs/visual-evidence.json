@@ -1,0 +1,21 @@
+{
+  "state": {
+    "stats": {
+      "fps": 1,
+      "drawCalls": 41,
+      "triangles": 5246786,
+      "physicsHz": 17,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "loading": false,
+      "error": null
+    },
+    "clumpsReady": true,
+    "quality": "High"
+  },
+  "errors": [],
+  "screenshots": [
+    "ground-concrete-detail.png",
+    "grass-closeup.png"
+  ],
+  "note": "Actual High-quality WebGL2 browser screenshots on SwiftShader. Subjective visual acceptance requires inspection."
+}

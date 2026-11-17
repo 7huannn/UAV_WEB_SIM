@@ -1,0 +1,51 @@
+{
+  "reference": {
+    "image": "assets/reference/arena-layout.png",
+    "pixelBounds": [129, 136, 1159, 754],
+    "pixelsPerMeter": 22.8888889,
+    "status": "Dimension-calibrated trace; neck Beziers and minor labels estimated. See docs/ASSUMPTIONS.md."
+  },
+  "concrete": { "length": 45, "width": 27, "height": 0 },
+  "grass": { "length": 60, "width": 42, "height": -0.035 },
+  "paint": {
+    "v1Width": 0.05,
+    "v2Width": 0.1,
+    "v3Width": 0.1,
+    "dashLength": 0.62,
+    "gapLength": 0.4
+  },
+  "corridors": {
+    "outer": { "minX": -18.5, "maxX": 19.5, "minZ": -10.5, "maxZ": 10.5 },
+    "center": { "minX": -17, "maxX": 18, "minZ": -9, "maxZ": 9 },
+    "inner": { "minX": -15.5, "maxX": 16.5, "minZ": -7.5, "maxZ": 7.5 },
+    "entryHalfWidth": 1.5
+  },
+  "figureEight": {
+    "centers": [
+      [-7.5, 0],
+      [8.5, 0]
+    ],
+    "innerRadius": 4,
+    "routeRadius": 5.5,
+    "outerRadius": 7,
+    "neckHalfWidth": 2.95,
+    "altitude": 5
+  },
+  "landingZones": [
+    { "id": "H", "x": -20, "z": 0, "radius": 1.5 },
+    { "id": "HA", "x": -20, "z": -9, "radius": 1.5 },
+    { "id": "HB", "x": -20, "z": 9, "radius": 1.5 }
+  ],
+  "markers": [
+    { "id": "WP1", "x": -15.5, "z": -7.5 },
+    { "id": "WP2", "x": 16.5, "z": -7.5 },
+    { "id": "WP3", "x": 16.5, "z": 7.5 },
+    { "id": "WP4", "x": -15.5, "z": 7.5 },
+    { "id": "M1", "x": -17, "z": -1.5 },
+    { "id": "M2", "x": -17, "z": -9 },
+    { "id": "M3", "x": 18, "z": -9 },
+    { "id": "M4", "x": 18, "z": 9 },
+    { "id": "M5", "x": -17, "z": 9 },
+    { "id": "M7", "x": 0.5, "z": 0 }
+  ]
+}
