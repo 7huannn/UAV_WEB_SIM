@@ -1,7 +1,7 @@
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
-const base = process.env.UAV_URL ?? "http://localhost:4175";
+const base = process.env.UAV_URL ?? "http://127.0.0.1:4175";
 const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome",
@@ -139,7 +139,9 @@ try {
   await page
     .getByLabel("Chọn bài bay", { exact: true })
     .selectOption("outer-circuit");
-  await page.getByLabel("Mức gió", { exact: true }).selectOption("light");
+  if ((await page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Điều kiện bay$/})}).getAttribute('open')) === null)
+    await page.locator('.task-group>summary').filter({hasText: 'Điều kiện bay'}).click();
+  await page.getByLabel("Mức gió", { exact: true }).fill("2");
   await button("Tiếp theo").click();
   await button("Dùng tay điều khiển").click();
   await frames();
@@ -150,7 +152,7 @@ try {
   await button("Dùng bàn phím").click();
   await capture("controller-simple-check");
   await button("Tiếp theo").click();
-  assert.ok(await page.getByText(/Bài đã chọn: Bay vòng ngoài/).isVisible());
+  assert.ok(await page.getByRole("heading", { name: "Sẵn sàng bắt đầu", exact: true }).isVisible());
   await button("Chuẩn bị bài bay").focus();
   await page.keyboard.press("Space");
   await frames();
@@ -171,48 +173,27 @@ try {
     .then(async (yes) => {
       if (yes) await button("Bỏ qua hướng dẫn").click();
     });
-  const expected = {
-    calm: [0, 0, 0],
-    light: [1.8, 0.6, 0.15],
-    medium: [3.8, 1.8, 0.3],
-    strong: [9, 4, 0.7],
-  };
-  for (const [key, values] of Object.entries(expected)) {
-    await page.getByLabel("Mức gió", { exact: true }).selectOption(key);
-    assert.deepEqual(
-      await page.evaluate(() => {
-        const t = window.__UAV__.weather.target;
-        return [t.wind, t.gust, t.turbulence];
-      }),
-      values,
-    );
+  const weatherGroup = page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Điều kiện bay$/})});
+  if ((await weatherGroup.getAttribute('open')) === null) await weatherGroup.locator('summary').click();
+  for (let n = 0; n <= 10; n++) {
+    await page.getByLabel("Mức gió", {exact: true}).fill(String(n));
+    const actual = await page.evaluate(() => { const t = window.__UAV__.weather.target; return [t.wind, t.gust, t.turbulence]; });
+    for (const [i, factor] of [.9, .4, .07].entries()) assert.ok(Math.abs(actual[i] - n * factor) < 1e-8);
+    await page.getByLabel("Mức mưa", {exact: true}).fill(String(n));
+    assert.equal(await page.evaluate(() => window.__UAV__.weather.target.rain), n / 10);
   }
-  await page.getByLabel("Mức gió", { exact: true }).selectOption("light");
-  await page
-    .getByLabel("Điều kiện thời tiết", { exact: true })
-    .selectOption("cloudy");
-  await page.locator(".simple-weather").scrollIntoViewIfNeeded();
+  await page.getByLabel("Mức gió", {exact: true}).fill("2");
+  await page.getByLabel("Mức mưa", {exact: true}).fill("3");
   await capture("wind-simple-selector");
-  await page.reload({ waitUntil: "networkidle" });
-  await page.waitForFunction(
-    () => window.__UAV__ && !window.__UAV__.stats.loading,
-  );
-  await nav("Luyện tập");
-  assert.equal(
-    await page.getByLabel("Mức gió", { exact: true }).inputValue(),
-    "light",
-  );
-  assert.equal(
-    await page.getByLabel("Điều kiện thời tiết", { exact: true }).inputValue(),
-    "cloudy",
-  );
-  assert.equal(
-    await page.evaluate(() => window.__UAV__.weather.target.wind),
-    1.8,
-  );
-  checks.push(
-    "Four wind presets map to exact shared-engine values; sky independent; convenience preferences survive reload",
-  );
+  await page.reload({waitUntil: 'networkidle'});
+  await page.waitForFunction(() => window.__UAV__ && !window.__UAV__.stats.loading);
+  await nav('Luyện tập');
+  if ((await page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Điều kiện bay$/})}).getAttribute('open')) === null)
+    await page.locator('.task-group>summary').filter({hasText: 'Điều kiện bay'}).click();
+  assert.equal(await page.getByLabel("Mức gió", {exact: true}).inputValue(), '2');
+  assert.equal(await page.getByLabel("Mức mưa", {exact: true}).inputValue(), '3');
+  assert.equal(await page.evaluate(() => window.__UAV__.weather.target.wind), 1.8);
+  checks.push('Eleven discrete wind/rain levels map to the shared engine, remain independent and persist separately from assessment');
   // Fixed camera: controls and wheel only rotate, and FOV never depends on aircraft distance.
   await page.locator(".training-panel").evaluate((e) => (e.scrollTop = 0));
   const initial = await page.evaluate(() => {
@@ -237,7 +218,9 @@ try {
   );
   assert.deepEqual(initial.eye, [0, geom.grass.height + 1.65, 17]);
   await button("Nhìn phải").click();
+  await page.locator(".head-more>summary").click();
   await button("Nhìn lên").click();
+  await page.locator(".head-more>summary").click();
   await frames();
   assert.deepEqual(
     await page.evaluate(() => window.__UAV__.camera.position.toArray()),
@@ -277,10 +260,9 @@ try {
     await page.evaluate(() => window.__UAV__.weather.target.gust),
     2.4,
   );
-  assert.equal(
-    await page.getByLabel("Mức gió", { exact: true }).inputValue(),
-    "",
-  );
+  if ((await page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Điều kiện bay$/})}).getAttribute('open')) === null)
+    await page.locator('.task-group>summary').filter({hasText: 'Điều kiện bay'}).click();
+  assert.ok(await page.getByText('Gió: Tùy chỉnh bởi giảng viên', {exact:true}).isVisible());
   await nav("Cài đặt");
   await page.locator(".technical-settings>summary").click();
   await page.getByLabel("Pilot setback", { exact: true }).fill("");
@@ -305,9 +287,11 @@ try {
     await page.evaluate(() => window.__UAV__.pilotMarker.visible),
     true,
   );
+  await page.locator(".training-scene-tools .camera-aids>summary").click();
   await button("Nhìn từ trên").click();
   await capture("pilot-technical-marker");
   await button("Góc người lái").click();
+  await page.locator(".training-scene-tools .camera-aids>summary").click();
   await page.getByLabel("Hiển thị", { exact: true }).selectOption("Low");
   await page.reload({ waitUntil: "networkidle" });
   await page.waitForFunction(
@@ -322,17 +306,13 @@ try {
     "Advanced settings initially collapsed; station diagram/optional marker; valid station and display quality persist",
   );
   await nav("Giảng viên");
-  await page
-    .getByLabel("Mức gió thi thử", { exact: true })
-    .selectOption("medium");
-  await page
-    .getByLabel("Điều kiện thi thử", { exact: true })
-    .selectOption("rain");
+  await page.getByLabel("Mức gió thi thử", {exact:true}).fill("4");
+  await page.getByLabel("Mức mưa thi thử", {exact:true}).fill("6");
   await capture("instructor-dashboard");
   await nav("Thi thử");
   assert.equal(
     await page.evaluate(() => window.__UAV__.weather.target.wind),
-    3.8,
+    3.6,
   );
   const skip = button("Bỏ qua hướng dẫn");
   if (await skip.isVisible()) await skip.click();
@@ -344,9 +324,10 @@ try {
         w.setSimpleWeather("calm", "clear"),
         w.setAdvancedWeather("wind", 0),
         w.setWeatherPreset("Clear skies"),
+        w.setWeatherLevels(0, 0),
       ];
     }),
-    [false, false, false],
+    [false, false, false, false],
   );
   await button("Chuẩn bị bài bay").click();
   const strict = await page.evaluate(() => {
@@ -389,13 +370,13 @@ try {
   await nav("Luyện tập");
   assert.equal(
     await page.evaluate(() => window.__UAV__.weather.target.gust),
-    0.6,
+    0.8,
   );
   // The prior reload intentionally restores the simple light/cloudy convenience preset.
   // Renderer/reference demonstration remains the original force-driven mission.
   await nav("Bay mẫu tự động");
   await page
-    .getByLabel("Weather preset", { exact: true })
+    .getByLabel("Kịch bản thời tiết", { exact: true })
     .selectOption("Clear skies");
   await page.evaluate(() => {
     const w = window.__UAV__;
@@ -482,7 +463,7 @@ try {
     .locator(".head-controls button,.workspace-navigation>button")
     .evaluateAll((nodes) =>
       nodes
-        .filter((n) => !n.disabled)
+        .filter((n) => !n.disabled && n.getBoundingClientRect().height > 0)
         .map((n) => ({
           text: n.innerText,
           height: n.getBoundingClientRect().height,

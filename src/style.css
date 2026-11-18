@@ -3282,3 +3282,93 @@ button:disabled {
 [hidden] {
   display: none !important;
 }
+
+/* Task-centered workspace: scene, disclosures and persistent flight actions. */
+.training-mode:not(.home-mode) {
+  grid-template-columns: 360px minmax(0, 1fr);
+  grid-template-rows: 56px 52px auto minmax(0, 1fr) 36px;
+}
+.training-mode:not(.home-mode) .app-header { padding: 0 20px; }
+.training-mode:not(.home-mode) .brand small,
+.training-mode:not(.home-mode) .project-name { display: none; }
+.training-mode:not(.home-mode) .workspace-navigation { padding: 2px 12px; }
+.training-mode:not(.home-mode) .training-panel { padding: 18px; gap: 14px; }
+.training-mode:not(.home-mode):has(.wide-panel) { grid-template-columns: 440px minmax(0, 1fr); }
+.training-mode.flight-workspace { grid-template-rows: 56px 52px auto minmax(0, 1fr) auto 32px; }
+.flight-workspace .training-panel { grid-row: 3/6; }
+.flight-workspace .statusbar { grid-row: 6; }
+.training-mode:has(.collapsed-panel) { grid-template-columns: 0 minmax(0, 1fr); }
+.training-mode .collapsed-panel { display: none; }
+.training-mode .training-scene-tools { padding: 6px 10px; gap: 8px; align-items: center; }
+.training-mode .training-scene-tools .head-controls { flex-basis: auto; margin-left: auto; flex-wrap: nowrap; }
+.training-mode .training-scene-tools .camera-aids { margin: 0; order: initial; position: relative; flex-basis: auto; }
+.training-scene-tools .camera-aids > div,
+.head-more > div { position: absolute; top: 100%; right: 0; width: min(340px, 85vw); background: #fff; padding: 12px; border: 1px solid var(--ux-border); box-shadow: 0 6px 15px #203c3120; z-index: 40; display: flex; flex-wrap: wrap; gap: 8px; }
+.training-scene-tools summary { cursor: pointer; min-height: 44px; padding: 11px 8px; font-size: 16px; color: var(--ux-ink); }
+.head-more { position: relative; }
+.training-scene-tools .panel-toggle { min-height: 44px; padding: 8px 10px; border: 1px solid var(--ux-border); border-radius: 5px; background: #fff; font-size: 16px; color: var(--ux-ink); }
+.training-panel .training-eyebrow { display: none; }
+.training-panel h1 { font-size: 25px; }
+.training-panel .preparation-groups { border: 0; padding: 0; gap: 10px; }
+.training-panel .task-group { border: 1px solid var(--ux-border); border-radius: 7px; padding: 0; background: #fff; }
+.training-panel .task-group > summary { padding: 12px 14px; line-height: 1.5; }
+.task-group > summary b { font-size: 18px; }
+.task-group > summary span { display: block; margin: 4px 0 0 18px; font-weight: normal; color: var(--ux-muted); font-size: 16px; }
+.task-group-content { display: flex; flex-direction: column; gap: 14px; padding: 4px 14px 16px; }
+.task-group .input-check { border: 0; padding: 0; }
+.task-group .input-check h2 { display: none; }
+.training-panel .journey-step { font-weight: bold; }
+.journey-step span { display: block; color: var(--ux-muted); font-weight: normal; }
+.guide-switch { display: flex; gap: 8px; flex-wrap: wrap; }
+.guide-switch button { flex: 1; }
+.setup-guide { background: #eef3eb; border-radius: 6px; padding: 12px; display: grid; gap: 10px; }
+.training-panel .setup-guide h2 { font-size: 18px; }
+.flight-dock { grid-column: 2; grid-row: 5; padding: 10px 14px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; background: #f8faf6; border-top: 1px solid var(--ux-border); z-index: 9; }
+.flight-dock .dock-state { color: var(--ux-muted); font-size: 16px; margin-right: auto; }
+.flight-dock button { min-height: 44px; min-width: 44px; border: 1px solid var(--ux-border); padding: 10px 14px; font-size: 16px; line-height: 1.4; border-radius: 5px; background: #fff; color: var(--ux-ink); }
+.flight-dock .training-primary { color: #fff; background: var(--ux-accent); border-color: var(--ux-accent); font-weight: bold; }
+.flight-dock .safety-action { color: #85371c; border: 2px solid #a54d26; background: #fff4e8; }
+.training-panel .simple-weather input[type=range] { width: 100%; min-height: 44px; accent-color: var(--ux-accent); cursor: pointer; }
+.simple-weather input::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ux-accent); border: 2px solid white; box-shadow: 0 0 0 1px var(--ux-accent); }
+.simple-weather input::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--ux-accent); border: 2px solid white; }
+.range-endpoints { display: flex; justify-content: space-between; gap: 8px; font-size: 16px; }
+.training-panel .training-muted { font-size: 16px !important; }
+@media (max-width: 1100px) {
+ .training-mode:not(.home-mode) { grid-template-columns: 330px minmax(0, 1fr); }
+ .training-mode:has(.collapsed-panel) { grid-template-columns: 0 minmax(0, 1fr); }
+ .training-scene-tools .panel-toggle { font-size: 15px; }
+ .training-mode .training-scene-tools .head-controls { flex-wrap: wrap; }
+ .head-more summary { font-size: 15px; }
+}
+@media (max-width: 800px) {
+ .training-mode:not(.home-mode), .training-mode:not(.home-mode):has(.wide-panel), .training-mode:has(.collapsed-panel) { height: auto; min-height: 100dvh; grid-template-columns: minmax(0, 1fr); grid-template-rows: 56px auto auto 38vh auto auto auto; }
+ .training-mode:not(.home-mode) .workspace-navigation { grid-row: 2; min-height: 96px; flex-wrap: wrap; }
+ .training-mode:not(.home-mode) .training-scene-tools { grid-column: 1; grid-row: 3; }
+ .training-mode:not(.home-mode) .stage { grid-column: 1; grid-row: 4; min-height: 240px; }
+ .training-mode:not(.home-mode) .flight-dock { grid-column: 1; grid-row: 5; position: sticky; bottom: 0; padding: 10px; }
+ .training-mode:not(.home-mode) .training-panel { grid-column: 1; grid-row: 6; overflow: visible; }
+ .training-mode:not(.home-mode) .statusbar { grid-row: 7; min-height: 44px; }
+ .training-mode .training-scene-tools .head-controls { margin-left: 0; flex-wrap: wrap; }
+ .flight-dock .dock-state { flex-basis: 100%; }
+ .training-panel .training-intro { margin: 0; }
+}
+/* The recommended first action stays distinct from review/configuration. */
+.home-actions > button:first-child { background: var(--ux-accent); border-color: var(--ux-accent); color: #fff; }
+.home-actions > button:first-child p,
+.home-actions > button:first-child b,
+.home-actions > button:first-child > span { color: #fff; }
+/* Open secondary camera choices stay in the toolbar, never over the aircraft. */
+.training-scene-tools .camera-aids[open] { flex-basis: 100%; order: 3; }
+.training-scene-tools .camera-aids > div,
+.head-more > div { position: static; width: auto; box-shadow: none; border: 0; padding: 4px 0; }
+.training-panel .essential-status > b { font-size: 18px; line-height: 1.5; }
+.training-panel .simple-weather input[type=range] { appearance: none; background: transparent; }
+.simple-weather input::-webkit-slider-runnable-track { height: 6px; background: #cad7cc; border-radius: 3px; }
+.simple-weather input::-webkit-slider-thumb { margin-top: -11px; }
+.simple-weather input::-moz-range-track { height: 6px; background: #cad7cc; border-radius: 3px; }
+@media (max-width: 800px) {
+ body { overflow: auto; }
+ .training-mode.flight-workspace { padding-bottom: var(--flight-dock-height, 120px); }
+ .training-mode.flight-workspace .flight-dock { position: fixed; inset: auto 0 0; max-height: 50dvh; overflow: auto; }
+ .flight-panel :is(input, select, button, summary) { scroll-margin-bottom: calc(var(--flight-dock-height, 120px) + 16px); }
+}

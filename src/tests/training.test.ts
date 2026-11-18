@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { PerspectiveCamera, Vector3 } from "three";
 import { config } from "../arena/geometry";
-import { simpleWeather, windLevels } from "../training/weatherPresets";
+import { weatherAtLevels, windLevelOf, simpleWeather, windLevels } from "../training/weatherPresets";
 import {
   PILOT_STATION,
   applyPilotCamera,
@@ -458,7 +458,7 @@ test("front pilot station follows court midpoint and outward edge normal, includ
   const t = stationFromEdge([10, -20], [10, 20], [0, 0], 3, -0.035);
   assert.equal(t.x, 13);
   assert.equal(t.z, 0);
-  assert.ok(Math.abs(Math.abs(t.initialYaw!) - Math.PI) < 1e-8);
+  assert.ok(Math.abs(t.initialYaw! - Math.atan2(8, -13)) < 1e-8);
   const reversed = stationFromEdge([10, 20], [10, -20], [0, 0], 3, -0.035);
   assert.deepEqual(reversed, t);
   assert.ok(!validFrontStation({ ...s, x: 1 }));
@@ -520,4 +520,44 @@ test("legacy archived station stays importable and Vietnamese reporting never ed
   assert.match(learnerReport(parsed.payload), /không tự kết luận đạt/);
   assert.equal((await seal(parsed.payload)).sha256, sealed.sha256);
   assert.equal(parsed.payload.pilotStation.x, -25);
+});
+
+
+test("0–10 weather levels are monotonic, independent, bounded and use the existing engine", () => {
+  const base = simpleWeather("calm", "clear");
+  for (let n = 0; n <= 10; n++) {
+    const p = weatherAtLevels(base, n, n);
+    assert.equal(windLevelOf(p), n);
+    assert.equal(p.wind, n * .9);
+    assert.equal(p.rain, n / 10);
+    const weather = new Weather(); weather.current = {...base}; weather.target = p;
+    for (let i = 0; i < 3000; i++) weather.step(.004);
+    assert.ok(Math.abs(weather.current.wind - p.wind) < .025);
+    if (n) { const prev = weatherAtLevels(base, n - 1, n - 1); assert.ok(p.wind > prev.wind && p.gust > prev.gust && p.rain > prev.rain && p.visibility < prev.visibility); }
+    assert.deepEqual(weatherAtLevels(p, undefined, 0).wind, p.wind);
+    assert.equal(weatherAtLevels(p, 0).rain, p.rain);
+  }
+  for (const n of [-1, 11, NaN, .5]) assert.throws(() => weatherAtLevels(base, n, 0));
+});
+
+test("ground guide projects vertically to court/turf, fades on landing and is Training only", async () => {
+  const { projectedGround, groundGuideAllowed, makeGroundGuide } = await import("../scene/groundGuide");
+  const guide = makeGroundGuide();
+  const p = new Vector3(4, 5.32, -2);
+  guide.update(p, true);
+  assert.equal(guide.group.visible, true);
+  const line = guide.group.children[0] as import("three").Line;
+  const ring = guide.group.children[1] as import("three").Mesh;
+  assert.deepEqual(ring.position.toArray(), [4, .025, -2]);
+  const data = Array.from(line.geometry.attributes.position.array);
+  assert.equal(data[0], data[3]); assert.equal(data[2], data[5]);
+  assert.equal(projectedGround(23, 0), -.035);
+  guide.update(new Vector3(23, 5, 0), true);
+  assert.ok(Math.abs(ring.position.y - (-.01)) < 1e-8);
+  guide.update(new Vector3(0, .32, 0), true); assert.equal(guide.group.visible, false);
+  for (const page of ["Training", "Mock Examination", "Instructor", "Session Review", "Reference missions"]) {
+    for (const mock of [false, true]) for (const replay of [false, true])
+      assert.equal(groundGuideAllowed(page, mock, replay), page === "Training" && !mock && !replay);
+  }
+  guide.update(p, false); assert.equal(guide.group.visible, false);
 });

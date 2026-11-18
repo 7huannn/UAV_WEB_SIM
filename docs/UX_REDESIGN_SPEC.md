@@ -1,3 +1,5 @@
+> Superseded layout details: the latest task-centered iteration is specified in [audit/architecture](HUMAN_CENTERED_UX_AUDIT.md) and [implementation report](HUMAN_CENTERED_UX_IMPLEMENTATION.md). Five independent preparation groups, persistent action dock, collapsible panel, compact camera toolbar,0–10 wind/rain sliders and Training-only ground guide replace the long preparation layout below. Historical design rationale remains for continuity.
+
 # Vietnamese UX redesign specification — v0.3.0
 
 Authoritative request: [VIETNAMESE_UX_REQUEST.md](VIETNAMESE_UX_REQUEST.md). Evidence, user assumptions and pending participant study: [UX research](VIETNAMESE_END_USER_UX_RESEARCH.md).

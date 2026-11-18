@@ -23,17 +23,17 @@ npm test            # native Node geometry/physics checks, no browser needed
 
 Ứng dụng mở ở **Trang chủ** với bốn lựa chọn: **Luyện tập**, **Thi thử**, **Xem lại bài bay**, **Cài đặt**. Chọn **Hướng dẫn bắt đầu** nếu mới sử dụng; có thể bỏ qua hoặc mở lại hướng dẫn. Các tiêu chí chỉ dùng luyện tập, không phải bộ sát hạch chính thức.
 
-1. Vào **Luyện tập**, chọn bài bay và **Mức gió**. Có Không gió, Gió nhẹ, Gió trung bình, Gió mạnh; mây/mưa được chọn riêng. Các mức gió là kịch bản mô phỏng, không phải ngưỡng cho phép ngoài thực địa.
+1. Vào **Luyện tập**, mở nhóm **Bài bay** để nhập mã và chọn bài. Nhóm **Thiết bị điều khiển** và **Điều kiện bay** đóng/mở độc lập, giữ nguyên giá trị. Gió và mưa có thanh trượt **0–10**, mức0 là không gió/không mưa; có nút đặt lại. Đây là thang mô phỏng, không phải giới hạn bay thực tế.
 2. Chọn **Dùng bàn phím** hoặc **Dùng tay điều khiển**. Với thiết bị USB, nhấn một nút để trình duyệt nhận; mở **Kiểm tra phản hồi điều khiển** để kiểm tra từng hướng. Cách gán trục, hiệu chỉnh và cấu hình đã lưu ở **Cài đặt tay điều khiển → Cài đặt nâng cao**. Chưa có tay điều khiển thực được kiểm chứng; chỉ thiết bị được trình duyệt Gamepad nhận mới có thể dùng. Dùng localhost hoặc HTTPS cho các tính năng bảo mật của trình duyệt.
 3. Chọn **Chuẩn bị bài bay**, kiểm tra trước bay, **Bật động cơ**, rồi **Bắt đầu bài tập** với các cần ở trung tâm. Tự cất cánh bằng R/F hoặc cần lên/xuống. Không có tự cất cánh, tự bay đường hoặc tự hạ cánh trong bài thủ công.
-4. **Góc người lái** đặt mắt cố định ở giữa cạnh dài phía trước (+Z), lùi3.5m ngoài V1: X=0,Z=17m; mắt cao1.65m, FOV dọc70°. H là điểm máy bay cất/hạ cánh. Đây là vị trí tạm đề xuất, cần khảo sát/xác nhận. Kéo chuột hoặc dùng các nút nhìn quanh; **Nhìn thẳng** về hướng ban đầu. Không theo máy bay, di chuyển, tự zoom hoặc phóng đại kích thước.
-5. Hoàn thành đủ hai vòng số8 hoặc toàn bộ M1–M5 theo thứ tự. **Tạm dừng bài bay** khác **Hủy bài bay**. Hủy giữ bản ghi chưa hoàn thành. Khi các phần bài bay đã được ghi nhận, chọn **Bắt đầu hạ cánh thủ công**, tự hạ trên H, **Tắt động cơ**, chờ cánh quạt dừng, kiểm tra sau bay rồi **Hoàn tất và lưu bài bay**. **Dừng khẩn cấp** khi đang trên không cần xác nhận và tắt lực đẩy; không tự hạ cánh.
+4. **Góc người lái** đặt mắt cố định ở giữa cạnh dài phía trước (+Z), lùi3.5m ngoài V1: X=0,Z=17m; mắt cao1.65m, FOV dọc55°, hướng ban đầu về nửa sân phía H và chúi5°. H là điểm máy bay cất/hạ cánh. Đây là vị trí tạm đề xuất, cần khảo sát/xác nhận. Kéo chuột hoặc dùng các nút nhìn quanh; **Nhìn thẳng** về hướng ban đầu. Không theo máy bay, di chuyển, tự zoom hoặc phóng đại kích thước.
+5. Thanh thao tác dưới vùng bay luôn có bước tiếp theo, tạm dừng và lệnh an toàn khi phù hợp. Có thể **Thu gọn bảng điều khiển** để mở rộng vùng quan sát. Trong **Hỗ trợ luyện tập**, bật/tắt **Hiện vị trí dưới máy bay**: nét đứt và vòng tròn chiếu thẳng xuống mặt sân, giảm khi hạ cánh. Không hiện trong Thi thử, Giảng viên hay phát lại. Hoàn thành đủ hai vòng số8 hoặc toàn bộ M1–M5 theo thứ tự. **Tạm dừng bài bay** khác **Hủy bài bay**. Hủy giữ bản ghi chưa hoàn thành. Khi các phần bài bay đã được ghi nhận, chọn **Bắt đầu hạ cánh thủ công**, tự hạ trên H, **Tắt động cơ**, chờ cánh quạt dừng, kiểm tra sau bay rồi **Hoàn tất và lưu bài bay**. **Dừng khẩn cấp** khi đang trên không cần xác nhận và tắt lực đẩy; không tự hạ cánh.
 6. **Giảng viên** đặt thời tiết cho lần **Thi thử** tiếp theo. Học viên thấy tóm tắt nhưng không sửa thời tiết; góc người lái, vị trí, bài và hỗ trợ bị khóa trong bài thi thử. Kết quả luôn cần người đánh giá, không tự cấp kết luận đạt chính thức.
 7. Vào **Xem lại bài bay** để mở bản ghi, phát lại, xem số liệu và xuất JSON/CSV/**báo cáo tiếng Việt**. Giảng viên thêm nhận xét riêng, không sửa dữ liệu gốc. Trình duyệt có thể xóa bộ nhớ; nên xuất bản sao lưu.
 
 **Cài đặt → Cài đặt nâng cao** giữ thời tiết số, khoảng lùi/chiều cao mắt/FOV, hướng dẫn hiệu chỉnh màn hình, lớp phủ PILOT và thông tin kỹ thuật. Chọn **Ưu tiên mượt / Cân bằng / Ưu tiên hình ảnh** để dùng các preset đồ họa hiện có. Thay đổi tiện ích không sửa bản ghi cũ. Màn hình nhỏ phù hợp cài đặt/xem lại; chưa chứng minh tương đương trạm huấn luyện màn hình lớn.
 
-See [UX implementation report](docs/UX_IMPLEMENTATION_REPORT.md), [UX research and pending human-testing plan](docs/VIETNAMESE_END_USER_UX_RESEARCH.md), [settings inventory](docs/SETTINGS_SIMPLIFICATION.md) and [pilot station design](docs/PILOT_STATION_AND_VLOS_DESIGN.md).
+See [latest task-centered UX report](docs/HUMAN_CENTERED_UX_IMPLEMENTATION.md), [audit and chosen flow](docs/HUMAN_CENTERED_UX_AUDIT.md), [previous UX implementation report](docs/UX_IMPLEMENTATION_REPORT.md), [UX research and pending human-testing plan](docs/VIETNAMESE_END_USER_UX_RESEARCH.md), [settings inventory](docs/SETTINGS_SIMPLIFICATION.md) and [pilot station design](docs/PILOT_STATION_AND_VLOS_DESIGN.md).
 
 Manual mode is **position-stabilized body-frame velocity / climb / yaw-rate**, using the existing 250 Hz PID/motor/force model. W/S follows the aircraft's forward/backward heading, A/D lateral, R/F climb/descent, Q/E yaw. Release holds the resulting target. Attitude/rate flight mode is not implemented. Text entry, window blur or controller loss neutralizes input and interrupts active attempts; click the scene to focus before flying. Buttons and guidance checkboxes remain usable. Space pauses; interruptions remain logged.
 
@@ -43,7 +43,7 @@ Attempts checkpoint to IndexedDB every 10 simulated seconds and seal on completi
 
 See [implementation and verification report](docs/IMPLEMENTATION_AND_VERIFICATION_REPORT.md), [rules and scoring](docs/EXAMINATION_RULES_AND_SCORING.md), [standards research](docs/UAV_EXAMINATION_STANDARDS_RESEARCH.md), [pilot station design](docs/PILOT_STATION_AND_VLOS_DESIGN.md), [controller architecture](docs/CONTROLLER_INPUT_ARCHITECTURE.md) and [real-world validation plan](docs/REAL_WORLD_VALIDATION_PLAN.md).
 
-![Vietnamese training home](docs/ux-screenshots/vietnamese-home-desktop.png)
+![Vietnamese training home](docs/task-ux-screenshots/home.png)
 
 ## Reference demonstrations
 
@@ -97,10 +97,12 @@ Browser validation uses installed Chrome and Playwright:
 
 ```sh
 # Start a dev/preview server and use its actual printed port.
-UAV_URL=http://localhost:4175 npm run test:browser
-UAV_URL=http://localhost:4175 npm run test:training-browser
-UAV_URL=http://localhost:4175 npm run test:ux-browser
-UAV_URL=http://localhost:4175 node scripts/visual-check.mjs
+UAV_URL=http://127.0.0.1:4175 npm run test:browser
+UAV_URL=http://127.0.0.1:4175 npm run test:training-browser
+UAV_URL=http://127.0.0.1:4175 npm run test:native-zoom-browser # actual Chrome Page zoom 200%, keyboard preparation
+npm run test:task-ux-browser # task groups, level sliders, guide isolation and zoom-equivalent reflow
+npm run test:ux-browser
+UAV_URL=http://127.0.0.1:4175 node scripts/visual-check.mjs
 # Optional: CHROME_PATH=/path/to/chrome; UAV_HARDWARE=1 omits forced SwiftShader.
 ```
 

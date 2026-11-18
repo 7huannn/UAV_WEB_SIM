@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-18T10:34:15.421Z",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-i8icxAy0.js",
+  "setting": "chrome://settings/appearance #zoomLevel = 2 (200%)",
+  "measured": {
+    "width": 683,
+    "height": 384,
+    "dpr": 2,
+    "visualScale": 1
+  },
+  "checks": [
+    "Native Chrome Page zoom 200%: actual683×384 CSS/DPR2 on1366×768 viewport, no pinch scale; keyboard disclosure/input/slider/prepare and preflight/action targets retain functionality without horizontal overflow"
+  ],
+  "screenshots": [
+    "native-zoom-200-home",
+    "native-zoom-200-sliders",
+    "native-zoom-200-preflight",
+    "native-zoom-200-checklist-complete"
+  ],
+  "controls": [
+    {
+      "text": "Xác nhận kiểm tra trước bay",
+      "width": 246.8203125,
+      "height": 44.3984375,
+      "font": "16px"
+    },
+    {
+      "text": "Hủy chuẩn bị",
+      "width": 123.390625,
+      "height": 44.3984375,
+      "font": "16px"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Automated Chrome only, no real participant or screen-reader audit"
+  ]
+}

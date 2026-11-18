@@ -90,7 +90,7 @@ function MiniMap({ t }: { t: Telemetry }) {
     <svg
       className="mini-map"
       viewBox="-8 -8 219 138"
-      aria-label="Live top-down flight position"
+      aria-label="Vị trí máy bay nhìn từ trên"
     >
       <rect
         x="0"
@@ -328,7 +328,7 @@ export default function App() {
       case "arm":
         d.armed ? d.disarm() : d.arm();
         setNotice(
-          d.armed ? "Motors armed. Select Take off." : "Motors disarmed.",
+          d.armed ? vi("Motors armed. Select Take off.") : vi("Motors disarmed."),
         );
         break;
       case "takeoff":
@@ -351,7 +351,7 @@ export default function App() {
         setRoute(true);
         world.current?.setRoute(true);
         setNotice(
-          `${missions[d.selectedMission].name}: take off, fly the course, return to H and land.`,
+          `${vi(missions[d.selectedMission].name)}: tự cất cánh, bay đủ đường, về H và hạ cánh.`,
         );
         break;
       case "abort":
@@ -364,13 +364,13 @@ export default function App() {
         d.toggleMissionPause();
         setNotice(
           d.missionPaused
-            ? "Mission paused. Holding position."
-            : "Mission resumed.",
+            ? vi("Mission paused. Holding position.")
+            : vi("Mission resumed."),
         );
         break;
       case "pause":
         d.paused = !d.paused;
-        setNotice(d.paused ? "Simulation paused." : "Simulation resumed.");
+        setNotice(d.paused ? vi("Simulation paused.") : vi("Simulation resumed."));
         break;
       case "reset":
         d.reset();
@@ -387,7 +387,7 @@ export default function App() {
     setPreset(p);
     world.current?.weather.setPreset(p);
     setWeather({ ...presets[p] });
-    setNotice(`${p}. Environment transitions over a few seconds.`);
+    setNotice(`${vi(p)}. Thời tiết chuyển dần trong vài giây.`);
   }
   function param(k: keyof WeatherParams, v: number) {
     setWeather((w) => ({ ...w, [k]: v }));
@@ -405,7 +405,7 @@ export default function App() {
   }
   return (
     <div
-      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""} ${workspace === "Home" ? "home-mode" : ""}`}
+      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""} ${workspace === "Home" ? "home-mode" : ""} ${["Training", "Mock Examination"].includes(workspace) ? "flight-workspace" : ""}`}
     >
       <header className="app-header">
         <button
@@ -521,14 +521,13 @@ export default function App() {
         )
       )}
       <aside className="sidebar">
-        <div className="section-eyebrow">
-          WORKSPACE <span>01</span>
+        <div className="section-eyebrow">{vi("WORKSPACE")}<span>01</span>
         </div>
         <div className="side-tabs">
           {["Flight desk", "Airframe"].map((v) => (
             <button
               className={tab === v ? "active" : ""}
-              key={v}
+              key={vi(v)}
               onClick={() => setTab(v)}
             >
               {v === "Flight desk" ? (
@@ -536,7 +535,7 @@ export default function App() {
               ) : (
                 <Icon name="drone" size={16} />
               )}{" "}
-              {v}
+              {vi(v)}
             </button>
           ))}
         </div>
@@ -548,18 +547,17 @@ export default function App() {
                   <Icon name="drone" size={28} />
                 </span>
                 <div>
-                  <h2>Quadrotor 15</h2>
-                  <p>15 kg · X configuration</p>
+                  <h2>{vi("Quadrotor 15")}</h2>
+                  <p>{vi("15 kg · X configuration")}</p>
                 </div>
                 <span className={`status-dot ${t.armed ? "armed" : ""}`} />
               </div>
               <div className="aircraft-meta">
-                <span>FLIGHT STATE</span>
-                <b>{t.mode}</b>
+                <span>{vi("FLIGHT STATE")}</span>
+                <b>{vi(t.mode)}</b>
               </div>
             </div>
-            <div className="panel-title">
-              Flight controls<span>250 Hz</span>
+            <div className="panel-title">{vi("Flight controls")}<span>250 Hz</span>
             </div>
             <button
               className={`arm-button ${t.armed ? "is-armed" : ""}`}
@@ -567,83 +565,71 @@ export default function App() {
               disabled={disabled}
             >
               <Icon name="lock" size={16} />
-              {t.armed ? "Disarm motors" : "Arm motors"}
-              <span>{t.armed ? "ON" : "OFF"}</span>
+              {t.armed ? vi("Disarm motors") : vi("Arm motors")}
+              <span>{t.armed ? vi("ON") : vi("OFF")}</span>
             </button>
             <div className="flight-grid">
               <button
                 onClick={() => action("takeoff")}
                 disabled={disabled || t.altitude > 1}
               >
-                <Icon name="up" />
-                Take off
-              </button>
+                <Icon name="up" />{vi("Take off")}</button>
               <button
                 onClick={() => action("land")}
                 disabled={!t.armed || t.altitude < 0.1}
               >
-                <Icon name="down" />
-                Land
-              </button>
+                <Icon name="down" />{vi("Land")}</button>
               <button onClick={() => action("hold")} disabled={!t.armed}>
-                <Icon name="target" />
-                Hold
-              </button>
+                <Icon name="target" />{vi("Hold")}</button>
               <button onClick={() => action("reset")}>
-                <Icon name="reset" />
-                Reset
-              </button>
+                <Icon name="reset" />{vi("Reset")}</button>
             </div>
             <div className="side-separator" />
-            <div className="panel-title">
-              Flight mission<span className="tiny-tag">AUTO</span>
+            <div className="panel-title">{vi("Flight mission")}<span className="tiny-tag">{vi("AUTO")}</span>
             </div>
             <div className="mission-card">
               <div className="mission-name">
                 <span className="infinity">∞</span>
                 <div>
-                  <h3>{mission.name}</h3>
-                  <p>
-                    Mission {mission.number} · {mission.altitude} m altitude
+                  <h3>{vi(mission.name)}</h3>
+                  <p>{vi("Mission")}{mission.number} · {mission.altitude} m độ cao
                   </p>
                 </div>
               </div>
-              <label className="mission-select-label">
-                Select mission
-                <select
-                  aria-label="Mission"
+              <label className="mission-select-label">{vi("Select mission")}<select
+                  aria-label={vi("Mission")}
                   value={t.selectedMission}
                   disabled={activeMission}
                   onChange={(e) => selectMission(e.target.value as MissionId)}
                 >
                   {Object.values(missions).map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.number} — {m.name}
+                      {m.number} — {vi(m.name)}
                     </option>
                   ))}
                 </select>
               </label>
-              <p className="mission-description">{mission.description}</p>
+              <p className="mission-description">{vi(mission.description)}</p>
               <MiniMap t={t} />
               <div className="mission-info">
                 <span>
-                  {mission.length.toFixed(1)} m <small>incl. return</small>
+                  {mission.length.toFixed(1)} m <small>{vi("incl. return")}</small>
                 </span>
                 <span>
-                  2.1 m/s <small>target</small>
+                  2.1 m/s <small>{vi("target")}</small>
                 </span>
               </div>
               <div className="mission-progress">
                 <span style={{ width: `${t.progress * 100}%` }} />
               </div>
               <div className="mission-phase" role="status">
-                <b>{t.missionPhase.replaceAll("_", " ")}</b>
+                <b>{vi(t.missionPhase)}</b>
                 <span>
                   {activeMission
-                    ? `Next · ${t.activeWaypoint}`
+                    ? `Tiếp theo · ${t.activeWaypoint}`
                     : t.missionPhase === "COMPLETED"
-                      ? "Landed at H"
-                      : "Start landed at H"}
+                      ? vi("Landed at H")
+                      : vi("Start landed at H")}
                 </span>
               </div>
               <button
@@ -654,14 +640,14 @@ export default function App() {
                 }
               >
                 <Icon
-                  name={activeMission && !t.missionPaused ? "pause" : "play"}
+                  name={activeMission && !t.missionPaused ? vi("pause") : "play"}
                   size={15}
                 />
                 {activeMission
                   ? t.missionPaused
-                    ? "Resume mission"
-                    : "Pause mission"
-                  : "Start mission"}
+                    ? vi("Resume mission")
+                    : vi("Pause mission")
+                  : vi("Start mission")}
                 <span>
                   {activeMission ? (
                     `${Math.round(t.progress * 100)}%`
@@ -674,17 +660,15 @@ export default function App() {
                 <button
                   className="abort-mission"
                   onClick={() => action("abort")}
-                >
-                  Abort · Hold position
-                </button>
+                >{vi("Abort · Hold position")}</button>
               )}
             </div>
           </>
         ) : (
           <div className="airframe-spec">
             <Icon name="drone" size={50} />
-            <h2>Quadrotor 15</h2>
-            <p>Illustrative airframe parameters</p>
+            <h2>{vi("Quadrotor 15")}</h2>
+            <p>{vi("Illustrative airframe parameters")}</p>
             {[
               ["Mass", "15 kg"],
               ["Motor span", "0.96 × 0.96 m"],
@@ -693,21 +677,18 @@ export default function App() {
               ["Thrust coefficient", "0.00019 N/(rad/s)²"],
               ["Inertia X / Y / Z", "0.65 / 1.05 / 0.65 kg·m²"],
             ].map(([a, b]) => (
-              <div key={a}>
-                <span>{a}</span>
+              <div key={vi(a)}>
+                <span>{vi(a)}</span>
                 <b>{b}</b>
               </div>
             ))}
-            <p className="model-note">
-              6DOF rigid body · four independent motors · cascaded PID.
-              Demonstration parameters, awaiting real-aircraft calibration.
-            </p>
+            <p className="model-note">{vi("6DOF rigid body · four independent motors · cascaded PID. Demonstration parameters, awaiting real-aircraft calibration.")}</p>
             <div className="state-detail">
-              <span>World position X / Y / Z</span>
+              <span>{vi("World position X / Y / Z")}</span>
               <b>{t.position.map((n) => n.toFixed(2)).join(" / ")} m</b>
-              <span>Body rates X / Y / Z</span>
+              <span>{vi("Body rates X / Y / Z")}</span>
               <b>{t.rates.map((n) => n.toFixed(2)).join(" / ")} rad/s</b>
-              <span>Local wind X / Y / Z</span>
+              <span>{vi("Local wind X / Y / Z")}</span>
               <b>{t.wind.map((n) => n.toFixed(2)).join(" / ")} m/s</b>
             </div>
             <div className="motor-detail">
@@ -722,22 +703,22 @@ export default function App() {
           </div>
         )}
         <label className="mobile-mission-select">
-          <span className="sr-only">Mobile mission</span>
+          <span className="sr-only">{vi("Mobile mission")}</span>
           <select
-            aria-label="Mobile mission"
+            aria-label={vi("Mobile mission")}
             value={t.selectedMission}
             disabled={activeMission}
             onChange={(e) => selectMission(e.target.value as MissionId)}
           >
             {Object.values(missions).map((m) => (
               <option key={m.id} value={m.id}>
-                {m.number} — {m.name}
+                {m.number} — {vi(m.name)}
               </option>
             ))}
           </select>
           <small>
-            {t.missionPhase.replaceAll("_", " ")} ·{" "}
-            {activeMission ? t.activeWaypoint : "Return + land"}
+            {vi(t.missionPhase)} ·{" "}
+            {activeMission ? t.activeWaypoint : vi("Return + land")}
           </small>
         </label>
         <button
@@ -746,43 +727,40 @@ export default function App() {
           onClick={() => action(activeMission ? "mission-pause" : "mission")}
         >
           <Icon
-            name={activeMission && !t.missionPaused ? "pause" : "play"}
+            name={activeMission && !t.missionPaused ? vi("pause") : "play"}
             size={14}
           />
           {activeMission
             ? t.missionPaused
-              ? "Resume mission"
-              : "Pause mission"
-            : "Start mission"}
+              ? vi("Resume mission")
+              : vi("Pause mission")
+            : vi("Start mission")}
         </button>
         <div className="side-bottom">
           <button
             className="reference-link"
             onClick={() => setDialog("reference")}
           >
-            <Icon name="map" size={16} /> Reference plan{" "}
+            <Icon name="map" size={16} />{vi("Reference plan")}{" "}
             <Icon name="arrow" size={15} />
           </button>
           <p>
-            <span className="small-dot" /> Fixed-step dynamics <span>v0.1</span>
+            <span className="small-dot" />{vi("Fixed-step dynamics")}<span>v0.1</span>
           </p>
         </div>
       </aside>
       <main className="stage">
         <div ref={mount} className="viewport" />
         <div className="scene-heading">
-          <span className="eyebrow">THE COMPETITION FIELD</span>
-          <h1>
-            Arena 01<span> / </span>
+          <span className="eyebrow">{vi("THE COMPETITION FIELD")}</span>
+          <h1>{vi("Arena 01")}<span> / </span>
             <small>45 × 27 m</small>
           </h1>
           <div className="scene-subtitle">
-            <span className="small-dot" />
-            Concrete court · natural grass perimeter
-          </div>
+            <span className="small-dot" />{vi("Concrete court · natural grass perimeter")}</div>
         </div>
         <div className="viewport-tools">
-          <div className="camera-tabs" role="group" aria-label="Camera views">
+          <div className="camera-tabs" role="group" aria-label={vi("Camera views")}>
             {cameras.map((c) => (
               <button
                 className={camera === c ? "active" : ""}
@@ -795,7 +773,7 @@ export default function App() {
           </div>
           <button
             className="icon-button fullscreen-button"
-            aria-label="Toggle fullscreen"
+            aria-label={vi("Toggle fullscreen")}
             onClick={() => {
               if (document.fullscreenElement) document.exitFullscreen();
               else
@@ -844,26 +822,26 @@ export default function App() {
               />
             </span>
             <div>
-              <span>ENVIRONMENT</span>
-              <h2>{preset}</h2>
+              <span>{vi("ENVIRONMENT")}</span>
+              <h2>{vi(preset)}</h2>
             </div>
             <Icon name="chevron" size={16} />
           </button>
           <label className="select-label">
-            <span className="sr-only">Weather preset</span>
+            <span className="sr-only">{vi("Weather preset")}</span>
             <select
-              aria-label="Weather preset"
-              value={preset}
+              aria-label={vi("Weather preset")}
+              value={vi(preset)}
               onChange={(e) => changeWeather(e.target.value as Preset)}
             >
               {Object.keys(presets).map((p) => (
-                <option key={p}>{p}</option>
+                <option key={p} value={p}>{vi(p)}</option>
               ))}
             </select>
             <Icon name="chevron" size={13} />
           </label>
           <div className="weather-summary">
-            <span title="Local wind at the aircraft, including gusts">
+            <span title={vi("Local wind at the aircraft, including gusts")}>
               <Icon name="wind" size={16} />
               <b>{Math.hypot(...t.wind).toFixed(1)}</b> m/s
             </span>
@@ -875,7 +853,7 @@ export default function App() {
           {weatherExpanded && (
             <div className="weather-sliders">
               <Slider
-                label="Wind speed"
+                label={vi("Wind speed")}
                 value={weather.wind}
                 unit="m/s"
                 min={0}
@@ -884,7 +862,7 @@ export default function App() {
                 onChange={(v) => param("wind", v)}
               />
               <Slider
-                label="Wind towards · +X = 0°"
+                label={vi("Wind towards · +X = 0°")}
                 value={weather.direction}
                 unit="°"
                 min={0}
@@ -892,7 +870,7 @@ export default function App() {
                 onChange={(v) => param("direction", v)}
               />
               <Slider
-                label="Gust strength"
+                label={vi("Gust strength")}
                 value={weather.gust}
                 unit="m/s"
                 min={0}
@@ -901,7 +879,7 @@ export default function App() {
                 onChange={(v) => param("gust", v)}
               />
               <Slider
-                label="Turbulence"
+                label={vi("Turbulence")}
                 value={weather.turbulence}
                 unit=""
                 min={0}
@@ -910,7 +888,7 @@ export default function App() {
                 onChange={(v) => param("turbulence", v)}
               />
               <Slider
-                label="Cloud cover"
+                label={vi("Cloud cover")}
                 value={weather.cloud * 100}
                 unit="%"
                 min={0}
@@ -918,7 +896,7 @@ export default function App() {
                 onChange={(v) => param("cloud", v / 100)}
               />
               <Slider
-                label="Rain intensity"
+                label={vi("Rain intensity")}
                 value={weather.rain * 100}
                 unit="%"
                 min={0}
@@ -926,7 +904,7 @@ export default function App() {
                 onChange={(v) => param("rain", v / 100)}
               />
               <Slider
-                label="Visibility"
+                label={vi("Visibility")}
                 value={weather.visibility}
                 unit="m"
                 min={60}
@@ -934,7 +912,7 @@ export default function App() {
                 onChange={(v) => param("visibility", v)}
               />
               <Slider
-                label="Time of day"
+                label={vi("Time of day")}
                 value={weather.timeOfDay}
                 unit="h"
                 min={7}
@@ -942,11 +920,7 @@ export default function App() {
                 step={0.1}
                 onChange={(v) => param("timeOfDay", v)}
               />
-              <p className="weather-footnote">
-                Wind acts on the airframe, grass and rain.
-                <br />
-                Rain intensity is normalized; visual effects only.
-              </p>
+              <p className="weather-footnote">{vi("Wind acts on the airframe, grass and rain.")}<br />{vi("Rain intensity is normalized; visual effects only.")}</p>
             </div>
           )}
           <button
@@ -955,14 +929,14 @@ export default function App() {
           >
             <Icon name="settings" size={14} />
             {weatherExpanded
-              ? "Close environment settings"
-              : "Tune environment"}
+              ? vi("Close environment settings")
+              : vi("Tune environment")}
             <span>{weatherExpanded ? "−" : "+"}</span>
           </button>
         </section>
         <div className="view-settings">
           <Toggle
-            label="Flight path"
+            label={vi("Flight path")}
             checked={route}
             onChange={(v) => {
               setRoute(v);
@@ -970,7 +944,7 @@ export default function App() {
             }}
           />
           <Toggle
-            label="Markers"
+            label={vi("Markers")}
             checked={labels}
             onChange={(v) => {
               setLabels(v);
@@ -978,7 +952,7 @@ export default function App() {
             }}
           />
           <Toggle
-            label="Colliders"
+            label={vi("Colliders")}
             checked={debug}
             onChange={(v) => {
               setDebug(v);
@@ -986,8 +960,8 @@ export default function App() {
             }}
           />
           <Toggle
-            label="Context"
-            hint="Optional distant visual backdrop. The simulated field stays 60 × 42 m."
+            label={vi("Context")}
+            hint={vi("Optional distant visual backdrop. The simulated field stays 60 × 42 m.")}
             checked={context}
             onChange={(v) => {
               setContext(v);
@@ -995,9 +969,9 @@ export default function App() {
             }}
           />
           <label className="quality-select">
-            <span>QUALITY</span>
+            <span>{vi("QUALITY")}</span>
             <select
-              aria-label="Graphics quality"
+              aria-label={vi("Graphics quality")}
               value={quality}
               onChange={(e) => {
                 setQuality(e.target.value as Quality);
@@ -1005,7 +979,7 @@ export default function App() {
               }}
             >
               {["Low", "Medium", "High", "Ultra"].map((q) => (
-                <option key={q}>{q}</option>
+                <option key={q} value={q}>{vi(q)}</option>
               ))}
             </select>
           </label>
@@ -1021,55 +995,53 @@ export default function App() {
         )}
         <div className="scene-caption">
           <span>WEBGL 2.0</span>
-          <span>LIVE 6DOF SIMULATION</span>
-          <span>1 UNIT = 1 METER</span>
+          <span>{vi("LIVE 6DOF SIMULATION")}</span>
+          <span>{vi("1 UNIT = 1 METER")}</span>
         </div>
         <div className="flight-toast" role="status" aria-live="polite">
           <span className="small-dot" />
-          {notice}
+          {vi(notice)}
         </div>
         <section
           className="telemetry-dock"
-          aria-label="Live aircraft telemetry"
+          aria-label={vi("Live aircraft telemetry")}
         >
           <div className="telemetry-live">
             <span>
-              <i /> TELEMETRY
-            </span>
+              <i />{vi("TELEMETRY")}</span>
             <b>{timeLabel(t.time)}</b>
             <small>
               {t.paused
-                ? "PAUSED"
+                ? vi("PAUSED")
                 : t.mode === "Crashed"
-                  ? "CRASH DETECTED"
+                  ? vi("CRASH DETECTED")
                   : t.armed
-                    ? "MOTORS ACTIVE"
-                    : "STANDING BY"}
+                    ? vi("MOTORS ACTIVE")
+                    : vi("STANDING BY")}
             </small>
           </div>
           <div className="metric altitude">
-            <span>
-              ALTITUDE <Icon name="up" size={12} />
+            <span>{vi("ALTITUDE")}<Icon name="up" size={12} />
             </span>
             <div>
               {t.altitude.toFixed(2)}
               <small>m</small>
             </div>
-            <p>above landing gear contact</p>
+            <p>{vi("above landing gear contact")}</p>
           </div>
           <div className="metric">
-            <span>GROUND SPEED</span>
+            <span>{vi("GROUND SPEED")}</span>
             <div>
               {t.groundSpeed.toFixed(2)}
               <small>m/s</small>
             </div>
             <p>
-              V/S {t.verticalSpeed >= 0 ? "+" : ""}
+              Lên/xuống {t.verticalSpeed >= 0 ? "+" : ""}
               {t.verticalSpeed.toFixed(2)} m/s
             </p>
           </div>
           <div className="metric attitude">
-            <span>ATTITUDE</span>
+            <span>{vi("ATTITUDE")}</span>
             <div>
               {t.roll.toFixed(1)}
               <small>° R</small>
@@ -1077,11 +1049,10 @@ export default function App() {
               {t.pitch.toFixed(1)}
               <small>° P</small>
             </div>
-            <p>Yaw {t.yaw.toFixed(1)}°</p>
+            <p>Hướng xoay {t.yaw.toFixed(1)}°</p>
           </div>
           <div className="motor-metric">
-            <span>
-              MOTOR SPEED <small>RPM</small>
+            <span>{vi("MOTOR SPEED")}<small>RPM</small>
             </span>
             <div className="motor-bars">
               {t.rpm.map((v, i) => (
@@ -1100,9 +1071,9 @@ export default function App() {
           <button
             className="pause-sim"
             onClick={() => action("pause")}
-            aria-label={t.paused ? "Resume simulation" : "Pause simulation"}
+            aria-label={t.paused ? vi("Resume simulation") : vi("Pause simulation")}
           >
-            <Icon name={t.paused ? "play" : "pause"} size={18} />
+            <Icon name={t.paused ? "play" : vi("pause")} size={18} />
           </button>
         </section>
         {stats.loading && !constructionError && (
@@ -1136,19 +1107,18 @@ export default function App() {
         <>
           <footer className="statusbar">
             <span>
-              <i /> {stats.fps} FPS <em>·</em> PHYSICS {stats.physicsHz} Hz{" "}
-              <em>·</em> {stats.drawCalls} DRAW CALLS
+              <i /> {stats.fps} FPS <em>·</em> VẬT LÝ {stats.physicsHz} Hz{" "}
+              <em>·</em> {stats.drawCalls} LƯỢT VẼ
               {stats.physicsHz > 0 && stats.physicsHz < 240 && (
-                <strong className="fidelity-warning">SIMULATION SLOWED</strong>
+                <strong className="fidelity-warning">{vi("SIMULATION SLOWED")}</strong>
               )}
             </span>
             <span className="keyboard-hint">
-              W A S D <span>move</span> R / F <span>altitude</span> Q / E{" "}
-              <span>yaw</span>
-              <em>·</em> SPACE <span>pause</span>
+              W A S D <span>{vi("move")}</span> R / F <span>{vi("altitude")}</span> Q / E{" "}
+              <span>{vi("yaw")}</span>
+              <em>·</em> SPACE <span>{vi("pause")}</span>
             </span>
-            <span>
-              LOCAL WORLD <em> / </em> {t.position[0].toFixed(1)},{" "}
+            <span>{vi("LOCAL WORLD")}<em> / </em> {t.position[0].toFixed(1)},{" "}
               {t.position[1].toFixed(1)}, {t.position[2].toFixed(1)} m
             </span>
           </footer>
@@ -1175,19 +1145,15 @@ export default function App() {
             </button>
             {dialog === "reference" ? (
               <>
-                <span className="eyebrow">SOURCE GEOMETRY</span>
-                <h2>The original competition plan</h2>
-                <p>
-                  Only the 45 × 27 m central court is reconstructed. Neck curves
-                  and minor marker positions are estimates from this
-                  dimension-calibrated trace.
-                </p>
+                <span className="eyebrow">{vi("SOURCE GEOMETRY")}</span>
+                <h2>{vi("The original competition plan")}</h2>
+                <p>{vi("Only the 45 × 27 m central court is reconstructed. Neck curves and minor marker positions are estimates from this dimension-calibrated trace.")}</p>
                 <img
                   src="/assets/reference/arena-layout.png"
-                  alt="Original UAV competition diagram, with 45m by 27m central arena, figure-eight circles and landing zones"
+                  alt={vi("Original UAV competition diagram, with 45m by 27m central arena, figure-eight circles and landing zones")}
                 />
                 <p className="dialog-note">
-                  V1 · white 5 cm　 V2 · white 10 cm　 V3 · dashed yellow 10 cm
+                  V1 · trắng 5 cm　 V2 · trắng 10 cm　 V3 · vàng đứt đoạn 10 cm
                 </p>
               </>
             ) : (
@@ -1196,7 +1162,7 @@ export default function App() {
                 <h2>Cách bắt đầu và điều khiển</h2>
                 <p>
                   {workspace === "Reference missions"
-                    ? "Select a reference mission while landed at H. The demonstration takes off, flies its course, returns and lands. Its completion is not candidate performance evidence."
+                    ? vi("Select a reference mission while landed at H. The demonstration takes off, flies its course, returns and lands. Its completion is not candidate performance evidence.")
                     : "Chọn bài bay → kiểm tra điều khiển → chuẩn bị → kiểm tra trước bay → bật động cơ → bắt đầu bài tập. Bạn tự cất cánh, bay và hạ cánh. Kết quả cần giảng viên đánh giá."}
                 </p>
                 <div className="help-keys">
@@ -1204,13 +1170,13 @@ export default function App() {
                     [
                       "W / S",
                       workspace === "Reference missions"
-                        ? "Forward / backward (world −Z / +Z)"
+                        ? vi("Forward / backward (world −Z / +Z)")
                         : "Tiến / lùi theo hướng mũi máy bay",
                     ],
                     [
                       "A / D",
                       workspace === "Reference missions"
-                        ? "Left / right (world −X / +X)"
+                        ? vi("Left / right (world −X / +X)")
                         : "Trái / phải theo hướng máy bay",
                     ],
                     ["R / F", "Lên / xuống"],
@@ -1223,8 +1189,8 @@ export default function App() {
                         : "Nhìn quanh tại chỗ. Dùng nút Nhìn thẳng để về hướng ban đầu",
                     ],
                   ].map(([a, b]) => (
-                    <div key={a}>
-                      <kbd>{a}</kbd>
+                    <div key={vi(a)}>
+                      <kbd>{vi(a)}</kbd>
                       <span>{b}</span>
                     </div>
                   ))}
@@ -1239,10 +1205,10 @@ export default function App() {
                   <p>
                     {stats.gpu}
                     <br />
-                    {Math.round(stats.triangles / 1000)}k triangles ·{" "}
-                    {stats.drawCalls} draw calls
+                    {Math.round(stats.triangles / 1000)}nghìn tam giác ·{" "}
+                    {stats.drawCalls} lượt vẽ
                     <br />
-                    250 Hz simulation · {stats.fps} FPS observed
+                    Vật lý 250 Hz · đo được {stats.fps} FPS
                   </p>
                 </details>
               </>

@@ -18,7 +18,7 @@ import {
 } from "../training/input";
 import { vi, learnerReport } from "./vi";
 import {
-  InputCheck,
+  InputCheck, TaskGroup,
   WindSelector,
   PilotDiagram,
   preference,
@@ -135,12 +135,12 @@ function TelemetryPlots({ attempt, at }: { attempt: Attempt; at: number }) {
   const end = Math.max(0.02, attempt.frames.at(-1)?.time ?? 0);
   const panels = [
     {
-      name: "Gear altitude (m)",
+      name: "Độ cao càng đáp (m)",
       series: [{ color: "#456844", values: frames.map((f) => f.altitude) }],
       max: Math.max(6, ...frames.map((f) => f.altitude)),
     },
     {
-      name: "Speed (m/s)",
+      name: "Tốc độ (m/s)",
       series: [
         {
           color: "#936044",
@@ -150,7 +150,7 @@ function TelemetryPlots({ attempt, at }: { attempt: Attempt; at: number }) {
       max: Math.max(3, ...frames.map((f) => Math.hypot(...f.velocity))),
     },
     {
-      name: "Lateral deviation (m)",
+      name: "Độ lệch ngang (m)",
       series: [{ color: "#6c779b", values: frames.map((f) => f.lateral) }],
       max: Math.max(1, ...frames.map((f) => f.lateral)),
     },
@@ -271,7 +271,21 @@ export function TrainingDesk({
       [],
     ),
     [station, setStation] = useState<PilotStation>({ ...PILOT_STATION });
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [groups, setGroups] = useState({ exercise: true, device: false, weather: false, help: false, advanced: false, aids: false });
+  const toggleGroup = (key: keyof typeof groups, value: boolean) => setGroups(p => ({...p, [key]: value}));
   const panelRef = useRef<HTMLElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const dock = dockRef.current;
+    const shell = dock?.closest<HTMLElement>(".app-shell");
+    if (!dock || !shell) return;
+    const measure = () => shell.style.setProperty("--flight-dock-height", `${dock.getBoundingClientRect().height}px`);
+    const observer = new ResizeObserver(measure);
+    observer.observe(dock);
+    measure();
+    return () => { observer.disconnect(); shell.style.removeProperty("--flight-dock-height"); };
+  }, [page, !!w]);
   const saveKey = useRef(""),
     lastCheckpoint = useRef(0),
     extremes = useRef<Record<number, { min: number; max: number }>>({});
@@ -280,7 +294,11 @@ export function TrainingDesk({
     strict = !!s?.strict;
   useEffect(() => {
     panelRef.current?.scrollTo({ top: 0 });
-  }, [s?.state, page, guide]);
+  }, [page]);
+  useEffect(() => {
+    if (guide === 1) setGroups(p => ({...p, exercise: true, device: false}));
+    if (guide === 2) setGroups(p => ({...p, exercise: false, device: true}));
+  }, [guide]);
   const update = () => refresh((n) => n + 1);
   const run = (fn: () => unknown, success?: string) => {
     try {
@@ -469,7 +487,7 @@ export function TrainingDesk({
   return (
     <>
       <aside
-        className={`training-panel ${flyPage ? "" : "wide-panel"}`}
+        className={`training-panel ${flyPage ? "flight-panel" : "wide-panel"} ${panelCollapsed ? "collapsed-panel" : ""}`}
         aria-label={`${vi(page)} · nội dung`}
         id="main-content"
         tabIndex={-1}
@@ -479,7 +497,7 @@ export function TrainingDesk({
           LUYỆN BAY UAV<span>LƯU TRÊN THIẾT BỊ</span>
         </div>
         <h1>{vi(page)}</h1>
-        <p className="training-intro" hidden={flyPage && locked}>
+        <p className="training-intro" hidden={flyPage}>
           {vi(
             page === "Mock Examination"
               ? "SIMULATED / PRACTICE EXAMINATION. Manual flight, fixed Pilot VLOS, locked profile and no guidance aids."
@@ -488,490 +506,74 @@ export function TrainingDesk({
                 : "Instructor tools and inspectable practice evidence. No official certification.",
           )}
         </p>
-        {flyPage && (
-          <>
-            <details className="control-explanation" hidden={locked}>
-              <summary>Chế độ điều khiển này hoạt động thế nào?</summary>
-              <div className="training-callout">
-                Cần điều khiển ra lệnh di chuyển theo hướng máy bay. Thả cần để
-                hệ thống giữ mục tiêu. Đây là chế độ ổn định vị trí, không tương
-                đương điều khiển góc nghiêng hay ga trực tiếp trên UAV thật.
-              </div>
-            </details>
-            {!locked && (
-              <button
-                onClick={() => {
-                  setGuide(0);
-                  remember("uav-show-guide", "yes");
-                }}
-              >
-                Hướng dẫn từng bước
-              </button>
-            )}
-            {!locked && guide >= 0 && (
-              <section
-                className="procedure-card setup-guide"
-                aria-label="Hướng dẫn bắt đầu"
-              >
-                <p>Bước {guide + 1} / 4</p>
-                <h2>
-                  {
-                    [
-                      "Chọn chế độ",
-                      "Chọn bài bay",
-                      "Kiểm tra điều khiển",
-                      "Sẵn sàng bắt đầu",
-                    ][guide]
-                  }
-                </h2>
-                {guide === 0 && (
-                  <div className="training-actions">
-                    <button
-                      onClick={() => {
-                        navigate("Training");
-                        setGuide(1);
-                      }}
-                    >
-                      Luyện tập
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate("Mock Examination");
-                        setGuide(1);
-                      }}
-                    >
-                      Thi thử
-                    </button>
-                  </div>
-                )}
-                {guide === 3 && (
-                  <p>
-                    Bạn sẽ tự cất cánh và hạ cánh. Bắt đầu tại H, giữ cần ở
-                    trung tâm và làm từng mục kiểm tra. Mọi kết quả đều cần
-                    giảng viên đánh giá.
-                  </p>
-                )}
-              </section>
-            )}
-            {!locked && (
-              <fieldset disabled={locked || !!replay}>
-                <legend>Chuẩn bị</legend>
-                {(guide < 0 || guide === 1) && (
-                  <>
-                    <label>
-                      Tên hoặc mã học viên
-                      <input
-                        aria-label="Tên hoặc mã học viên"
-                        maxLength={80}
-                        value={candidate}
-                        onChange={(e) => setCandidate(e.target.value)}
-                      />
-                    </label>
-                    <label>
-                      Chọn bài bay
-                      <select
-                        aria-label="Chọn bài bay"
-                        value={profile}
-                        onChange={(e) => {
-                          setProfile(e.target.value as ProfileId);
-                          remember("uav-preferred-profile", e.target.value);
-                        }}
-                      >
-                        {Object.entries(profiles).map(([id, p]) => (
-                          <option key={id} value={id}>
-                            {vi(p.name)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </>
-                )}
-                {guide < 0 || guide === 2 ? (
-                  <InputCheck w={w} onUpdate={update} />
-                ) : null}
-                {(guide < 0 || guide === 1) && page === "Training" && (
-                  <WindSelector w={w} onUpdate={update} />
-                )}
-                {page === "Mock Examination" && (
-                  <p>
-                    Thời tiết do giảng viên chọn:{" "}
-                    {weatherSummary(w.weather.target)}. Điều kiện sẽ khóa khi
-                    chuẩn bị bài.
-                  </p>
-                )}
-                <p className="training-muted">
-                  Chỉ dùng luyện tập · cần giảng viên đánh giá
-                </p>
-                {guide === 3 && (
-                  <p>
-                    Bài đã chọn: {vi(profiles[profile].name)} ·{" "}
-                    {w.input.source === "Keyboard"
-                      ? "Bàn phím"
-                      : "Tay điều khiển"}
-                    .
-                  </p>
-                )}
-                {(guide < 0 || guide === 3) && (
-                  <button
-                    className="training-primary"
-                    disabled={
-                      w.input.source === "Gamepad" &&
-                      (!w.input.connected || !!w.input.fault)
-                    }
-                    onClick={() => {
-                      begin();
-                      setGuide(-1);
-                      remember("uav-show-guide", "no");
-                    }}
-                  >
-                    Chuẩn bị bài bay
-                  </button>
-                )}
-              </fieldset>
-            )}
-            {!locked && guide >= 0 && (
+        {flyPage && <>
+          {!locked && <>
+            <p className="journey-step">1 · Chuẩn bị <span>→ 2 · Bay → 3 · Xem kết quả</span></p>
+            <div className="guide-switch">
+              <button onClick={() => { setGuide(0); remember("uav-show-guide", "yes"); }}>Hướng dẫn từng bước</button>
+              {guide >= 0 && <button onClick={() => { setGuide(-1); remember("uav-show-guide", "no"); }}>Bỏ qua hướng dẫn</button>}
+            </div>
+            {guide >= 0 && <section className="setup-guide" aria-label="Hướng dẫn bắt đầu">
+              <p>Bước {guide + 1} / 4</p>
+              <h2>{["Chọn chế độ", "Chọn bài bay", "Kiểm tra điều khiển", "Sẵn sàng bắt đầu"][guide]}</h2>
+              {guide === 0 ? <div className="training-actions">
+                <button onClick={() => { navigate("Training"); setGuide(1); }}>Luyện tập</button>
+                <button onClick={() => { navigate("Mock Examination"); setGuide(1); }}>Thi thử</button>
+              </div> : <p>{guide === 1 ? "Nhập tên hoặc mã và chọn bài muốn tập." : guide === 2 ? "Chọn bàn phím hoặc cắm tay điều khiển rồi thử phản hồi." : "Chọn Chuẩn bị bài bay bên dưới, rồi kiểm tra trước bay. Bạn sẽ tự cất và hạ cánh."}</p>}
               <div className="training-actions">
-                {guide > 0 && (
-                  <button onClick={() => setGuide(guide - 1)}>Quay lại</button>
-                )}
-                {guide < 3 && (
-                  <button
-                    className="training-primary"
-                    disabled={
-                      guide === 2 &&
-                      w.input.source === "Gamepad" &&
-                      (!w.input.connected || !!w.input.fault)
-                    }
-                    onClick={() => setGuide(guide + 1)}
-                  >
-                    Tiếp theo
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    setGuide(-1);
-                    remember("uav-show-guide", "no");
-                  }}
-                >
-                  Bỏ qua hướng dẫn
-                </button>
+                {guide > 0 && <button onClick={() => setGuide(guide - 1)}>Quay lại</button>}
+                {guide < 3 && <button className="training-primary" disabled={guide === 2 && w.input.source === "Gamepad" && (!w.input.connected || !!w.input.fault)} onClick={() => setGuide(guide + 1)}>Tiếp theo</button>}
               </div>
-            )}
-            {replay && (
-              <button
-                onClick={() =>
-                  run(() => {
-                    w.setReplay(null);
-                    setSelected(null);
-                    return true;
-                  })
-                }
-              >
-                Đóng phát lại để chuẩn bị bay
-              </button>
-            )}
-            {s && (
-              <section
-                className="essential-status"
-                aria-label="Trạng thái bài bay"
-              >
-                <b>{vi(s.state)}</b>
-                <p>
-                  {w.input.source === "Keyboard"
-                    ? "Bàn phím"
-                    : w.input.connected
-                      ? "Tay điều khiển đã kết nối"
-                      : "Chưa kết nối tay điều khiển"}
-                </p>
-                {w.input.fault && <p>{vi(w.input.fault)}</p>}
-                {!strict && (
-                  <p>
-                    Độ cao {fixed(t.altitude, 1)} m · tốc độ{" "}
-                    {fixed(t.groundSpeed, 1)} m/s
-                  </p>
-                )}
-              </section>
-            )}
-            {s && (
-              <section className="procedure-card">
-                <div className="training-eyebrow">
-                  CÁC BƯỚC THỰC HIỆN
-                  <b data-testid="exam-state">{vi(s.state)}</b>
-                </div>
-                {s.state === "PREFLIGHT" && (
-                  <>
-                    {preflight.map((text, i) => (
-                      <label className="training-check" key={text}>
-                        <input
-                          type="checkbox"
-                          checked={s.attempt.preflight[i]}
-                          onChange={(e) =>
-                            run(() => s.check("preflight", i, e.target.checked))
-                          }
-                        />
-                        {vi(text)}
-                      </label>
-                    ))}
-                    <button
-                      disabled={!s.attempt.preflight.every(Boolean)}
-                      onClick={() =>
-                        run(
-                          () => s.ready(),
-                          "Đã kiểm tra xong. Bật động cơ rồi chọn Bắt đầu bài tập.",
-                        )
-                      }
-                    >
-                      Xác nhận kiểm tra trước bay
-                    </button>
-                  </>
-                )}
-                {s.state === "READY" && (
-                  <>
-                    <button
-                      onClick={() =>
-                        run(
-                          () => w.drone.arm(),
-                          "Đã bật động cơ. Máy bay chờ lệnh cất cánh của bạn.",
-                        )
-                      }
-                      disabled={t.armed}
-                    >
-                      Bật động cơ
-                    </button>
-                    <button
-                      className="training-primary"
-                      disabled={!t.armed}
-                      onClick={() =>
-                        run(
-                          () => s.start(w.drone),
-                          "Bài bay đã bắt đầu. R/F lên xuống; W/S tiến lùi; A/D trái phải; Q/E xoay hướng.",
-                        )
-                      }
-                    >
-                      Bắt đầu bài tập
-                    </button>
-                  </>
-                )}
-                {s.state === "ACTIVE" && (
-                  <>
-                    <h2>{vi(s.task?.label)}</h2>
-                    <p>
-                      Phần {s.taskIndex + 1} / {s.attempt.profile.tasks.length}
-                    </p>
-                    {!strict && (
-                      <>
-                        <progress
-                          max={1}
-                          value={
-                            s.task?.kind === "route"
-                              ? s.pathProgress
-                              : Math.min(1, s.dwell / (s.task?.seconds ?? 5))
-                          }
-                        />
-                        <p>
-                          Đường bay {Math.round(s.pathProgress * 100)}% · giữ ổn
-                          định {fixed(s.dwell, 1)} s
-                        </p>
-                        <p>
-                          Lệch độ cao {fixed(s.altitudeError)} m · lệch ngang{" "}
-                          {fixed(s.lateral)} m
-                        </p>
-                        {s.task?.kind === "orientation" && (
-                          <p>
-                            Hướng cần giữ{" "}
-                            {[0, 90, 180, -90][s.orientationIndex]}° · lệch{" "}
-                            {fixed(s.headingError, 0)}°
-                          </p>
-                        )}
-                      </>
-                    )}
-                    {s.task?.kind === "abnormal" && (
-                      <button
-                        onClick={() =>
-                          run(
-                            () => s.acknowledgeAbnormal(),
-                            "Đã xác nhận phương án để giảng viên đánh giá. Tự đưa máy bay về H và hạ cánh.",
-                          )
-                        }
-                      >
-                        Xác nhận tình huống và phương án xử lý
-                      </button>
-                    )}
-                  </>
-                )}
-                {s.state === "TASK_COMPLETE" && (
-                  <>
-                    <p>
-                      Đã ghi nhận các phần bài bay. Tự đưa máy bay về H và hạ
-                      xuống bằng F hoặc cần xuống.
-                    </p>
-                    <button
-                      className="training-primary"
-                      onClick={() =>
-                        run(
-                          () => s.requestLanding(),
-                          "Tự hạ máy bay xuống H, rồi tắt động cơ sau khi chạm đất ổn định.",
-                        )
-                      }
-                    >
-                      Bắt đầu hạ cánh thủ công
-                    </button>
-                  </>
-                )}
-                {s.state === "LANDING" && (
-                  <p>
-                    Hạ xuống trên H. Chỉ tắt động cơ khi đã chạm đất ổn định.
-                    Chờ cánh quạt dừng rồi kiểm tra sau bay.
-                  </p>
-                )}
-                {s.state === "POSTFLIGHT" && (
-                  <>
-                    {postflight.map((text, i) => (
-                      <label className="training-check" key={text}>
-                        <input
-                          type="checkbox"
-                          checked={s.attempt.postflight[i]}
-                          onChange={(e) =>
-                            run(() =>
-                              s.check("postflight", i, e.target.checked),
-                            )
-                          }
-                        />
-                        {vi(text)}
-                      </label>
-                    ))}
-                    <button
-                      className="training-primary"
-                      disabled={!s.attempt.postflight.every(Boolean)}
-                      onClick={() =>
-                        run(
-                          () => s.finish(),
-                          "Đã lưu bài luyện tập. Cần giảng viên đánh giá; không phải kết quả sát hạch chính thức.",
-                        )
-                      }
-                    >
-                      Hoàn tất và lưu bài bay
-                    </button>
-                  </>
-                )}
-                {s.active && s.state !== "PREFLIGHT" && (
-                  <div className="training-actions">
-                    <button
-                      onClick={() => run(() => s.pause(w.drone))}
-                      disabled={s.state === "READY"}
-                    >
-                      {s.state === "PAUSED"
-                        ? "Tiếp tục bài bay"
-                        : "Tạm dừng bài bay"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        run(() => {
-                          if (
-                            !window.confirm(
-                              "Hủy bài bay hiện tại? Bản ghi sẽ được giữ để xem lại; bài này được đánh dấu chưa hoàn thành.",
-                            )
-                          )
-                            return true;
-                          s.abort();
-                          w.drone.hold();
-                          w.drone.paused = false;
-                          return true;
-                        })
-                      }
-                    >
-                      Hủy bài bay
-                    </button>
-                  </div>
-                )}
-                {s.state === "PREFLIGHT" && (
-                  <button onClick={() => run(() => s.abort())}>
-                    Hủy chuẩn bị
-                  </button>
-                )}
-                {isFinal(s.state) && (
-                  <div className="training-result">
-                    <h2>{vi(s.attempt.result.decision)}</h2>
-                    <p>
-                      Điểm luyện tập {fixed(s.attempt.result.practiceScore, 1)}{" "}
-                      / 100
-                    </p>
-                    <p>
-                      Hoàn thành {s.attempt.result.completedTasks.length} phần.
-                      Hạ cánh hoặc điểm cao chưa đủ để kết luận đạt.
-                    </p>
-                  </div>
-                )}
-              </section>
-            )}
-            <div className="training-actions">
-              <button
-                onClick={() =>
-                  run(() => {
-                    if (
-                      w.drone.altitude > 0.12 &&
-                      !window.confirm(
-                        "Dừng khẩn cấp sẽ tắt lực đẩy khi máy bay đang ở trên không. Tiếp tục?",
-                      )
-                    )
-                      return true;
-                    if (w.drone.altitude > 0.12)
-                      s?.abort("Emergency motor stop", true);
-                    w.drone.disarm();
-                  }, "Đã tắt lực đẩy. Kiểm tra trạng thái bài bay và lưu bản ghi.")
-                }
-                disabled={!t.armed}
-              >
-                {t.altitude > 0.12 ? "Dừng khẩn cấp" : "Tắt động cơ"}
-              </button>
-              <button
-                disabled={locked}
-                onClick={() =>
-                  run(() => {
-                    w.setReplay(null);
-                    w.drone.reset();
-                    w.session = null;
-                    setSelected(null);
-                    return true;
-                  }, "Đã đặt lại máy bay tại H. Bạn có thể chuẩn bị bài mới.")
-                }
-              >
-                Thử lại từ H
-              </button>
-            </div>
-            {!strict && (
-              <>
-                <label className="training-check">
-                  <input
-                    type="checkbox"
-                    checked={w.routeVisible}
-                    onChange={(e) =>
-                      run(() => {
-                        w.setRoute(e.target.checked);
-                      })
-                    }
-                  />
-                  Hỗ trợ luyện tập: hiện đường mẫu và vệt bay
-                </label>
-                <p className="training-muted">
-                  Đường hỗ trợ chỉ có trong luyện tập; được ẩn khi thi thử.
-                </p>
-              </>
-            )}
-            <div className="training-keyboard">
-              <b>Cách điều khiển</b>
-              <p>
-                W/S tiến / lùi · A/D trái / phải
-                <br />
-                R/F lên / xuống · Q/E xoay hướng · Space tạm dừng
-              </p>
-              <p>
-                Chọn vùng mô phỏng trước khi bay. Nhập chữ sẽ ngắt điều khiển.
-                Kéo chuột để nhìn quanh; con lăn không phóng to góc người lái.
-              </p>
-            </div>
-          </>
-        )}
+            </section>}
+            <fieldset disabled={!!replay} className="preparation-groups">
+              <TaskGroup title="Bài bay" summary={`${candidate || "Chưa nhập tên"} · ${vi(profiles[profile].name)}`} open={groups.exercise} onToggle={v => toggleGroup("exercise", v)}>
+                <label>Tên hoặc mã học viên<input aria-label="Tên hoặc mã học viên" maxLength={80} value={candidate} onChange={e => setCandidate(e.target.value)} /></label>
+                <label>Chọn bài bay<select aria-label="Chọn bài bay" value={profile} onChange={e => { setProfile(e.target.value as ProfileId); remember("uav-preferred-profile", e.target.value); }}>
+                  {Object.entries(profiles).map(([id, p]) => <option key={id} value={id}>{vi(p.name)}</option>)}
+                </select></label>
+                <p>{vi(profiles[profile].tasks[0]?.label)}</p>
+                <button onClick={() => setGroups(p => ({...p, exercise: false, device: true}))}>Tiếp tục: kiểm tra điều khiển</button>
+              </TaskGroup>
+              <TaskGroup title="Thiết bị điều khiển" summary={w.input.source === "Keyboard" ? "Bàn phím · sẵn sàng luyện thử" : w.input.connected ? "Tay điều khiển · đã kết nối" : "Tay điều khiển · chưa kết nối"} open={groups.device} onToggle={v => toggleGroup("device", v)}>
+                <InputCheck w={w} onUpdate={update} />
+              </TaskGroup>
+              <TaskGroup title="Điều kiện bay" summary={page === "Mock Examination" ? "Giảng viên chọn · không thể sửa" : weatherSummary(w.weather.target)} open={groups.weather} onToggle={v => toggleGroup("weather", v)}>
+                {page === "Training" ? <WindSelector w={w} onUpdate={update} /> : <p>Thời tiết do giảng viên chọn: {weatherSummary(w.weather.target)}. Bạn không thể thay đổi trong Thi thử.</p>}
+              </TaskGroup>
+            </fieldset>
+          </>}
+          {s && <section className="essential-status" aria-label="Trạng thái bài bay">
+            <b data-testid="exam-state">{vi(s.state)}</b>
+            <p>{w.input.source === "Keyboard" ? "Bàn phím" : w.input.connected ? "Tay điều khiển đã kết nối" : "Chưa kết nối tay điều khiển"}</p>
+            {w.input.fault && <p role="alert">{vi(w.input.fault)}</p>}
+            {!strict && <p>Độ cao {fixed(t.altitude, 1)} m · tốc độ {fixed(t.groundSpeed, 1)} m/s</p>}
+          </section>}
+          {s && <section className="procedure-card flight-task" aria-label="Việc cần làm">
+            {s.state === "PREFLIGHT" && <><h2>Kiểm tra trước bay</h2>{preflight.map((text, i) => <label className="training-check" key={text}><input type="checkbox" checked={s.attempt.preflight[i]} onChange={e => run(() => s.check("preflight", i, e.target.checked))} />{vi(text)}</label>)}</>}
+            {s.state === "READY" && <><h2>Sẵn sàng cất cánh</h2><p>Bật động cơ, chọn Bắt đầu bài tập rồi tự đưa máy bay lên bằng R hoặc cần lên.</p></>}
+            {s.state === "ACTIVE" && <><h2>{vi(s.task?.label)}</h2><p>Phần {s.taskIndex + 1} / {s.attempt.profile.tasks.length}</p>
+              {!strict && <><progress max={1} value={s.task?.kind === "route" ? s.pathProgress : Math.min(1, s.dwell / (s.task?.seconds ?? 5))} /><p>Đường bay {Math.round(s.pathProgress * 100)}% · giữ ổn định {fixed(s.dwell, 1)} s</p>
+                <details><summary>Số liệu bài tập</summary><p>Lệch độ cao {fixed(s.altitudeError)} m · lệch ngang {fixed(s.lateral)} m</p>{s.task?.kind === "orientation" && <p>Hướng cần giữ {[0, 90, 180, -90][s.orientationIndex]}° · lệch {fixed(s.headingError, 0)}°</p>}</details></>}
+              {s.task?.kind === "abnormal" && <button onClick={() => run(() => s.acknowledgeAbnormal(), "Đã xác nhận phương án. Tự đưa máy bay về H và hạ cánh.")}>Xác nhận tình huống và phương án xử lý</button>}
+            </>}
+            {s.state === "PAUSED" && <><h2>Đang tạm dừng</h2><p>Kiểm tra thiết bị và chọn Tiếp tục bài bay khi sẵn sàng.</p></>}
+            {s.state === "TASK_COMPLETE" && <><h2>Đưa máy bay về H</h2><p>Đã ghi nhận các phần bài bay. Chọn Bắt đầu hạ cánh thủ công rồi tự hạ bằng F hoặc cần xuống.</p></>}
+            {s.state === "LANDING" && <><h2>Hạ cánh thủ công</h2><p>Hạ xuống trên H. Chỉ tắt động cơ khi đã chạm đất ổn định. Chờ cánh quạt dừng.</p></>}
+            {s.state === "POSTFLIGHT" && <><h2>Kiểm tra sau bay</h2>{postflight.map((text, i) => <label className="training-check" key={text}><input type="checkbox" checked={s.attempt.postflight[i]} onChange={e => run(() => s.check("postflight", i, e.target.checked))} />{vi(text)}</label>)}</>}
+            {isFinal(s.state) && <div className="training-result"><h2>{vi(s.attempt.result.decision)}</h2><p>Điểm luyện tập {fixed(s.attempt.result.practiceScore, 1)} / 100</p><p>Hoàn thành {s.attempt.result.completedTasks.length} phần. Điểm cao chưa đủ để kết luận đạt.</p><button onClick={() => navigate("Session Review")}>Xem kết quả và bản ghi</button></div>}
+          </section>}
+          {page === "Training" && !strict && <TaskGroup title="Hỗ trợ luyện tập" summary="Tùy chọn · không dùng trong Thi thử" open={groups.aids} onToggle={v => toggleGroup("aids", v)}>
+            <label className="training-check"><input type="checkbox" checked={w.groundGuideEnabled} onChange={e => run(() => w.setGroundGuide(e.target.checked))} />Hiện vị trí dưới máy bay</label>
+            <label className="training-check"><input type="checkbox" checked={w.routeVisible} onChange={e => run(() => w.setRoute(e.target.checked))} />Hỗ trợ luyện tập: hiện đường mẫu và vệt bay</label>
+          </TaskGroup>}
+          <TaskGroup title="Hướng dẫn" summary={locked ? "Phím điều khiển và bước tiếp theo" : "Tùy chọn · đọc khi cần"} open={groups.help} onToggle={v => toggleGroup("help", v)}>
+            <div className="training-keyboard"><b>Cách điều khiển</b><p>W/S tiến / lùi · A/D trái / phải<br />R/F lên / xuống · Q/E xoay hướng · Space tạm dừng</p><p>Chọn vùng mô phỏng trước khi bay. Nhập chữ sẽ ngắt điều khiển. Kéo chuột hoặc dùng nút nhìn quanh; góc người lái không phóng to.</p></div>
+            <details className="control-explanation"><summary>Chế độ điều khiển này hoạt động thế nào?</summary><p>Cần ra lệnh vận tốc theo hướng máy bay. Thả cần để hệ thống giữ mục tiêu. Không phải ga trực tiếp hay điều khiển góc nghiêng trên UAV thật.</p></details>
+          </TaskGroup>
+          {!locked && <TaskGroup title="Cài đặt nâng cao" summary="Hiệu chỉnh và công cụ giảng viên" open={groups.advanced} onToggle={v => toggleGroup("advanced", v)}>
+            <button onClick={() => navigate("Controller Calibration")}>Hiệu chỉnh tay điều khiển</button><button onClick={() => navigate("System Configuration")}>Mở cài đặt chi tiết</button>
+          </TaskGroup>}
+        </>}
         {page === "Controller Calibration" && (
           <>
             <div className="training-callout">
@@ -1091,9 +693,9 @@ export function TrainingDesk({
                           ] as const
                         ).map(([key, min, max, step]) => (
                           <label key={key}>
-                            {key}
+                            {({axis:"Số trục",min:"Đầu hành trình dưới",center:"Điểm giữa",max:"Đầu hành trình trên",deadzone:"Vùng chết"})[key]}
                             <input
-                              aria-label={`${k} ${key}`}
+                              aria-label={`${vi(k)} ${vi(key)}`}
                               type="number"
                               min={min}
                               max={max}
@@ -1107,7 +709,7 @@ export function TrainingDesk({
                         ))}
                         <label className="training-check">
                           <input
-                            aria-label={`${k} inverted`}
+                            aria-label={`${vi(k)} đảo chiều`}
                             type="checkbox"
                             checked={a.inverted}
                             onChange={(e) =>
@@ -1883,117 +1485,33 @@ export function TrainingDesk({
           {message}
         </p>
       </aside>
+      {flyPage && <div className="flight-dock" ref={dockRef} role="group" aria-label="Thao tác bài bay">
+        <span className="dock-state">{s ? vi(s.state) : "Chuẩn bị xong?"}</span>
+        {!locked && !replay && <button className="training-primary" disabled={w.input.source === "Gamepad" && (!w.input.connected || !!w.input.fault)} onClick={() => { begin(); setGuide(-1); remember("uav-show-guide", "no"); }}>Chuẩn bị bài bay</button>}
+        {replay && <button onClick={() => run(() => { w.setReplay(null); setSelected(null); return true; })}>Đóng phát lại để chuẩn bị bay</button>}
+        {s?.state === "PREFLIGHT" && <><button className="training-primary" disabled={!s.attempt.preflight.every(Boolean)} onClick={() => run(() => s.ready(), "Đã kiểm tra xong. Bật động cơ rồi chọn Bắt đầu bài tập.")}>Xác nhận kiểm tra trước bay</button><button onClick={() => run(() => s.abort())}>Hủy chuẩn bị</button></>}
+        {s?.state === "READY" && <>{!t.armed ? <button className="training-primary" onClick={() => run(() => w.drone.arm(), "Đã bật động cơ. Chọn Bắt đầu bài tập.")}>Bật động cơ</button> : <button className="training-primary" onClick={() => run(() => s.start(w.drone), "Tự cất cánh bằng R hoặc cần lên. W/S tiến lùi, A/D trái phải.")}>Bắt đầu bài tập</button>}</>}
+        {s?.state === "TASK_COMPLETE" && <button className="training-primary" onClick={() => run(() => s.requestLanding())}>Bắt đầu hạ cánh thủ công</button>}
+        {s?.state === "POSTFLIGHT" && <button className="training-primary" disabled={!s.attempt.postflight.every(Boolean)} onClick={() => run(() => s.finish(), "Đã lưu bài bay. Cần giảng viên đánh giá.")}>Hoàn tất và lưu bài bay</button>}
+        {s?.active && !["PREFLIGHT", "READY", "POSTFLIGHT"].includes(s.state) && <button className={s.state === "TASK_COMPLETE" ? "" : "training-primary"} onClick={() => run(() => s.pause(w.drone))}>{s.state === "PAUSED" ? "Tiếp tục bài bay" : "Tạm dừng bài bay"}</button>}
+        {t.armed && <button className="safety-action" onClick={() => run(() => {
+          if (w.drone.altitude > .12 && !window.confirm("Dừng khẩn cấp sẽ tắt lực đẩy khi máy bay đang ở trên không. Tiếp tục?")) return true;
+          if (w.drone.altitude > .12) s?.abort("Emergency motor stop", true);
+          w.drone.disarm();
+        }, "Đã tắt lực đẩy. Kiểm tra và lưu bản ghi.")}>{t.altitude > .12 ? "Dừng khẩn cấp" : "Tắt động cơ"}</button>}
+        {s?.active && s.state !== "PREFLIGHT" && <button onClick={() => run(() => { if (!window.confirm("Hủy bài bay hiện tại? Bản ghi sẽ được giữ để xem lại; bài này được đánh dấu chưa hoàn thành.")) return true; s.abort(); w.drone.hold(); w.drone.paused = false; return true; })}>Hủy bài bay</button>}
+        {!locked && (s || t.armed || t.altitude > .12) && <button onClick={() => run(() => { w.setReplay(null); w.drone.reset(); w.session = null; setSelected(null); return true; }, "Đã đặt lại máy bay tại H.")}>Thử lại từ H</button>}
+      </div>}
       <div className="training-scene-tools">
-        <span className="training-scene-label">
-          {vi(
-            strict
-              ? "SIMULATED / PRACTICE EXAMINATION · VLOS LOCKED"
-              : replay
-                ? "INSTRUCTOR · RECORDED STATE REPLAY"
-                : "PILOT TRAINING · SIMULATION",
-          )}
-        </span>
-        <div className="training-camera-buttons">
-          {views
-            .filter((v) => (!strict && !flyPage) || v === "PILOT VLOS")
-            .map((v) => (
-              <button
-                key={v}
-                className={
-                  !w.replay?.recordedCamera && w.cameraMode === v
-                    ? "active"
-                    : ""
-                }
-                onClick={() => run(() => w.setCamera(v))}
-              >
-                {vi(v)}
-              </button>
-            ))}
-        </div>
-        {flyPage && !strict && (
-          <details className="camera-aids">
-            <summary>Góc quan sát hỗ trợ</summary>
-            <div>
-              {views
-                .filter((v) => v !== "PILOT VLOS")
-                .map((v) => (
-                  <button key={v} onClick={() => run(() => w.setCamera(v))}>
-                    {vi(v)}
-                  </button>
-                ))}
-            </div>
-            <p>Chỉ để học và minh họa. Thi thử chỉ cho phép góc người lái.</p>
-          </details>
-        )}
-        {w.cameraMode === "PILOT VLOS" && (
-          <div
-            className="head-controls"
-            role="group"
-            aria-label="Nhìn quanh tại chỗ"
-          >
-            <button
-              aria-label="Nhìn trái"
-              onClick={() => {
-                w.lookPilot(-0.15, 0);
-                update();
-              }}
-            >
-              ← Trái
-            </button>
-            <button
-              aria-label="Nhìn lên"
-              onClick={() => {
-                w.lookPilot(0, 0.12);
-                update();
-              }}
-            >
-              ↑ Lên
-            </button>
-            <button
-              onClick={() => {
-                w.recenterPilot();
-                update();
-              }}
-            >
-              Nhìn thẳng
-            </button>
-            <button
-              aria-label="Nhìn xuống"
-              onClick={() => {
-                w.lookPilot(0, -0.12);
-                update();
-              }}
-            >
-              ↓ Xuống
-            </button>
-            <button
-              aria-label="Nhìn phải"
-              onClick={() => {
-                w.lookPilot(0.15, 0);
-                update();
-              }}
-            >
-              Phải →
-            </button>
-            <span>Kéo chuột để nhìn quanh · đứng tại chỗ</span>
-          </div>
-        )}
-      </div>
-      <div className="training-scene-status">
-        <b>
-          {frame
-            ? `REPLAY · ${vi(frame.state)}`
-            : (s?.state ?? "READY TO PREPARE")}
-        </b>
-        <span>
-          {strict
-            ? (s?.task?.label ?? "Complete procedures")
-            : `Gear altitude ${fixed(frame?.altitude ?? t.altitude)} m · ${frame?.flightMode ?? t.mode}`}
-        </span>
-        <small>
-          {w.input.source} ·{" "}
-          {strict ? "Guidance OFF" : "Manual body-frame velocity"}
-        </small>
+        <button className="panel-toggle" aria-expanded={!panelCollapsed} aria-controls="main-content" onClick={() => setPanelCollapsed(!panelCollapsed)}>{panelCollapsed ? "Mở bảng điều khiển" : "Thu gọn bảng điều khiển"}</button>
+        {!flyPage && <details className="camera-aids"><summary>Góc quan sát · {vi(w.cameraMode)}</summary><div>{views.filter(v => !strict || v === "PILOT VLOS").map(v => <button key={v} onClick={() => run(() => w.setCamera(v))}>{vi(v)}</button>)}</div></details>}
+        {flyPage && !strict && <details className="camera-aids"><summary>Góc quan sát hỗ trợ</summary><div>{views.map(v => <button key={v} onClick={() => run(() => w.setCamera(v))}>{vi(v)}</button>)}</div></details>}
+        {w.cameraMode === "PILOT VLOS" && <div className="head-controls" role="group" aria-label="Nhìn quanh tại chỗ">
+          <button aria-label="Nhìn trái" onClick={() => { w.lookPilot(-.2, 0); update(); }}>← Trái</button>
+          <button onClick={() => { w.recenterPilot(); update(); }}>Nhìn thẳng</button>
+          <button aria-label="Nhìn phải" onClick={() => { w.lookPilot(.2, 0); update(); }}>Phải →</button>
+          <details className="head-more"><summary>Nhìn lên / xuống</summary><div><button aria-label="Nhìn lên" onClick={() => { w.lookPilot(0, .12); update(); }}>↑ Lên</button><button aria-label="Nhìn xuống" onClick={() => { w.lookPilot(0, -.12); update(); }}>↓ Xuống</button></div></details>
+        </div>}
       </div>
     </>
   );

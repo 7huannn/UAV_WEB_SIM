@@ -48,14 +48,14 @@ async function screenshot(name) {
   const previous = await page.evaluate(() => window.__UAV__.quality);
   if (captureHigh)
     await page
-      .getByLabel("Graphics quality", { exact: true })
+      .getByLabel("Chất lượng hình ảnh", { exact: true })
       .selectOption("High");
   await frames();
   await page.screenshot({ path: `docs/screenshots/${name}.png` });
   console.log(`Captured ${name}`);
   if (captureHigh)
     await page
-      .getByLabel("Graphics quality", { exact: true })
+      .getByLabel("Chất lượng hình ảnh", { exact: true })
       .selectOption(previous);
 }
 // Fast forward the same 250Hz force-based simulation, never mutate aircraft XYZ.
@@ -137,7 +137,7 @@ try {
   });
   await screenshot("grass-closeup");
   await page
-    .getByRole("button", { name: "Take off", exact: true })
+    .getByRole("button", { name: "Cất cánh tự động", exact: true })
     .click({ noWaitAfter: true });
   await simulate(22);
   const takeoff = await page.evaluate(() => window.__UAV__.drone.telemetry());
@@ -185,12 +185,12 @@ try {
     .getByRole("button", { name: "Toàn cảnh", exact: true })
     .click({ noWaitAfter: true });
   await page
-    .getByLabel("Weather preset", { exact: true })
+    .getByLabel("Kịch bản thời tiết", { exact: true })
     .selectOption("Overcast");
   await simulate(12);
   await screenshot("overcast");
   await page
-    .getByLabel("Weather preset", { exact: true })
+    .getByLabel("Kịch bản thời tiết", { exact: true })
     .selectOption("Heavy rain");
   await simulate(24);
   await screenshot("rain-overcast");
@@ -205,24 +205,24 @@ try {
     "Weather selector blends cloud/rain, wets concrete and physically disturbs aircraft",
   );
   await page
-    .getByRole("button", { name: /^Tune environment/ })
+    .getByRole("button", { name: /^Điều chỉnh thời tiết/ })
     .click({ noWaitAfter: true });
   await page
-    .getByRole("slider", { name: "Wind speed", exact: true })
+    .getByRole("slider", { name: "Gió nền", exact: true })
     .press("End");
   assert.equal(
     await page.evaluate(() => window.__UAV__.weather.target.wind),
     15,
   );
   await page
-    .getByRole("button", { name: /^Close environment settings/ })
+    .getByRole("button", { name: /^Đóng cài đặt thời tiết/ })
     .click({ noWaitAfter: true });
   await page
-    .getByLabel("Weather preset", { exact: true })
+    .getByLabel("Kịch bản thời tiết", { exact: true })
     .selectOption("Clear skies");
   await simulate(12);
   await page
-    .getByRole("button", { name: "Reset", exact: true })
+    .getByRole("button", { name: "Đặt lại tại H", exact: true })
     .click({ noWaitAfter: true });
   const missionResults = [];
   async function until(condition) {
@@ -255,9 +255,9 @@ try {
     // Trigger both selections even when Figure Eight is the initial option.
     if (id === "figure-eight")
       await page
-        .getByLabel("Mission", { exact: true })
+        .getByLabel("Bài bay mẫu", { exact: true })
         .selectOption("outer-circuit");
-    await page.getByLabel("Mission", { exact: true }).selectOption(id);
+    await page.getByLabel("Bài bay mẫu", { exact: true }).selectOption(id);
     await frames();
     const preview = await page
       .locator(".mini-map polyline")
@@ -272,16 +272,16 @@ try {
       id === "figure-eight" ? "figure-eight-preview" : "outer-circuit-preview",
     );
     await page
-      .getByRole("button", { name: "Start mission", exact: true })
+      .getByRole("button", { name: "Bắt đầu bay mẫu", exact: true })
       .first()
       .click({ noWaitAfter: true });
     await until("EXECUTING");
     assert.equal(
-      await page.getByLabel("Mission", { exact: true }).isDisabled(),
+      await page.getByLabel("Bài bay mẫu", { exact: true }).isDisabled(),
       true,
     );
     await page
-      .getByRole("button", { name: /^Pause mission/ })
+      .getByRole("button", { name: /^Tạm dừng bay mẫu/ })
       .first()
       .click({ noWaitAfter: true });
     const distance = await page.evaluate(
@@ -297,7 +297,7 @@ try {
       "PAUSED",
     );
     await page
-      .getByRole("button", { name: /^Resume mission/ })
+      .getByRole("button", { name: /^Tiếp tục bay mẫu/ })
       .first()
       .click({ noWaitAfter: true });
     await until("APPROACH");
@@ -339,25 +339,25 @@ try {
       `${id}: selected preview/overlay, takeoff, route, pause/resume, H approach and physical landing before completion`,
     );
     await page
-      .getByRole("button", { name: "Reset", exact: true })
+      .getByRole("button", { name: "Đặt lại tại H", exact: true })
       .click({ noWaitAfter: true });
   }
   const mission = missionResults;
-  await page.getByRole("checkbox", { name: "Markers", exact: true }).check();
+  await page.getByRole("checkbox", { name: "Nhãn mốc sân", exact: true }).check();
   assert.equal(await page.evaluate(() => window.__UAV__.labels.visible), true);
-  await page.getByRole("checkbox", { name: "Markers", exact: true }).uncheck();
-  await page.getByRole("checkbox", { name: "Colliders", exact: true }).check();
+  await page.getByRole("checkbox", { name: "Nhãn mốc sân", exact: true }).uncheck();
+  await page.getByRole("checkbox", { name: "Khung va chạm", exact: true }).check();
   assert.equal(await page.evaluate(() => window.__UAV__.debug.visible), true);
   await page
-    .getByRole("checkbox", { name: "Colliders", exact: true })
+    .getByRole("checkbox", { name: "Khung va chạm", exact: true })
     .uncheck();
   await page
-    .getByLabel("Graphics quality", { exact: true })
+    .getByLabel("Chất lượng hình ảnh", { exact: true })
     .selectOption("Low");
   assert.equal(await page.evaluate(() => window.__UAV__.quality), "Low");
   checks.push("Markers, collider overlay and graphics quality controls work");
   await page
-    .getByRole("button", { name: "Pause simulation", exact: true })
+    .getByRole("button", { name: "Tạm dừng mô phỏng", exact: true })
     .click({ noWaitAfter: true });
   const pausedTime = await page.evaluate(() => window.__UAV__.drone.time);
   await frames();
@@ -366,15 +366,15 @@ try {
     pausedTime,
   );
   await page
-    .getByRole("button", { name: "Resume simulation", exact: true })
+    .getByRole("button", { name: "Tiếp tục mô phỏng", exact: true })
     .click({ noWaitAfter: true });
   checks.push("Global pause stops simulated time");
   await page
-    .getByRole("button", { name: "Take off", exact: true })
+    .getByRole("button", { name: "Cất cánh tự động", exact: true })
     .click({ noWaitAfter: true });
   await simulate(16);
   await page
-    .getByRole("button", { name: "Land", exact: true })
+    .getByRole("button", { name: "Hạ cánh tự động", exact: true })
     .click({ noWaitAfter: true });
   await simulate(25);
   assert.equal(
@@ -383,13 +383,13 @@ try {
   );
   checks.push("Land button descends and disarms on physical ground contact");
   await page
-    .getByRole("button", { name: "Reset", exact: true })
+    .getByRole("button", { name: "Đặt lại tại H", exact: true })
     .click({ noWaitAfter: true });
   await frames();
   assert.equal(await page.evaluate(() => window.__UAV__.drone.altitude), 0);
   checks.push("Reset returns to H at rest");
   await page
-    .getByRole("button", { name: "Reference plan", exact: true })
+    .getByRole("button", { name: "Sơ đồ sân tham chiếu", exact: true })
     .click({ noWaitAfter: true });
   assert.ok(await page.getByRole("dialog").isVisible());
   await page
@@ -412,12 +412,12 @@ try {
   );
   assert.ok(
     await page
-      .getByRole("button", { name: "Start mission", exact: true })
+      .getByRole("button", { name: "Bắt đầu bay mẫu", exact: true })
       .last()
       .isVisible(),
   );
   await page
-    .getByLabel("Mobile mission", { exact: true })
+    .getByLabel("Bài bay mẫu trên màn hình nhỏ", { exact: true })
     .selectOption("figure-eight");
   assert.equal(
     await page.evaluate(() => window.__UAV__.drone.selectedMission),

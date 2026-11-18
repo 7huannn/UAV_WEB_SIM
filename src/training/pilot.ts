@@ -14,6 +14,7 @@ export type PilotStation = {
   setback?: number;
   initialYaw?: number;
   initialPitch?: number;
+  viewRevision?: number;
 };
 // Edge/centre vectors use the same world coordinates as the court; this also
 // handles a rotated edge when a surveyed transform is supplied by the caller.
@@ -44,14 +45,12 @@ export function stationFromEdge(
     z,
     groundY,
     eyeHeight: 1.65,
-    verticalFov: 70,
+    verticalFov: 55,
     edge: "front-long-edge",
+    viewRevision: 2,
     setback,
-    initialYaw: Math.atan2(center[1] - z, center[0] - x),
-    initialPitch: Math.atan2(
-      2 - (groundY + 1.65),
-      Math.hypot(center[0] - x, center[1] - z),
-    ),
+    initialYaw: Math.atan2(center[1] + 8 * nx - z, center[0] - 8 * nz - x),
+    initialPitch: -5 * Math.PI / 180,
     source:
       "Giả định kỹ thuật: trung điểm cạnh dài phía trước (+Z), lùi ngoài V1; chưa có khảo sát hiện trường",
     confidence: "Cần giảng viên và đơn vị có thẩm quyền xác nhận",

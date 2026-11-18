@@ -38,3 +38,26 @@ export function simpleWeather(
 export function weatherSummary(p: WeatherParams) {
   return `Gió nền ${p.wind.toFixed(1)} m/s · gió giật tối đa ±${p.gust.toFixed(1)} m/s · ${p.rain > 0 ? "Mưa" : p.cloud > 0.6 ? "Nhiều mây" : "Trời quang"}`;
 }
+
+// Teaching scale, not legal wind limits or calibrated rainfall in mm/h.
+export function validLevel(n: number) {
+  return Number.isInteger(n) && n >= 0 && n <= 10;
+}
+export function weatherAtLevels(base: WeatherParams, wind?: number, rain?: number): WeatherParams {
+  if ((wind !== undefined && !validLevel(wind)) || (rain !== undefined && !validLevel(rain)))
+    throw new Error("Weather level must be an integer from 0 to 10");
+  const result = { ...base };
+  if (wind !== undefined) Object.assign(result, { wind: wind * 0.9, gust: wind * 0.4, turbulence: wind * 0.07 });
+  if (rain !== undefined) {
+    const r = rain / 10;
+    Object.assign(result, { rain: r, cloud: 0.12 + 0.88 * r, visibility: 650 - 555 * r, timeOfDay: 15.5 - 2.5 * r });
+  }
+  return result;
+}
+export function windLevelOf(p: WeatherParams) {
+  const n = Math.round(p.wind / 0.9);
+  return validLevel(n) && Math.abs(p.wind - n * 0.9) < 1e-6 && Math.abs(p.gust - n * 0.4) < 1e-6 && Math.abs(p.turbulence - n * 0.07) < 1e-6 ? n : null;
+}
+export function levelDescription(n: number, rain = false) {
+  return n === 0 ? (rain ? "Không mưa" : "Không gió") : n <= 3 ? "Nhẹ" : n <= 6 ? "Trung bình" : "Mạnh";
+}

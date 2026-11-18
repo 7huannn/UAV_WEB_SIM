@@ -1,0 +1,647 @@
+{
+  "date": "2026-11-18T10:32:44.724Z",
+  "url": "http://127.0.0.1:4175",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-i8icxAy0.js",
+  "checks": [
+    "Task groups support Space/Enter, independent collapse, retained values, summaries and contextual progression",
+    "Device fault blocks prepare with keyboard recovery; keyboard weather increments/reset change real target and survive disclosure",
+    "Sidebar collapses/reopens while action dock stays reachable; laptop canvas/action bounds verified",
+    "Real force-integrated H/takeoff/center/extremes/two heights before-after optics, fixed eye/unit scale/zoom, explicit far-right head turn and recenter",
+    "Training guide follows actual displayed pose vertically on court/grass in clear/rain, toggles off, fades at touchdown and never changes physics",
+    "Mock before/during attempt rejects weather/guide API, ignores enabled preference and hides aid UI; instructor cannot activate guide",
+    "200% zoom-equivalent CSS viewport/DPR reflow with retained inputs and reachable actions; tablet/mobile configuration/review without horizontal overflow"
+  ],
+  "screenshots": [
+    "home",
+    "exercise-expanded",
+    "groups-collapsed",
+    "wind-rain-sliders",
+    "panel-collapsed",
+    "preflight-pinned-actions",
+    "pilot-before-home",
+    "pilot-after-home",
+    "pilot-before-takeoff",
+    "pilot-after-takeoff",
+    "pilot-before-center",
+    "pilot-after-center",
+    "pilot-before-far-left",
+    "pilot-after-far-left",
+    "pilot-before-far-right",
+    "pilot-after-far-right",
+    "pilot-far-right-head-turn",
+    "pilot-before-high-center",
+    "pilot-after-high-center",
+    "pilot-high-center-head-up",
+    "pilot-head-left",
+    "pilot-head-right",
+    "pilot-recentered",
+    "ground-guide-clear-court",
+    "ground-guide-rain-court",
+    "ground-guide-rain-grass",
+    "ground-guide-clear-grass",
+    "mock-no-assistance",
+    "zoom-200-equivalent",
+    "training-tablet",
+    "mobile-configuration",
+    "mobile-review"
+  ],
+  "positions": [
+    {
+      "label": "before-home",
+      "position": [
+        -20,
+        0.32,
+        0
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.8467750488143617,
+        -0.14137852897106068,
+        0.9930268159813309
+      ],
+      "pixelHeight": 21.338675514116094,
+      "guide": false,
+      "ground": [
+        0,
+        0,
+        0
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-home",
+      "position": [
+        -20,
+        0.32,
+        0
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.43859267167185223,
+        0.06366630710237757,
+        0.9950829870232413
+      ],
+      "pixelHeight": 20.299702203685047,
+      "guide": false,
+      "ground": [
+        0,
+        0,
+        0
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "before-takeoff",
+      "position": [
+        -20,
+        5.284321254013543,
+        0
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.8378773436555211,
+        0.27456943032622855,
+        0.993073366045499
+      ],
+      "pixelHeight": 20.97549538494909,
+      "guide": true,
+      "ground": [
+        -20,
+        0.025,
+        0
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-takeoff",
+      "position": [
+        -20,
+        5.284321254013543,
+        0
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.44490672550193044,
+        0.46931974659154224,
+        0.9949905657771199
+      ],
+      "pixelHeight": 20.97127816611868,
+      "guide": true,
+      "ground": [
+        -20,
+        0.025,
+        0
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "before-center",
+      "position": [
+        -0.03563635714472161,
+        5.32006979324731,
+        8.38344694305862e-17
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.0014928740630711732,
+        0.27754485673699647,
+        0.9930736990349687
+      ],
+      "pixelHeight": 20.973507391344413,
+      "guide": true,
+      "ground": [
+        -0.03563635714472161,
+        0.025,
+        8.38344694305862e-17
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-center",
+      "position": [
+        -0.03563635714472161,
+        5.32006979324731,
+        8.38344694305862e-17
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.4618769910559697,
+        0.6438738569373152,
+        0.9921079077570227
+      ],
+      "pixelHeight": 33.0583990778071,
+      "guide": true,
+      "ground": [
+        -0.03563635714472161,
+        0.025,
+        8.38344694305862e-17
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "before-far-left",
+      "position": [
+        -16.968139722109875,
+        5.319977914486426,
+        -8.983874510127961
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.4658512655028388,
+        0.1707414668006167,
+        0.9954952106919397
+      ],
+      "pixelHeight": 13.768679767303313,
+      "guide": true,
+      "ground": [
+        -16.968139722109875,
+        0.025,
+        -8.983874510127961
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-far-left",
+      "position": [
+        -16.968139722109875,
+        5.319977914486426,
+        -8.983874510127961
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        -0.13625516772016225,
+        0.40388497879665414,
+        0.9961388632445708
+      ],
+      "pixelHeight": 16.21072449688915,
+      "guide": true,
+      "ground": [
+        -16.968139722109875,
+        0.025,
+        -8.983874510127961
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "before-far-right",
+      "position": [
+        17.96428769513184,
+        5.319989357118522,
+        -9.000048466421019
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.49289415423409144,
+        0.17061616420048098,
+        0.9954980660462571
+      ],
+      "pixelHeight": 13.760169456562052,
+      "guide": true,
+      "ground": [
+        17.96428769513184,
+        0.025,
+        -9.000048466421019
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-far-right",
+      "position": [
+        17.96428769513184,
+        5.319989357118522,
+        -9.000048466421019
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        1.6974108470141611,
+        0.6292057889668022,
+        0.9923541167210663
+      ],
+      "pixelHeight": 32.01917324731849,
+      "guide": true,
+      "ground": [
+        17.96428769513184,
+        0.025,
+        -9.000048466421019
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "far-right-turned",
+      "position": [
+        17.96428769513184,
+        5.319989357118522,
+        -9.000048466421019
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.46536857073443094,
+        0.4223075628767225,
+        0.9958294276453528
+      ],
+      "pixelHeight": 17.491475154387096,
+      "guide": true,
+      "ground": [
+        17.96428769513184,
+        0.025,
+        -9.000048466421019
+      ],
+      "q": [
+        -0.043479605254191166,
+        -0.07991701482617006,
+        -0.003489252221744123,
+        0.9958466848803317
+      ]
+    },
+    {
+      "label": "before-high-center",
+      "position": [
+        0.03203110879446504,
+        10.31654922972967,
+        -0.01536624741926748
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.0013318241460637862,
+        0.6900109801826493,
+        0.9931261630699206
+      ],
+      "pixelHeight": 20.680142379711693,
+      "guide": true,
+      "ground": [
+        0.03203110879446504,
+        0.025,
+        -0.01536624741926748
+      ],
+      "q": [
+        0.0113213522391041,
+        -3.0614207832378025e-17,
+        3.4661644454096406e-19,
+        0.9999359114380671
+      ]
+    },
+    {
+      "label": "after-high-center",
+      "position": [
+        0.03203110879446504,
+        10.31654922972967,
+        -0.01536624741926748
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.4806350455724595,
+        1.3200773911924821,
+        0.9918608106166142
+      ],
+      "pixelHeight": 35.100176296313236,
+      "guide": true,
+      "ground": [
+        0.03203110879446504,
+        0.025,
+        -0.01536624741926748
+      ],
+      "q": [
+        -0.042568797969769576,
+        0.21794517775341313,
+        0.009515691963077279,
+        0.9749857683781369
+      ]
+    },
+    {
+      "label": "high-center-turned",
+      "position": [
+        0.03203110879446504,
+        10.31654922972967,
+        -0.01536624741926748
+      ],
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.42358472494570504,
+        0.7276196706034015,
+        0.9928387848314005
+      ],
+      "pixelHeight": 27.262414934565097,
+      "guide": true,
+      "ground": [
+        0.03203110879446504,
+        0.025,
+        -0.01536624741926748
+      ],
+      "q": [
+        0.07445502816552396,
+        0.21751699910507574,
+        -0.016643437139768576,
+        0.9730702954470289
+      ]
+    },
+    {
+      "label": "grass",
+      "position": [
+        22.964320476319337,
+        5.319934954284175,
+        0.000028331423622648445
+      ],
+      "eye": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "fov": 45,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "ndc": [
+        0.47282369859039647,
+        -0.007697386617090993,
+        0.9980123557008437
+      ],
+      "pixelHeight": 6.801633378398185,
+      "guide": true,
+      "ground": [
+        22.964320476319337,
+        -0.010000000000000002,
+        0.000028331423622648445
+      ],
+      "q": [
+        -0.4190010335287275,
+        0.09392430017805757,
+        0.043627208742797546,
+        0.9020604338930029
+      ]
+    }
+  ],
+  "layout": {
+    "before": {
+      "x": 360,
+      "y": 165,
+      "width": 1006,
+      "height": 506
+    },
+    "after": {
+      "x": 0,
+      "y": 165,
+      "width": 1366,
+      "height": 506
+    },
+    "normal": {
+      "x": 360,
+      "y": 165,
+      "width": 1366,
+      "height": 506
+    }
+  },
+  "errors": [],
+  "limits": [
+    "Synthetic velocity-command screenshots, no human usability or RC hardware validation",
+    "200% zoom-equivalent CDP viewport/DPR emulation; native browser zoom/assistive technology still needs classroom verification",
+    "Only Training without replay permits ground assistance; no indicator is recorded"
+  ]
+}

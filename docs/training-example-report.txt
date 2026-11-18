@@ -1,44 +1,48 @@
-SIMULATED / PRACTICE EXAMINATION - not a licence or certificate
-Candidate: Browser figure-eight manual attempt
-Attempt: 650349bc-0682-4512-ad08-50bd959b9e08 · 2026-11-18T05:46:56.080Z
-Software: uav-arena-0.2.0 · geometry assets/reference/arena-layout.png
-Status: ABORTED · INCOMPLETE_ATTEMPT
-Profile: Full Figure Eight 1.0.0 · training-rules-1.0.0
-Provenance: TRAINING_ONLY · Engineering assumptions; no verified Vietnamese scoring tolerance
-Flight mode: Position-stabilized body-frame velocity / climb / yaw-rate; release holds last target; no attitude mode
-Pilot station: {"x":-25,"z":0,"groundY":-0.035,"eyeHeight":1.65,"verticalFov":60,"source":"Engineering assumption: west turf, distinct from H and examiner area; diagram has no pilot station","confidence":"Low; requires authority and surveyed-site confirmation","verification":"PROVISIONAL"}
-Controller: Keyboard · Keyboard fallback · hardware UNVERIFIED
-Physics: 0.004s fixed step · state recording every 5 steps
-Samples: 937 · dropped wall time: 3.966s
-Practice score: 100.0/100 (engineering deduction, NOT official pass/fail)
-Completed tasks: takeoff, hover
-Missing gates at stop: 174
-Max lateral: 0.01m · max altitude error: 0.05m · max speed: 2.59m/s
-Landing error: NOT OBSERVED
-Rule exceedance seconds: {}
-Preflight: true,true,true,true · Postflight: false,false
-LIMITATIONS
+UAV ARENA — BÁO CÁO LUYỆN BAY MÔ PHỎNG
+Chỉ dùng luyện tập. Không phải giấy phép hoặc kết quả sát hạch chính thức.
+Học viên: Browser figure-eight manual attempt
+Mã bài bay: a5caaf72-f89a-4622-ae9d-fc144b76b0d5 · 17:28:01 18/11/2026
+Bài bay: Bay hình số 8 · phiên bản 1.0.0
+Trạng thái: Đã hủy bài bay · Bài bay chưa hoàn thành
+Điểm luyện tập: 100.0/100. Điểm cao không tự kết luận đạt.
+Phần đã hoàn thành: Tự cất cánh lên 5 m, giữ ổn định 2 giây; Giữ vị trí trên H trong 5 giây
+Mốc đường bay chưa đi qua: 174
+Lệch ngang lớn nhất: 0.00 m
+Lệch độ cao lớn nhất: 0.05 m
+Tốc độ lớn nhất: 2.57 m/s
+Độ lệch hạ cánh: Chưa ghi nhận
+Nguồn điều khiển: Bàn phím · Dùng bàn phím để luyện thử. Chưa kiểm chứng bằng phần cứng thực.
+Chế độ bay: cần ra lệnh vận tốc theo hướng máy bay, lên xuống và xoay; hệ thống ổn định vị trí khi thả cần. Không phải ga trực tiếp hoặc điều khiển góc nghiêng.
+Vị trí người lái: X=0, Z=17 m; mắt cao 1.65 m; góc nhìn dọc 55°. Vị trí tạm đề xuất.
+Thời tiết lúc chuẩn bị: gió 0 m/s, gió giật 0 m/s; mưa 0. Seed 42.
+Kiểm tra trước bay: Đủ các xác nhận · sau bay: Chưa đủ
+Số mẫu ghi: 936. Bước vật lý 0.004 giây; ghi mỗi 5 bước. Thời gian thực bị bỏ qua khi máy chậm: 7.399 giây.
+GIỚI HẠN CẦN HIỂU
+Tiêu chí là giả định luyện tập, cần giảng viên đánh giá. Mô hình máy bay, quan sát trên màn hình, tay điều khiển và khả năng chuyển kỹ năng ra thực địa chưa được xác minh.
+Bản ghi được giữ nguyên. Nhận xét được thêm riêng; checksum không phải chữ ký thiết bị hay hồ sơ sát hạch được chứng thực.
+NHẬN XÉT CỦA GIẢNG VIÊN
+4.00 giây · Giảng viên: Synthetic browser QA review: partial attempt, not a completed flight or certification.
+PHỤ LỤC KỸ THUẬT — giữ mã gốc để đối chiếu JSON/CSV
+Phần mềm: uav-arena-0.3.0 · tiêu chí: training-rules-1.0.0 · TRAINING_ONLY · Engineering assumptions; no verified Vietnamese scoring tolerance
+Thời gian vượt giới hạn: {}
+0.000 s · STATE: PREFLIGHT
+0.132 s · CHECKLIST: preflight 1: true
+0.332 s · CHECKLIST: preflight 2: true
+0.532 s · CHECKLIST: preflight 3: true
+0.732 s · CHECKLIST: preflight 4: true
+0.932 s · STATE: READY
+1.432 s · STATE: ACTIVE
+7.800 s · TASK_COMPLETE: Manual climb to 5 m; settle for 2 s
+12.800 s · TASK_COMPLETE: Hold over H for 5 s
+18.516 s · STATE: PAUSED
+18.516 s · PAUSE: Practice interrupted; human review required
+18.516 s · STATE: ACTIVE
+18.716 s · ABORT: Candidate aborted
+18.716 s · STATE: ABORTED
+18.716 s · RESULT: INCOMPLETE_ATTEMPT
 Practice only; no official examination equivalence
 Rules and pilot station provisional; human review required
 Illustrative uncalibrated aircraft and ideal state telemetry
 RC hardware, display perceptual fidelity and field transfer unverified
 Replay is recorded-state playback, not resimulation or device-signed evidence
 Attempt paused/interrupted
-EVENT TIMELINE
-0.000s STATE: PREFLIGHT
-0.200s CHECKLIST: preflight 1: true
-0.400s CHECKLIST: preflight 2: true
-0.600s CHECKLIST: preflight 3: true
-0.800s CHECKLIST: preflight 4: true
-1.000s STATE: READY
-1.400s STATE: ACTIVE
-7.756s TASK_COMPLETE: Manual climb to 5 m; settle for 2 s
-12.756s TASK_COMPLETE: Hold over H for 5 s
-18.536s STATE: PAUSED
-18.536s PAUSE: Practice interrupted; human review required
-18.536s STATE: ACTIVE
-18.736s ABORT: Candidate aborted
-18.736s STATE: ABORTED
-18.736s RESULT: INCOMPLETE_ATTEMPT
-APPENDED HUMAN REVIEW (original recording unchanged)
-4.00s Instructor NOTE: Synthetic browser QA review: partial attempt, not a completed flight or certification.

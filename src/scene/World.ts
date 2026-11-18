@@ -2,7 +2,7 @@ import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
-  simpleWeather,
+  simpleWeather, weatherAtLevels, validLevel,
   type WindLevel,
   type Condition,
 } from "../training/weatherPresets";
@@ -17,6 +17,7 @@ import {
   updateLabels,
   ribbon,
 } from "./paint";
+import { makeGroundGuide, groundGuideAllowed } from "./groundGuide";
 import { makeDrone } from "./drone";
 import { makeGrass } from "./grass";
 import { makeGrassClumps } from "./grassClumps";
@@ -33,7 +34,7 @@ import {
   type Attempt,
 } from "../training/Session";
 import {
-  PILOT_STATION,
+  PILOT_STATION, frontPilotStation,
   applyPilotCamera,
   validFrontStation,
   type PilotStation,
@@ -120,6 +121,8 @@ export class World {
   };
   keys = new Set<string>();
   routeVisible = false;
+  groundGuide = makeGroundGuide();
+  groundGuideEnabled = true;
   private frame = 0;
   private last = 0;
   private sample = 0;
@@ -141,9 +144,14 @@ export class World {
     onUpdate: (t: Telemetry, s: WorldStats) => void,
   ) {
     this.callbacks = onUpdate;
+    try { this.groundGuideEnabled = localStorage.getItem("uav-ground-guide") !== "off"; } catch { /* optional preference */ }
+    this.scene.add(this.groundGuide.group);
     try {
       const s = JSON.parse(localStorage.getItem("uav-pilot-station") ?? "null");
-      if (s && validFrontStation(s)) this.pilotStation = s;
+      if (s && validFrontStation(s)) this.pilotStation = s.viewRevision === 2 ? s : {
+        ...s, verticalFov: PILOT_STATION.verticalFov, initialYaw: frontPilotStation(s.setback).initialYaw,
+        initialPitch: PILOT_STATION.initialPitch, viewRevision: 2,
+      };
       // Legacy local west station is superseded; archived attempt snapshots stay untouched.
     } catch {
       /* default provisional station */
@@ -709,6 +717,13 @@ export class World {
       b = new T.Vector3(5, 0, 0).project(this.camera);
     return (Math.abs(b.x - a.x) * this.host.clientWidth) / 2;
   }
+  setGroundGuide(show: boolean) {
+    if (!groundGuideAllowed(this.workspace, this.session?.attempt.mode === "Mock Examination", !!this.replay)) return false;
+    this.groundGuideEnabled = show;
+    if (!show) this.groundGuide.group.visible = false;
+    try { localStorage.setItem("uav-ground-guide", show ? "on" : "off"); } catch { /* optional preference */ }
+    return true;
+  }
   setLabels(v: boolean) {
     if (this.session?.strict && v) return false;
     this.labels.visible = v;
@@ -754,6 +769,7 @@ export class World {
     if (this.session?.strict && page !== this.workspace) return false;
     if (this.session?.locked && page === "Reference missions") return false;
     this.workspace = page;
+    this.groundGuide.group.visible = false;
     this.pilotMarker.visible = false;
     if (!this.session?.strict) this.markerDots.visible = true;
     if (page === "Reference missions") {
@@ -784,6 +800,12 @@ export class World {
   setSimpleWeather(wind: WindLevel, condition: Condition) {
     if (!this.canConfigureWeather()) return false;
     this.weather.target = simpleWeather(wind, condition);
+    this.session?.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
+    return true;
+  }
+  setWeatherLevels(wind?: number, rain?: number) {
+    if (!this.canConfigureWeather() || (wind !== undefined && !validLevel(wind)) || (rain !== undefined && !validLevel(rain))) return false;
+    this.weather.target = weatherAtLevels(this.weather.target, wind, rain);
     this.session?.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
     return true;
   }
@@ -899,6 +921,7 @@ export class World {
     this.setDebug(false);
     this.markerDots.visible = mode !== "Mock Examination";
     this.pilotMarker.visible = false;
+    this.groundGuide.group.visible = false;
     this.setCamera("PILOT VLOS");
     this.traceCount = -1;
     return true;
@@ -916,6 +939,7 @@ export class World {
       Object.assign(this.weather, this.replayWeather);
       this.replayWeather = null;
     }
+    this.groundGuide.group.visible = false;
     this.replay = attempt
       ? {
           attempt,
@@ -1137,6 +1161,7 @@ export class World {
       model.position.fromArray(playback.position);
       model.quaternion.fromArray(playback.orientation);
     }
+    this.groundGuide.update(model.position, this.groundGuideEnabled && groundGuideAllowed(this.workspace, this.session?.attempt.mode === "Mock Examination", !!this.replay));
     this.updateTrace();
     if (!this.drone.paused || this.replay?.playing) {
       if (this.loadedAirframe) {
@@ -1291,7 +1316,7 @@ export class World {
     this.scene.traverse((o) => {
       if (
         o instanceof T.Mesh ||
-        o instanceof T.LineSegments ||
+        o instanceof T.Line ||
         o instanceof T.Sprite
       ) {
         if (o.geometry) geos.add(o.geometry);

@@ -119,7 +119,7 @@ async function simulate(seconds) {
   await frames();
 }
 async function weather(preset) {
-  await page.getByLabel("Weather preset", { exact: true }).selectOption(preset);
+  await page.getByLabel("Kịch bản thời tiết", { exact: true }).selectOption(preset);
   await simulate(14);
 }
 async function capture(name) {
@@ -194,7 +194,7 @@ async function raw(name) {
 }
 try {
   await mkdir("docs/screenshots", { recursive: true });
-  await page.goto(process.env.UAV_URL ?? "http://localhost:4175", {
+  await page.goto(process.env.UAV_URL ?? "http://127.0.0.1:4175", {
     waitUntil: "networkidle",
   });
   await page.waitForFunction(
@@ -209,7 +209,7 @@ try {
     true,
   );
   await page
-    .getByLabel("Graphics quality", { exact: true })
+    .getByLabel("Chất lượng hình ảnh", { exact: true })
     .selectOption("High");
   await page.evaluate(() => (window.__UAV__.drone.paused = true));
   if (process.env.UAV_PAINT_ONLY) {
@@ -314,7 +314,7 @@ try {
     }
     if (!section || section === "missions") {
       for (const id of ["figure-eight", "outer-circuit"]) {
-        await page.getByLabel("Mission", { exact: true }).selectOption(id);
+        await page.getByLabel("Bài bay mẫu", { exact: true }).selectOption(id);
         await view("Top down");
         await capture(
           id === "figure-eight"
@@ -323,21 +323,21 @@ try {
         );
       }
       await page
-        .getByRole("checkbox", { name: "Markers", exact: true })
+        .getByRole("checkbox", { name: "Nhãn mốc sân", exact: true })
         .check();
       await capture("compact-engineering-labels");
       await page
-        .getByRole("checkbox", { name: "Markers", exact: true })
+        .getByRole("checkbox", { name: "Nhãn mốc sân", exact: true })
         .uncheck();
       await weather("Clear skies");
       await page
-        .getByRole("button", { name: "Reset", exact: true })
+        .getByRole("button", { name: "Đặt lại tại H", exact: true })
         .click({ noWaitAfter: true });
       await page
-        .getByLabel("Mission", { exact: true })
+        .getByLabel("Bài bay mẫu", { exact: true })
         .selectOption("figure-eight");
       await page
-        .getByRole("button", { name: "Start mission", exact: true })
+        .getByRole("button", { name: "Bắt đầu bay mẫu", exact: true })
         .first()
         .click({ noWaitAfter: true });
       await page.evaluate(() => {
@@ -361,7 +361,7 @@ try {
       await view("FPV");
       await capture("fpv-flight");
       await page
-        .getByRole("button", { name: "Reset", exact: true })
+        .getByRole("button", { name: "Đặt lại tại H", exact: true })
         .click({ noWaitAfter: true });
       await page.evaluate(() => (window.__UAV__.drone.paused = true));
       await view("Overview");
@@ -375,16 +375,16 @@ try {
         true,
       );
       const mobile = await page
-          .getByLabel("Mobile mission", { exact: true })
+          .getByLabel("Bài bay mẫu trên màn hình nhỏ", { exact: true })
           .boundingBox(),
         button = await page
-          .getByRole("button", { name: "Start mission", exact: true })
+          .getByRole("button", { name: "Bắt đầu bay mẫu", exact: true })
           .last()
           .boundingBox();
       assert.ok(mobile && button && mobile.y + mobile.height < button.y);
       await page.setViewportSize({ width: 1600, height: 1000 });
       await page
-        .getByLabel("Graphics quality", { exact: true })
+        .getByLabel("Chất lượng hình ảnh", { exact: true })
         .selectOption("Low");
       await profile("Low overview");
     }
@@ -394,7 +394,7 @@ try {
     await position([-23.5, 0.3, 5], [-25.5, 0.07, 1]);
     for (const quality of ["Low", "Medium", "High", "Ultra"]) {
       await page
-        .getByLabel("Graphics quality", { exact: true })
+        .getByLabel("Chất lượng hình ảnh", { exact: true })
         .selectOption(quality);
       await frames();
       assert.equal(await page.evaluate(() => window.__UAV__.quality), quality);
@@ -402,7 +402,7 @@ try {
     await capture("ultra-grass-depth");
     await view("Overview");
     await page
-      .getByLabel("Graphics quality", { exact: true })
+      .getByLabel("Chất lượng hình ảnh", { exact: true })
       .selectOption("Low");
     for (const preset of [
       "Clear skies",

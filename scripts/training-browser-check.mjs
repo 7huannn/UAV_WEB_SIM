@@ -6,7 +6,7 @@ const vi = (s) => dictionary[s] ?? s;
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
-const base = process.env.UAV_URL ?? "http://localhost:4175";
+const base = process.env.UAV_URL ?? "http://127.0.0.1:4175";
 const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.CHROME_PATH ?? "/usr/bin/google-chrome",
@@ -79,6 +79,8 @@ async function fast(seconds, rc = { throttle: 0, yaw: 0, pitch: 0, roll: 0 }) {
   await frames();
 }
 async function prepare(name, profile = "figure-eight") {
+  if (!(await page.getByLabel("Tên hoặc mã học viên", {exact:true}).isVisible()))
+    await page.locator('.task-group>summary').filter({hasText: /^Bài bay/}).click();
   await page.getByLabel("Tên hoặc mã học viên", { exact: true }).fill(name);
   await page.getByLabel("Chọn bài bay", { exact: true }).selectOption(profile);
   await page
@@ -160,8 +162,8 @@ try {
   await page
     .getByText("Cài đặt nâng cao · hiệu chỉnh tay điều khiển", { exact: true })
     .click();
-  await page.getByLabel("roll axis", { exact: true }).fill("3");
-  await page.getByLabel("roll inverted", { exact: true }).check();
+  await page.getByLabel("Trái / phải Số trục", { exact: true }).fill("3");
+  await page.getByLabel("Trái / phải đảo chiều", { exact: true }).check();
   await page
     .getByRole("button", { name: "Lưu cấu hình tay điều khiển", exact: true })
     .click();
@@ -189,6 +191,8 @@ try {
   await fast(2.5, { throttle: 1, yaw: 0, pitch: 0, roll: 0 });
   await fast(10);
   assert.ok(await page.evaluate(() => window.__UAV__.drone.altitude > 4));
+  if ((await page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Hỗ trợ luyện tập$/})}).getAttribute('open')) === null)
+    await page.locator('.task-group>summary').filter({hasText: /^Hỗ trợ luyện tập/}).click();
   await page
     .getByLabel("Hỗ trợ luyện tập: hiện đường mẫu và vệt bay", {
       exact: true,
@@ -240,6 +244,8 @@ try {
   await prepare("Browser outer-circuit manual attempt", "outer-circuit");
   await fast(2.5, { throttle: 1, yaw: 0, pitch: 0, roll: 0 });
   await fast(10);
+  if ((await page.locator('.task-group').filter({has: page.locator('summary>b', {hasText: /^Hỗ trợ luyện tập$/})}).getAttribute('open')) === null)
+    await page.locator('.task-group>summary').filter({hasText: /^Hỗ trợ luyện tập/}).click();
   await page
     .getByLabel("Hỗ trợ luyện tập: hiện đường mẫu và vệt bay", {
       exact: true,
@@ -264,6 +270,8 @@ try {
     const w = window.__UAV__,
       before = w.camera.position.toArray();
     const results = {
+      guide: w.setGroundGuide(true),
+      levels: w.setWeatherLevels(10, 10),
       overview: w.setCamera("Overview"),
       route: w.setRoute(true),
       labels: w.setLabels(true),
@@ -315,6 +323,7 @@ try {
     .click();
   await page.getByLabel("Thời điểm phát lại", { exact: false }).fill("4");
   await page.getByText("Số liệu chi tiết của bản ghi", { exact: true }).click();
+  assert.deepEqual(await page.evaluate(() => { const w = window.__UAV__, before = JSON.stringify(w.replay.attempt); return [w.setGroundGuide(true), w.groundGuide.group.visible, JSON.stringify(w.replay.attempt) === before]; }), [false, false, true]);
   await capture("replay-telemetry");
   checks.push(
     "Stored recording replay with RC, attitude/position and task timeline",
@@ -389,7 +398,9 @@ try {
   });
   assert.deepEqual(restored.eye, restored.recorded);
   checks.push("Recorded camera pose replay preserves fixed eye");
+  await page.locator(".training-scene-tools .camera-aids>summary").click();
   await page.getByRole("button", { name: "Toàn cảnh", exact: true }).click();
+  await page.locator(".training-scene-tools .camera-aids>summary").click();
   await page
     .getByLabel("Nhập bản ghi mô phỏng JSON", { exact: true })
     .setInputFiles({
@@ -573,11 +584,7 @@ try {
     await page
       .getByRole("button", { name: "Hoàn tất và lưu bài bay", exact: true })
       .click();
-    await page
-      .getByText(vi("Attempt saved offline. Human review remains required."), {
-        exact: true,
-      })
-      .waitFor();
+    await page.waitForFunction(() => window.__UAV__.session.state === 'FINISHED');
     assert.equal(
       await page.evaluate(() => window.__UAV__.session.attempt.result.decision),
       "HUMAN_REVIEW_REQUIRED",
@@ -593,10 +600,12 @@ try {
         name: new RegExp(`Browser QA synthetic RC full ${id}`),
       })
       .click();
+    await page.locator(".training-scene-tools .camera-aids>summary").click();
     await page
       .getByRole("button", { name: "Nhìn từ trên", exact: true })
       .click();
-    await page.locator(".training-panel").evaluate((el) => (el.scrollTop = 0));
+    await page.locator(".training-scene-tools .camera-aids>summary").click();
+    await page.locator(".result-metrics").scrollIntoViewIfNeeded();
     await capture(`complete-${id}-debrief`);
     await page
       .getByRole("button", { name: "Đóng phát lại", exact: true })
