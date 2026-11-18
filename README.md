@@ -1,6 +1,6 @@
-# UAV Arena — Flight laboratory
+# UAV Arena — Practical pilot training
 
-A local, browser-native 3D UAV competition simulator. The central court is **45 × 27 m concrete**, surrounded by **60 × 42 m natural turf**. Geometry is traced from the supplied diagram; ancillary facilities are excluded.
+A local, browser-native multirotor practical-training simulator (v0.2.0). The central court is **45 × 27 m concrete**, surrounded by **60 × 42 m natural turf**. Geometry is traced from the supplied diagram; ancillary facilities are excluded.
 
 ## Run
 
@@ -19,7 +19,29 @@ npm run preview     # serve the production build locally
 npm test            # native Node geometry/physics checks, no browser needed
 ```
 
-## Fly
+## Manual training and mock examination
+
+The app opens in **Training**, with a fixed **Pilot VLOS** observation camera. The pilot station is provisional, west of H; it is distinct from the aircraft landing location and the examiner area. No official Vietnamese examination profile or certification equivalence is claimed. All numeric scoring tolerances are visibly **TRAINING_ONLY**.
+
+1. In **Controller Calibration**, choose keyboard or an exposed browser gamepad/USB RC simulator adapter. Inspect axes, capture neutral/ranges, set inversion/deadzones and save a named mapping. Mode 2 defaults are provisional; real RC compatibility/latency is unverified. Select a saved mapping, then save it to make it active. Use localhost (or a secure HTTPS origin) for browser crypto/gamepad capabilities.
+2. In **System Configuration**, confirm the provisional pilot station/eye height/FOV and weather. Mock conditions lock at preparation. Instructor weather changes during training require pausing the live attempt.
+3. Choose candidate/profile, **Prepare attempt**, acknowledge preflight, **Confirm preflight**, **Arm for manual flight**, then **Begin manual task** with neutral sticks. Climb manually with R/F or the calibrated climb channel. There is no automatic climb, route flight or landing in a manual attempt.
+4. Complete the observed takeoff/hover and selected complete route or foundations tasks. Figure Eight requires both lobes in order and return to H. Outer Circuit requires the full M1–M5 corridor and H return. Training can show explicit reference/trace guidance; mock examination locks Pilot VLOS and removes those aids. Drag to turn your head; the eye never translates and wheel input never magnifies VLOS.
+5. After flight tasks, **Begin manual landing**, descend over H, disarm after contact and wait for stopped motors. Complete postflight and finish. Outcomes require human review; a landing or high practice score alone never produces a pass. Abort, safety stop and input loss remain distinct incomplete outcomes.
+
+Manual mode is **position-stabilized body-frame velocity / climb / yaw-rate**, using the existing 250 Hz PID/motor/force model. W/S follows the aircraft's forward/backward heading, A/D lateral, R/F climb/descent, Q/E yaw. Release holds the resulting target. Attitude/rate flight mode is not implemented. Text entry, window blur or controller loss neutralizes input and interrupts active attempts; click the scene to focus before flying. Buttons and guidance checkboxes remain usable. Space pauses; interruptions remain logged.
+
+**Instructor** and **Session Review** provide live controls, plan/reference and actual 3D trace, recorded telemetry/RC histories, event timeline, replay/scrubbing and separately appended human notes/assessments. Replay uses recorded states and camera poses, not a claimed deterministic aircraft resimulation. JSON/CSV/readable report exports retain provenance (CSV `rate_*_rps` is body angular rate in rad/s; `motor*_rads` is rotor rad/s); JSON includes a SHA-256 payload checksum and appended notes. These are local practice records, not authenticated aircraft/device evidence. Future external telemetry is a read-only manifest boundary; no aircraft command transport exists.
+
+Attempts checkpoint to IndexedDB every 10 simulated seconds and seal on completion/abort. Final records cannot be overwritten through the storage API. An interrupted checkpoint remains visibly incomplete and is not resumed into a pass. Export backups: browser storage can be cleared or quota-limited. Recording is bounded to 600 simulated seconds; JSON imports are limited to 100 MB and validate schema, finite values, timestamps, quaternion and checksum. No account/cloud service is needed; all runtime assets are local.
+
+See [implementation and verification report](docs/IMPLEMENTATION_AND_VERIFICATION_REPORT.md), [rules and scoring](docs/EXAMINATION_RULES_AND_SCORING.md), [standards research](docs/UAV_EXAMINATION_STANDARDS_RESEARCH.md), [pilot station design](docs/PILOT_STATION_AND_VLOS_DESIGN.md), [controller architecture](docs/CONTROLLER_INPUT_ARCHITECTURE.md) and [real-world validation plan](docs/REAL_WORLD_VALIDATION_PLAN.md).
+
+![Fixed pilot observation and manual training](docs/training-screenshots/pilot-vlos.png)
+
+## Reference demonstrations
+
+Select **Reference missions** to use the preserved flight laboratory controls below. Automatic demonstrations remain separate from candidate task evaluation. Navigation into a manual workflow is unavailable while an automatic mission is active; finish or abort it first.
 
 1. Arm motors, then **Take off** for a controlled climb to a 5 m landing-gear altitude. Take off also arms automatically when disarmed.
 2. **Hold** captures the current position. **Land** descends and disarms on contact. Disarming in flight removes thrust; it does not freeze the aircraft.
@@ -70,13 +92,16 @@ Browser validation uses installed Chrome and Playwright:
 ```sh
 # Start a dev/preview server and use its actual printed port.
 UAV_URL=http://localhost:4175 npm run test:browser
+UAV_URL=http://localhost:4175 npm run test:training-browser
 UAV_URL=http://localhost:4175 node scripts/visual-check.mjs
 # Optional: CHROME_PATH=/path/to/chrome; UAV_HARDWARE=1 omits forced SwiftShader.
 ```
 
 The visual matrix opens a fresh browser for environment, temporal and mission sections to bound software-renderer memory. It captures the requested weather, map, ground/grass distances, both previews, H approach, follow/FPV and mobile views. Frozen raw WebGL frames are compared exactly; cloud motion and camera travel have multiple captured frames. For targeted work use `UAV_VISUAL_SECTION=environment|temporal|missions`, `UAV_PAINT_ONLY=1`, or `UAV_VISUAL_QUICK=1`.
 
-Actual evidence is saved in `docs/browser-evidence.json`, `docs/visual-evidence.json` and `docs/screenshots/`. The pre-refinement images/evidence are retained under `docs/baseline-*`. Long flight tests advance the same force-based 250 Hz integrator and never assign aircraft XYZ. See `docs/REFINEMENT_REPORT.md` and the latest handoff for measured results and remaining visual limitations.
+Training verification is in `docs/training-browser-evidence.json` and `docs/training-screenshots/`. Headless training checks include complete physically integrated courses using synthetic manual velocity inputs, ordered-gate shortcut rejection, procedure/neutral-input guards, calibration, focus, camera projection and recording/replay/export integrity. Synthetic inputs do not establish human skill or physical RC compatibility.
+
+Earlier environment evidence is saved in `docs/browser-evidence.json`, `docs/visual-evidence.json` and `docs/screenshots/`. The pre-refinement images/evidence are retained under `docs/baseline-*`. Long flight tests advance the same force-based 250 Hz integrator and never assign aircraft XYZ. See `docs/REFINEMENT_REPORT.md` and the latest handoff for measured results and remaining visual limitations.
 
 ## Known limits
 

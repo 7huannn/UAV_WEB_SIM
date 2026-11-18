@@ -76,6 +76,7 @@ try {
     null,
     { timeout: 60000 },
   );
+  await page.getByRole("button",{name:"Reference missions",exact:true}).click();
   await frames();
   const profile = await page.evaluate(
     () =>

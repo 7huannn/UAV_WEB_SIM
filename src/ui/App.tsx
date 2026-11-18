@@ -14,6 +14,7 @@ import {
 } from "../weather/Weather";
 import { config } from "../arena/geometry";
 import { missions, type MissionId } from "../simulation/missions";
+import { TrainingDesk, workspaces } from "./TrainingDesk";
 const iconPaths: Record<string, string> = {
   drone:
     "M8 8 4 4m12 4 4-4M8 16l-4 4m12-4 4 4M8 8h8v8H8zM2 4h4M4 2v4m14-2h4m-2-2v4M2 20h4m-2-2v4m14-2h4m-2-2v4",
@@ -67,6 +68,7 @@ const initialStats: WorldStats = {
   error: null,
 };
 const cameras: CameraMode[] = [
+  "PILOT VLOS",
   "Overview",
   "Orbit",
   "Top down",
@@ -204,6 +206,7 @@ function Toggle({
 export default function App() {
   const mount = useRef<HTMLDivElement>(null),
     world = useRef<World | null>(null);
+  const [workspace, setWorkspace] = useState("Training");
   const [t, setT] = useState(initial),
     [stats, setStats] = useState(initialStats),
     [camera, setCamera] = useState<CameraMode>("Overview"),
@@ -232,6 +235,7 @@ export default function App() {
         setStats(s);
       });
       world.current = w;
+      w.setWorkspace("Training");
       setQuality(w.quality);
       if (w.quality === "Low")
         setNotice("Software rendering detected. Low graphics selected.");
@@ -257,6 +261,10 @@ export default function App() {
   function action(name: string) {
     const d = world.current?.drone;
     if (!d) return;
+    if (world.current?.session?.active) {
+      setNotice("Reference controls are unavailable during a manual attempt.");
+      return;
+    }
     switch (name) {
       case "arm":
         d.armed ? d.disarm() : d.arm();
@@ -337,7 +345,9 @@ export default function App() {
     world.current.setRoute(true);
   }
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""}`}
+    >
       <header className="app-header">
         <a className="brand" href="/" aria-label="UAV Arena home">
           <span className="brand-mark">
@@ -345,12 +355,12 @@ export default function App() {
           </span>
           <span>
             UAV<span className="brand-light"> ARENA</span>
-            <small>FLIGHT LABORATORY</small>
+            <small>PRACTICAL PILOT TRAINING</small>
           </span>
         </a>
         <div className="header-divider" />
         <span className="project-name">
-          Outdoor flight environment <span> / </span> Arena 01
+          Multirotor pilot training <span> / </span> Arena 01
         </span>
         <div className="header-right">
           <span className="local-badge">
@@ -372,6 +382,34 @@ export default function App() {
           </button>
         </div>
       </header>
+      <nav className="workspace-navigation" aria-label="Training workspaces">
+        {workspaces.map((page) => (
+          <button
+            key={page}
+            className={workspace === page ? "active" : ""}
+            disabled={
+              (!!world.current?.session?.strict && page !== workspace) ||
+              (!!world.current?.session?.locked &&
+                page === "Reference missions") ||
+              (activeMission && page !== "Reference missions") ||
+              (!!world.current?.session?.active &&
+                ["Training", "Mock Examination"].includes(page) &&
+                page !== world.current.session.attempt.mode)
+            }
+            onClick={() => {
+              if (world.current?.setWorkspace(page)) {
+                setWorkspace(page);
+                setCamera(world.current.cameraMode);
+              }
+            }}
+          >
+            {page}
+          </button>
+        ))}
+      </nav>
+      {workspace !== "Reference missions" && (
+        <TrainingDesk w={world.current} t={t} page={workspace} />
+      )}
       <aside className="sidebar">
         <div className="section-eyebrow">
           WORKSPACE <span>01</span>
@@ -1030,15 +1068,24 @@ export default function App() {
                 <span className="eyebrow">FLIGHT LABORATORY</span>
                 <h2>Your controls, at a glance.</h2>
                 <p>
-                  Select a mission while landed at H. Each mission takes off to
-                  5 m, flies its course, returns to H and lands. Pause holds
-                  position; Abort or Hold cancels. Manual flight uses Take off
-                  and the keyboard.
+                  {workspace === "Reference missions"
+                    ? "Select a reference mission while landed at H. The demonstration takes off, flies its course, returns and lands. Its completion is not candidate performance evidence."
+                    : "Prepare an attempt, complete preflight, arm and begin the manual task. R/F commands climb/descent; no automatic takeoff or landing is available. Complete the entire ordered course, land, disarm and complete postflight. All profiles are training-only and require human review."}
                 </p>
                 <div className="help-keys">
                   {[
-                    ["W / S", "Forward / backward (world −Z / +Z)"],
-                    ["A / D", "Left / right (world −X / +X)"],
+                    [
+                      "W / S",
+                      workspace === "Reference missions"
+                        ? "Forward / backward (world −Z / +Z)"
+                        : "Forward / backward in aircraft heading frame",
+                    ],
+                    [
+                      "A / D",
+                      workspace === "Reference missions"
+                        ? "Left / right (world −X / +X)"
+                        : "Left / right in aircraft heading frame",
+                    ],
                     ["R / F", "Climb / descend"],
                     ["Q / E", "Yaw left / right"],
                     ["Space", "Pause or resume the simulation"],

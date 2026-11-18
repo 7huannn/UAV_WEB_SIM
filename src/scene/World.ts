@@ -17,8 +17,32 @@ import { makeGrass } from "./grass";
 import { makeGrassClumps } from "./grassClumps";
 import { makeAtmosphere } from "./atmosphere";
 import { missions, type MissionId } from "../simulation/missions";
+import {
+  ControllerInput,
+  validController,
+  flightDemand,
+} from "../training/input";
+import {
+  TrainingSession,
+  type OperatingMode,
+  type Attempt,
+} from "../training/Session";
+import {
+  PILOT_STATION,
+  applyPilotCamera,
+  validStation,
+  type PilotStation,
+} from "../training/pilot";
+import { replayAt } from "../training/records";
+import { type ProfileId } from "../training/profiles";
 export type CameraMode =
-  "Overview" | "Orbit" | "Top down" | "Ground" | "Follow" | "FPV";
+  | "PILOT VLOS"
+  | "Overview"
+  | "Orbit"
+  | "Top down"
+  | "Ground"
+  | "Follow"
+  | "FPV";
 export type Quality = "Low" | "Medium" | "High" | "Ultra";
 export type WorldStats = {
   fps: number;
@@ -30,6 +54,36 @@ export type WorldStats = {
   error: string | null;
 };
 export class World {
+  workspace = "Reference missions";
+  input = new ControllerInput();
+  session: TrainingSession | null = null;
+  pilotStation: PilotStation = { ...PILOT_STATION };
+  headYaw = 0;
+  headPitch = 0.2;
+  inputFocused = true;
+  replay: {
+    attempt: Attempt;
+    time: number;
+    playing: boolean;
+    speed: number;
+    recordedCamera?: boolean;
+  } | null = null;
+  private replayWeather: {
+    current: Weather["current"];
+    target: Weather["target"];
+    wetness: number;
+  } | null = null;
+  private trace = new T.Line(
+    new T.BufferGeometry(),
+    new T.LineBasicMaterial({ color: "#de7847" }),
+  );
+  private trainingReference = new T.Line(
+    new T.BufferGeometry(),
+    new T.LineDashedMaterial({ color: "#698f65", dashSize: 0.5, gapSize: 0.3 }),
+  );
+  private traceCount = -1;
+  private traceArray = new Float32Array(100000 * 3);
+  private pointer: { x: number; y: number } | null = null;
   scene = new T.Scene();
   renderer: T.WebGLRenderer;
   camera = new T.PerspectiveCamera(43, 1, 0.06, 1200);
@@ -81,6 +135,18 @@ export class World {
     onUpdate: (t: Telemetry, s: WorldStats) => void,
   ) {
     this.callbacks = onUpdate;
+    try {
+      const s = JSON.parse(localStorage.getItem("uav-pilot-station") ?? "null");
+      if (s && validStation(s)) this.pilotStation = s;
+    } catch {
+      /* default provisional station */
+    }
+    try {
+      const p = JSON.parse(localStorage.getItem("uav-controller") ?? "null");
+      if (p && validController(p)) this.input.profile = p;
+    } catch {
+      /* default unverified mapping */
+    }
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -93,6 +159,11 @@ export class World {
     this.renderer.shadowMap.type = T.PCFShadowMap;
     this.renderer.setClearColor("#cbdbe0");
     host.appendChild(this.renderer.domElement);
+    this.renderer.domElement.tabIndex = 0;
+    this.renderer.domElement.addEventListener("pointerdown", this.headStart);
+    this.renderer.domElement.addEventListener("pointermove", this.headMove);
+    this.renderer.domElement.addEventListener("pointerup", this.headEnd);
+    this.renderer.domElement.addEventListener("pointercancel", this.headEnd);
     this.renderer.domElement.setAttribute(
       "aria-label",
       "Interactive 3D UAV competition arena",
@@ -383,6 +454,30 @@ export class World {
     (this.route.material as T.MeshStandardMaterial).emissiveIntensity = 0.3;
     this.route.visible = false;
     this.scene.add(this.route);
+    this.trace.geometry.setAttribute(
+      "position",
+      new T.BufferAttribute(this.traceArray, 3),
+    );
+    this.trace.geometry.setDrawRange(0, 0);
+    this.trace.frustumCulled = false;
+    this.scene.add(this.trace);
+    this.trainingReference.visible = false;
+    this.scene.add(this.trainingReference);
+    this.drone.resetGuard = () => !this.session?.active;
+    this.drone.beforeStep = (dt) => this.trainingInput(dt);
+    this.drone.afterStep = () =>
+      this.session?.sample(
+        this.drone,
+        this.weather,
+        this.input,
+        this.cameraMode,
+        this.inputFocused,
+        {
+          position: this.camera.position.toArray(),
+          orientation: this.camera.quaternion.toArray(),
+          verticalFov: this.camera.fov,
+        },
+      );
     this.scene.add(this.airframe.group);
     new GLTFLoader().load(
       "/assets/models/uav-15.glb",
@@ -478,6 +573,11 @@ export class World {
     this.camera.updateProjectionMatrix();
   }
   setCamera(mode: CameraMode) {
+    if (this.session?.strict && mode !== "PILOT VLOS") {
+      this.session.event("AID_BLOCKED", `Camera ${mode}`);
+      return false;
+    }
+    if (this.replay) this.replay.recordedCamera = false;
     this.cameraMode = mode;
     this.controls.enabled =
       mode === "Overview" || mode === "Orbit" || mode === "Ground";
@@ -529,8 +629,16 @@ export class World {
         .copy(this.drone.position)
         .add(new T.Vector3(3, 2.5, 4));
     }
+    if (mode === "PILOT VLOS")
+      applyPilotCamera(
+        this.camera,
+        this.pilotStation,
+        this.headYaw,
+        this.headPitch,
+      );
     this.camera.updateProjectionMatrix();
-    this.controls.update();
+    if (this.controls.enabled) this.controls.update();
+    return true;
   }
   setQuality(q: Quality) {
     this.quality = q;
@@ -555,9 +663,11 @@ export class World {
     return (Math.abs(b.x - a.x) * this.host.clientWidth) / 2;
   }
   setLabels(v: boolean) {
+    if (this.session?.strict && v) return false;
     this.labels.visible = v;
   }
   selectMission(id: MissionId) {
+    if (this.session?.locked) return false;
     if (!this.drone.selectMission(id)) return false;
     this.route.geometry.dispose();
     const replacement = ribbon(
@@ -572,12 +682,199 @@ export class World {
     return true;
   }
   setRoute(v: boolean) {
+    if (this.session?.strict && v) return false;
     this.route.visible = v;
     this.routeVisible = v;
   }
   setDebug(v: boolean) {
+    if (this.session?.strict && v) return false;
     this.debug.visible = v;
   }
+  setWorkspace(page: string) {
+    if (
+      this.session?.active &&
+      ["Training", "Mock Examination"].includes(page) &&
+      page !== this.session.attempt.mode
+    )
+      return false;
+    if (this.drone.missionActive && page !== "Reference missions") return false;
+    if (page === "Reference missions" && this.replay) this.setReplay(null);
+    if (this.session?.strict && page !== this.workspace) return false;
+    if (this.session?.locked && page === "Reference missions") return false;
+    this.workspace = page;
+    if (!this.session?.strict) this.markerDots.visible = true;
+    if (page === "Reference missions") {
+      this.drone.manualOnly = false;
+      this.setCamera("Overview");
+    } else {
+      this.drone.manualOnly = true;
+      if (page === "Training" || page === "Mock Examination")
+        this.setCamera("PILOT VLOS");
+    }
+    return true;
+  }
+  configureStation(station: PilotStation) {
+    if (this.session?.locked || !validStation(station)) return false;
+    this.pilotStation = {
+      ...station,
+      verification: "PROVISIONAL",
+      source:
+        "User-configured engineering assumption; authority/site validation required",
+    };
+    try {
+      localStorage.setItem(
+        "uav-pilot-station",
+        JSON.stringify(this.pilotStation),
+      );
+    } catch {
+      this.stats.error = "Pilot station could not be persisted";
+    }
+    if (this.cameraMode === "PILOT VLOS") this.setCamera("PILOT VLOS");
+    return true;
+  }
+  beginAttempt(candidate: string, mode: OperatingMode, profile: ProfileId) {
+    if (this.workspace !== mode) return false;
+    if (
+      this.session?.active ||
+      this.drone.missionActive ||
+      this.drone.armed ||
+      this.drone.altitude > 0.12 ||
+      Math.hypot(this.drone.position.x + 20, this.drone.position.z) > 0.6 ||
+      this.replay
+    )
+      return false;
+    if (profile in missions) this.selectMission(profile as MissionId);
+    this.keys.clear();
+    this.session = new TrainingSession(
+      candidate,
+      mode,
+      profile,
+      this.drone,
+      this.weather,
+      this.input,
+      this.pilotStation,
+    );
+    const task = this.session.attempt.profile.tasks.find(
+      (t) => t.kind === "route",
+    );
+    this.trainingReference.geometry.dispose();
+    this.trainingReference.geometry = new T.BufferGeometry().setFromPoints(
+      (task ? this.session.attempt.referencePaths[task.id] : []).map(
+        ([x, z]) => new T.Vector3(x, 5 + aircraft.gearHeight, z),
+      ),
+    );
+    this.trainingReference.computeLineDistances();
+    this.drone.manualOnly = true;
+    this.drone.paused = false;
+    this.headYaw = 0;
+    this.headPitch = 0.2;
+    this.setLabels(false);
+    this.setRoute(false);
+    this.setDebug(false);
+    this.markerDots.visible = mode !== "Mock Examination";
+    this.setCamera("PILOT VLOS");
+    this.traceCount = -1;
+    return true;
+  }
+  setReplay(attempt: Attempt | null) {
+    if (this.session?.active || (attempt && !attempt.frames.length))
+      return false;
+    if (attempt && !this.replay)
+      this.replayWeather = {
+        current: { ...this.weather.current },
+        target: { ...this.weather.target },
+        wetness: this.weather.wetness,
+      };
+    if (!attempt && this.replayWeather) {
+      Object.assign(this.weather, this.replayWeather);
+      this.replayWeather = null;
+    }
+    this.replay = attempt
+      ? {
+          attempt,
+          time: attempt.frames[0]?.time ?? 0,
+          playing: false,
+          speed: 1,
+        }
+      : null;
+    this.drone.paused = !!attempt;
+    if (!attempt) this.setCamera(this.cameraMode);
+    this.traceCount = -1;
+    return true;
+  }
+  private trainingInput(dt: number) {
+    if (this.workspace === "Reference missions" || this.replay) return;
+    const s = this.session;
+    if (!s?.active || !["ACTIVE", "TASK_COMPLETE", "LANDING"].includes(s.state))
+      return;
+    if (!this.inputFocused || this.input.fault) return;
+    const v = this.input.value,
+      heading = new T.Euler().setFromQuaternion(
+        this.drone.orientation,
+        "YXZ",
+      ).y;
+    const demand = flightDemand(v, heading);
+    this.drone.manual(
+      new T.Vector3(...demand.worldVelocity),
+      demand.yawRate,
+      dt,
+    );
+  }
+  private updateTrace() {
+    const frames =
+      this.replay?.attempt.frames ?? this.session?.attempt.frames ?? [];
+    this.trace.visible =
+      !this.session?.strict &&
+      (this.workspace === "Instructor" ||
+        this.workspace === "Session Review" ||
+        (this.workspace === "Training" && this.routeVisible));
+    this.trainingReference.visible =
+      this.trace.visible &&
+      this.session?.attempt.profile.tasks.some((t) => t.kind === "route") ===
+        true;
+    if (this.replay) {
+      const task = this.replay.attempt.profile.tasks.find(
+        (t) => t.kind === "route",
+      );
+      if (this.traceCount === -1) {
+        this.trainingReference.geometry.dispose();
+        this.trainingReference.geometry = new T.BufferGeometry().setFromPoints(
+          (task ? this.replay.attempt.referencePaths[task.id] : []).map(
+            ([x, z]) => new T.Vector3(x, 5 + aircraft.gearHeight, z),
+          ),
+        );
+        this.trainingReference.computeLineDistances();
+      }
+      this.trainingReference.visible = this.trace.visible && !!task;
+    }
+    if (!this.trace.visible || frames.length === this.traceCount) return;
+    const n = Math.min(frames.length, 100000);
+    for (let i = 0; i < n; i++) this.traceArray.set(frames[i].position, i * 3);
+    this.trace.geometry.attributes.position.needsUpdate = true;
+    this.trace.geometry.setDrawRange(0, n);
+    this.traceCount = frames.length;
+  }
+  private headStart = (e: PointerEvent) => {
+    this.renderer.domElement.focus();
+    if (this.cameraMode !== "PILOT VLOS") return;
+    this.pointer = { x: e.clientX, y: e.clientY };
+    this.renderer.domElement.setPointerCapture(e.pointerId);
+  };
+  private headMove = (e: PointerEvent) => {
+    if (!this.pointer || this.cameraMode !== "PILOT VLOS") return;
+    this.headYaw = Math.max(
+      -Math.PI,
+      Math.min(Math.PI, this.headYaw + (e.clientX - this.pointer.x) * 0.003),
+    );
+    this.headPitch = Math.max(
+      -1.2,
+      Math.min(1.2, this.headPitch - (e.clientY - this.pointer.y) * 0.003),
+    );
+    this.pointer = { x: e.clientX, y: e.clientY };
+  };
+  private headEnd = () => {
+    this.pointer = null;
+  };
   private keyDown = (e: KeyboardEvent) => {
     if (
       (e.target as HTMLElement).matches(
@@ -600,8 +897,10 @@ export class World {
     ) {
       e.preventDefault();
       this.keys.add(e.code);
-      if (e.code === "Space" && !e.repeat)
-        this.drone.paused = !this.drone.paused;
+      if (e.code === "Space" && !e.repeat) {
+        if (this.session?.active) this.session.pause(this.drone);
+        else this.drone.paused = !this.drone.paused;
+      }
     }
   };
   private keyUp = (e: KeyboardEvent) => {
@@ -609,17 +908,29 @@ export class World {
   };
   private clearKeys = () => {
     this.keys.clear();
+    this.inputFocused = false;
+    this.input.value = { throttle: 0, yaw: 0, pitch: 0, roll: 0 };
+    if (
+      this.session?.active &&
+      ["ACTIVE", "LANDING", "TASK_COMPLETE"].includes(this.session.state)
+    ) {
+      this.drone.target.copy(this.drone.position);
+      this.drone.targetVelocity.set(0, 0, 0);
+      this.session.abort("Window focus lost", true);
+    }
   };
   private visibility = () => {
     this.last = 0;
     this.drone.accumulator = 0;
     this.keys.clear();
+    if (document.hidden) this.clearKeys();
   };
   private onContextLost = (event: Event) => {
     event.preventDefault();
     this.stats.error =
       "Graphics context lost. Reload to restore the simulator.";
     this.drone.paused = true;
+    this.session?.abort("Graphics context lost", true);
     this.callbacks(this.drone.telemetry(), { ...this.stats });
   };
   private tick = (stamp: number) => {
@@ -629,17 +940,53 @@ export class World {
     const dt = Math.min(rawDt, 0.1);
     this.last = stamp;
     if (document.hidden) return;
+    this.inputFocused =
+      document.hasFocus() &&
+      !document.activeElement?.matches(
+        "input:not([type=checkbox]):not([type=range]):not([type=button]),select,textarea,[contenteditable=true]",
+      );
+    this.input.poll(
+      this.keys,
+      this.inputFocused,
+      typeof navigator.getGamepads === "function"
+        ? navigator.getGamepads()
+        : [],
+    );
     const key = (k: string) => (this.keys.has(k) ? 1 : 0);
     const command = new T.Vector3(
       key("KeyD") - key("KeyA"),
       key("KeyR") - key("KeyF"),
       key("KeyS") - key("KeyW"),
     ).multiplyScalar(2);
-    if (!this.drone.paused)
+    if (!this.drone.paused && this.workspace === "Reference missions")
       this.drone.manual(command, (key("KeyQ") - key("KeyE")) * 0.7, dt);
     const beforeTime = this.drone.time;
     this.drone.advance(rawDt);
     this.physicsSteps += (this.drone.time - beforeTime) / aircraft.fixedDt;
+    if (this.replay?.playing) {
+      this.replay.time = Math.min(
+        this.replay.attempt.frames.at(-1)?.time ?? 0,
+        this.replay.time + dt * this.replay.speed,
+      );
+      if (this.replay.time >= (this.replay.attempt.frames.at(-1)?.time ?? 0))
+        this.replay.playing = false;
+    }
+    const playback = this.replay
+      ? replayAt(this.replay.attempt.frames, this.replay.time)
+      : null;
+    if (playback) {
+      this.weather.current = { ...playback.weather };
+      this.weather.target = { ...playback.weather };
+      this.weather.wetness = playback.wetness;
+    }
+    const viewPosition = playback
+      ? new T.Vector3().fromArray(playback.position)
+      : this.drone.position;
+    const viewOrientation = playback
+      ? new T.Quaternion().fromArray(playback.orientation)
+      : this.drone.orientation;
+    const viewYaw = new T.Euler().setFromQuaternion(viewOrientation, "YXZ").y;
+    const visualMotors = playback?.motors ?? this.drone.motors;
     const model = this.loadedAirframe ?? this.airframe.group;
     const alpha = this.drone.paused
       ? 1
@@ -654,45 +1001,62 @@ export class World {
       this.drone.orientation,
       alpha,
     );
-    if (!this.drone.paused) {
+    if (playback) {
+      model.position.fromArray(playback.position);
+      model.quaternion.fromArray(playback.orientation);
+    }
+    this.updateTrace();
+    if (!this.drone.paused || this.replay?.playing) {
       if (this.loadedAirframe) {
         for (let i = 0; i < 4; i++) {
           const rotor = this.loadedAirframe.getObjectByName(`rotor-${i}`);
-          if (rotor)
-            rotor.rotation.y += motorSpin[i] * this.drone.motors[i] * dt;
+          if (rotor) rotor.rotation.y += motorSpin[i] * visualMotors[i] * dt;
           const blur = this.loadedAirframe.getObjectByName(
             `blur-${i}`,
           ) as T.Mesh<T.RingGeometry, T.MeshStandardMaterial>;
           if (blur)
             blur.material.opacity = Math.min(
               0.12,
-              (this.drone.motors[i] / 760) * 0.12,
+              (visualMotors[i] / 760) * 0.12,
             );
         }
-      } else this.airframe.update(this.drone.motors, dt);
+      } else this.airframe.update(visualMotors, dt);
     }
-    if (this.cameraMode === "Follow") {
+    if (this.cameraMode === "PILOT VLOS")
+      applyPilotCamera(
+        this.camera,
+        this.pilotStation,
+        this.headYaw,
+        this.headPitch,
+      );
+    else if (this.cameraMode === "Follow") {
       const offset = new T.Vector3(3, 2.4, 4).applyAxisAngle(
         new T.Vector3(0, 1, 0),
-        this.drone.yaw,
+        viewYaw,
       );
-      const desired = this.drone.position.clone().add(offset);
+      const desired = viewPosition.clone().add(offset);
       this.camera.position.lerp(desired, 1 - Math.exp(-dt * 4));
-      this.camera.lookAt(
-        this.drone.position.clone().add(new T.Vector3(0, 0.1, 0)),
-      );
+      this.camera.lookAt(viewPosition.clone().add(new T.Vector3(0, 0.1, 0)));
     } else if (this.cameraMode === "FPV") {
       this.camera.position.copy(
         new T.Vector3(0, 0.04, -0.4)
-          .applyQuaternion(this.drone.orientation)
-          .add(this.drone.position),
+          .applyQuaternion(viewOrientation)
+          .add(viewPosition),
       );
-      this.camera.quaternion.copy(this.drone.orientation);
+      this.camera.quaternion.copy(viewOrientation);
     } else if (this.cameraMode === "Top down")
       this.camera.lookAt(this.controls.target);
     else {
       this.controls.update();
       if (this.camera.position.y < 0.2) this.camera.position.y = 0.2;
+    }
+    if (this.replay?.recordedCamera && playback?.cameraPose) {
+      this.controls.enabled = false;
+      this.camera.position.fromArray(playback.cameraPose.position);
+      this.camera.quaternion.fromArray(playback.cameraPose.orientation);
+      this.camera.fov = playback.cameraPose.verticalFov;
+      this.camera.zoom = 1;
+      this.camera.updateProjectionMatrix();
     }
     this.atmosphere.update(this.weather, this.drone.time, this.camera);
     const current = this.weather.current,
@@ -767,6 +1131,10 @@ export class World {
     cancelAnimationFrame(this.frame);
     this.observer.disconnect();
     this.controls.dispose();
+    this.renderer.domElement.removeEventListener("pointerdown", this.headStart);
+    this.renderer.domElement.removeEventListener("pointermove", this.headMove);
+    this.renderer.domElement.removeEventListener("pointerup", this.headEnd);
+    this.renderer.domElement.removeEventListener("pointercancel", this.headEnd);
     window.removeEventListener("keydown", this.keyDown);
     window.removeEventListener("keyup", this.keyUp);
     window.removeEventListener("blur", this.clearKeys);

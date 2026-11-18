@@ -1,37 +1,37 @@
 # UAV ARENA — AGENT HANDOFF & LIVE PROJECT CONTEXT
 
-Authoritative requirements: `UAV_ARENA_WEB_SIM_SPEC.md`. Read that file and this entire document before continuing. Source and actual test/browser evidence govern status. Updated 2026-11-18, Asia/Ho_Chi_Minh.
+Authoritative requirements: `UAV_ARENA_WEB_SIM_SPEC.md` plus latest `docs/UAV_PRACTICAL_TRAINING_SPEC.md` (training priorities supersede cosmetic refinement). Read that file and this entire document before continuing. Source and actual test/browser evidence govern status. Updated 2026-11-18, Asia/Ho_Chi_Minh.
 
 ## 1. CURRENT SNAPSHOT
 
-- Existing local Vite/React/TypeScript/Three.js app retained. No physics rewrite or new runtime dependency. Original specification/reference and prior history preserved; pre-refinement handoff archived in `docs/HANDOFF_BEFORE_REFINEMENT.md`.
-- Court45×27m, simulated turf60×42m; calibrated V1/V2/V3, radii and H/HA/HB retained. No ancillary facilities. Top-down now truly vertical and framed below overlapping UI. Diagram's ambiguous neck/marker trace assumptions remain explicit.
-- Two finite missions in `src/simulation/missions.ts`: Figure Eight (exact existing tangents/arcs, western entry, both lobes once, H return) and Outer Circuit (M1→M2→M3→M4→M5, left-corridor gate return). Both start landed at H, arm, take off, transit, execute, return, land and only then complete. Pause retains phase/progress; Abort/Hold cancels into hold. Selection locks during active missions.250Hz force/PID/motor/contact implementation preserved.
-- Camera fit uses projected court bounds and viewport aspect. Ground view shows more surface; follow/FPV retained. Compact default marker dots; optional pixel-sized labels suppress overlap and emphasize active markers. Desktop/mobile mission selector, source-derived previews/lengths, phase, next waypoint and completion status added.
-- Concrete: local PBR maps at multiple scales, restrained wet roughness,3.5cm shallow edge with5mm bevel,9cm soil/contact band and1.5–2mm paint optical separation. Overall footprint unchanged.
-- Vegetation: deterministic2m near tuft tiles +4m middle blade-cluster tiles, world anchoring, geometric LOD fade and frustum/distance culling. No camera-relative patch. High avoids broad tuft shadow passes; Ultra uses matching wind/LOD depth shaders. Far turf uses multi-scale/macro variation.
-- Atmosphere: replaced screen-jittered ray march with three stable filtered cloud shells and continuous integrated wind offset. Shared weather/physical wind retained; continuous ambient/fog colors and settled-transition sky/cloud reflection refresh. Optional finite visual Context matte replaces white field cutout; no added interactive terrain/colliders/facilities.
-- Current checks:15 headless tests PASS; production build PASS (`index-CWunFRAi.js`). Full visual matrix PASS:17 primary views + temporal sequences, zero browser/asset errors. Final13/13 production browser control checks PASS against the same final bundle; all four graphics and six weather presets also pass, including Ultra vegetation shadow shaders.
-- Full photorealism NOT accepted. Low-angle clouds still read as layered/flat; grass detail transitions and flat distant matte remain synthetic. Hardware GPU unavailable; software timing only. See current report/evidence for actual metrics.
+- Local app v0.2.0 now opens in Training. Eight workspaces: Training / Mock Examination / Instructor / Session Review / Controller Calibration / Examination Profiles / System Configuration / Reference missions. Original reference desk, two programmed demonstrations, calibrated geometry, local assets, shared weather and 250 Hz force/PID/motor/contact model are preserved. No runtime dependencies added; no controller gain, motor parameter, grass or cloud redesign.
+- Fixed Pilot VLOS eye at provisional station X=-25, Z=0, groundY=-0.035, eyeHeight=1.65 m, verticalFOV=60°. Initial head pitch0.2rad, east bearing; drag rotates only, no translation/orbit/tracking/zoom. Station distinct from H/examiner area, source/confidence/PROVISIONAL status explicit. Diagram does not specify a pilot station. Settings lock per attempt.
+- Browser Gamepad/USB-when-exposed input with Mode2 defaults, per-axis min/center/max/inversion/deadzone, normalized diagnostics, saved named profiles and keyboard fallback. No physical RC device validated. Manual mode is position-stabilized body-frame velocity/climb/yaw-rate, release holds target. Input applies at fixed steps through existing motors; manual start has no automatic climb. Autopilot/takeoff/landing/reset shortcuts are blocked during attempts; disconnect/focus loss interrupts and logs.
+- Versioned TRAINING_ONLY profiles: full Figure Eight, full Outer Circuit M1–M5, hover/orientation/straight foundations and abnormal-response acknowledgement. Procedural state machine requires preflight, manual task observation, manual landing/disarm/stopped motors and postflight. Ordered0.5m gates prevent endpoint/crossover/lobe shortcuts. Metrics and engineering practice score are separate from final judgement; completion always requires human review, never an official pass. V2 monitor is approximate route deviation, not exact fuselage/paint intersection.
+- Mock examination locks Pilot VLOS and removes candidate route/trace/labels/debug/other views and instructor navigation. Live operating mode cannot change. Training permits explicit guidance and instructor pause/environment adjustment. Original automatic missions remain reference demonstrations and do not count as candidate evidence.
+- 50Hz simulation-time recording includes pose/quaternion, velocities/rates, motors/thrust, RC/raw axes, wind/weather/wetness, camera mode/pose/FOV, task/state/mode/violations. Metadata locks software, geometry, literal reference paths, aircraft/controller/rules/station and seed. IndexedDB checkpoints10sim seconds; final snapshots immutable through storage API. Separate append-only human notes, JSON/SHA256, CSV and readable report. Replay interpolates original state and optionally restores camera; no claimed aircraft resimulation/device authentication. Bounded600sim-second recording and100MB imports with schema/timestamp/finite/quaternion/weather/checksum validation.
+- Current checks:32 headless tests PASS; production build PASS (`index-Bk5P8NB2.js`,1,050.16KB /287.53KB gzip; CSS34.59KB). New18/18 browser workflow checks PASS, zero errors,13 real screenshots, same final bundle. Both full courses physically traversed with explicitly labelled synthetic RC fixtures and then manually descended/disarmed/postflighted into HUMAN_REVIEW_REQUIRED. Preserved reference-mode13/13 browser checks also PASS on the same final JS bundle, with zero errors.
+- Seven required training engineering documents in docs; standards register compares Vietnam/Korea/Japan/Australia/UK/EU/FAA with primary links and explicit gaps. Visually inspected Vietnamese decree/circular pages. Article/category distinctions prevent assuming the diagram is a complete mandatory VLOS licence test; authenticated current examination appendix still needed. No official profile/certification equivalence, hardware compatibility, calibrated airframe, human skill transfer or hardware60FPS claim.
+- Same authoritative handoff updated; pre-training major-milestone snapshot in `docs/HANDOFF_BEFORE_TRAINING.md`, previous refinement backup/history retained. No commit authorized or created. Original photorealistic acceptance remains open; do not resume cloud/grass cosmetics ahead of the latest training task.
 
 ## 2. NEXT EXACT ACTIONS
 
-1. On an available real GPU, start the local app using its actual printed port and repeat `UAV_HARDWARE=1` browser/visual profiles. Record GPU/frame times and inspect the existing17-view matrix. This environment has no `/dev/dri`; `nvidia-smi` cannot communicate with a driver. Hardware60FPS remains unverified.
-2. Improve the observed low-angle flat cloud structure and simple flat horizon matte while retaining deterministic cloud advection and the optional finite context scope. Compare `clouds-moving-*` as well as still images; do not equate stable frames with convincing volume.
-3. Refine the observed turf/tuft shading and density transition at `grass-closeup`, `grass-mid-distance` and `grass-long-distance`, preserving fixed tiles and the measured triangle reduction. No camera-following patches, unrelated facilities or new physical terrain. Keep diagram estimates until better reference evidence exists.
+1. Start from the saved v0.2.0 source and seven engineering documents in `docs/IMPLEMENTATION_AND_VERIFICATION_REPORT.md`.32 headless tests, build,18 training +13 reference browser checks and13 inspected training PNGs pass. Do not treat synthetic fixtures/screenshots as human or hardware validation.
+2. For real-world acceptance, obtain authenticated current Vietnamese category-specific examination appendices/amendments and authority/instructor confirmation of pilot station, allowed stabilization mode, tasks, tolerances, safety rules and records. Keep profiles TRAINING_ONLY until verified; do not silently import foreign criteria.
+3. Follow `docs/REAL_WORLD_VALIDATION_PLAN.md`: surveyed geometry/station/body envelope, actual transmitter/adapter calibration and latency, aircraft bench/log calibration, human VLOS/display/skill-transfer trials and classroom hardware reliability. V2 exact body/paint contact remains a documented approximation requiring better evidence/model validation.
 
-Implementation,15 headless checks, final13 browser controls, full visual matrix, quality/weather checks and documentation are saved. No additional functional verification is pending. Full photorealistic acceptance remains open. Owned preview4175 is stopped at delivery; use README commands to restart. Current Git status is readable; source remains uncommitted, with no commit requested.
+Source implementation is saved and uncommitted. Owned production preview4175 is stopped at delivery; unrelated services are left alone. Use README commands to restart. External validation gaps are not completed acceptance gates.
 
 ## 3. PHASE ACCEPTANCE
 
-- [x] Original calibrated map/dimensions and accurate vertical reference view retained.
-- [x] Two finite controller-driven missions, exact outer marker order, both figure-eight lobes, explicit H return and landing-only completion; headless and browser checks.
-- [x] Six cameras, shared weather, manual controls and existing dynamics retained.
-- [x] Camera framing, shallow ground/soil interface, restrained wet PBR and compact overlays implemented and captured.
-- [x] Stable world-space vegetation LOD and cloud advection; frozen frames byte-identical; moving-camera transforms unchanged.
-- [x]15 headless tests/build and full17-view visual/temporal matrix pass with zero errors.
-- [x] Final13/13 production controls, all four graphics presets and all six weather presets; zero exceptions/assets.
-- [ ] Full photorealistic visual acceptance and actual hardware60FPS benchmark.
+- [x] Existing calibrated court/paint/geometry and original physics/reference missions preserved; baseline15 tests/build pass.
+- [x] Source register and gap analysis, Vietnam category distinctions, provisional pilot station and fixed-eye VLOS.
+- [x] Calibrated browser-controller abstraction, keyboard fallback and fixed-step force-driven manual control; hardware unverified.
+- [x] Versioned practice task/state/scoring engine, complete ordered routes, restrictions and human-review decisions.
+- [x] Offline recordings/checkpoints, checksum/validation, recorded-state replay, telemetry/RC histories, exports and separate annotations.
+- [x]32 headless tests/build and18 new real-browser checks,13 screenshots, including two full synthetic-RC manual-input flights; zero reported errors.
+- [x] Final preserved13/13 reference-mode browser regression, zero errors; same final bundle. Owned preview stopped at delivery.
+- [ ] Official examination equivalence, surveyed pilot station/V2 body contact, real RC/aircraft/human validation and hardware GPU performance. These require external evidence; not claimed.
 
 ## 4. PROJECT MAP / DECISIONS
 
@@ -64,7 +64,7 @@ Implementation,15 headless checks, final13 browser controls, full visual matrix,
 - Browser/screenshot evidence not yet collected; do not treat rendering code as visual acceptance.
 - No Git commit possible in mounted repository state.
 
-## 6. EVIDENCE
+## 6. REFINEMENT EVIDENCE (HISTORICAL)
 
 - Baseline before refinement:11 headless tests/build PASS,13 live browser checks PASS. Low30-frame mean2.6707FPS (median383.2ms, p95399.9ms), SwiftShader. Fresh baseline aerial/top-down and previous8 screenshots retained under `docs/baseline-screenshots/`; evidence in `docs/baseline-{browser,paint}-evidence.json`.
 - Current `npm test`: PASS15/15. Includes both complete finite missions, M1–M5 order, physical corridor containment, strict phase progression, pause/resume, H landing before completion, bounded per-step motion, deterministic tiles and preserved physics/paint checks.
@@ -81,14 +81,16 @@ Implementation,15 headless checks, final13 browser controls, full visual matrix,
 
 ## 7. OPEN ISSUES / LIMITATIONS
 
-- Full photorealism remains OPEN. Clouds are temporally stable but still visibly layered/flat near the horizon; the distant matte is deliberately simple and flat. Near/middle/far turf shading and geometry density can still look synthetic. Do not represent these as fully accepted.
-- Only software SwiftShader accessible. Heavy closeups remain slow; there is no measured hardware60FPS claim. Actual GPU test and thermal/frame-time stability remain necessary.
-- Optional Context is visual-only and finite; official flight/ground bounds remain unchanged. It is not surveyed surrounding terrain.
-- The diagram's neck curves, dash spacing and minor marker positions remain estimates pending higher resolution reference evidence. Transfers/return procedures are documented implementation assumptions, not official paint.
-- Physics/airframe remains illustrative and uncalibrated. Contact uses the existing simplified four-foot height field; the5mm bevel is visual. Rain visual only, telemetry ideal state.
-- All runtime assets local. No new asset downloads/dependencies this iteration. Original CC0 licenses and retained GLB unchanged.
+- Current official Vietnamese practical appendix/category application, exact pilot station and scoring tolerances remain unverified. All implemented profiles/rules are engineering practice assumptions. Article28 distinguishes HạngA theoretical licensing and HạngB theory/practical; do not imply every VLOS licence uses this course.
+- V2 monitoring uses local ordered route deviation rather than exact rotated fuselage/paint contact. V1 uses an illustrative fuselage rectangle. Low-resolution neck/marker estimates and transfer assumptions remain explicit. Human review required.
+- No physical RC/adapter, actual aircraft logs/bench calibration, surveyed field, instructor cohort or perceptual skill-transfer study. Ideal state telemetry, simplified foot contact and visual-only rain remain model limits. Only position-stabilized velocity mode is supported.
+- Replay is recorded-state interpolation with logged camera/weather, not complete atmospheric/rotor-phase or sensor resimulation. SHA256 is a local checksum, not an authenticated device signature; browser storage is not a certified institutional archive. Export backups and validate long-session/quota/recovery behavior on classroom hardware.
+- Full photorealism remains open and was not this iteration's priority. Clouds/horizon/turf still show synthetic cues. SwiftShader only; no hardware60FPS acceptance.
+- Future field telemetry boundary is read-only metadata/design. No live aircraft transport, command, arming or takeoff integration exists.
 
 ## 8. CONTINUITY RULES
+
+Keep updating this same authoritative `AGENT_HANDOFF_CONTEXT.md`; preserve its history. Create backups only for major milestones/substantial rewrites, not every iteration. Pre-training snapshot: `docs/HANDOFF_BEFORE_TRAINING.md`.
 
 Keep this snapshot/evidence and NEXT EXACT ACTIONS current after every milestone. Do not discard working source, invent completed tests or claim photorealism without inspecting screenshots. Only reconstruct the central court and compact grass/sky. Never add ancillary facilities. Never teleport aircraft to fake flight. Preserve the spec. Record current limitations before stopping.
 
@@ -174,3 +176,23 @@ Keep this snapshot/evidence and NEXT EXACT ACTIONS current after every milestone
 - Structured `docs/REFINEMENT_REPORT.md`, README, assumptions, asset licenses and current handoff updated; historical work log and baseline evidence preserved. The optional visual Context scope tradeoff is explicit.
 - Current Git status is functional/readable after continuation; work remains uncommitted. Earlier inaccessible-Git statements above describe prior sessions, not the current state.
 - Owned production preview4175 stopped at final teardown; no unrelated service stopped.
+
+
+### 2026-11-18 — Practical training implementation milestone (v0.2.0)
+
+- Read the new master request, original specifications/handoff/report/source/diagram. Baseline15 tests and build passed. Added six training modules/design boundaries and a reusable training workspace around the existing world; no new runtime dependency or physical model retuning.
+- Added fixed Pilot VLOS/provisional station, controller calibration/named profiles, body-frame manual demands, core assistance/reset guards, procedure and complete-route task evaluation, mock restrictions, offline records/checkpoints/replay/exports and append-only human review. Original reference demonstrations remain separate.
+- Researched official Vietnam and comparison sources; inspected signed decree/circular pages. No authenticated full current Vietnamese exam appendix found. All practice scoring remains TRAINING_ONLY; authority/hardware/human validation gaps documented instead of invented certification rules.
+-32 headless checks and production build pass. New18-check Chrome workflow passes on `index-BZHHy9LS.js`;13 real images saved/reviewed. Includes actual keyboard input, mock API/UI locks, mode lock, offline save, camera/telemetry replay, unchanged hashes after annotations, export and malformed-import rejection, mobile, and two complete force-integrated courses from explicitly labelled synthetic RC inputs. No human-pilot or physical-controller equivalence claimed.
+- Browser validation exposed and fixed active guidance-checkbox focus interruption and flex-compressed saved-attempt buttons. Import boundary validates required weather/geometry before replay; a malformed fixture is rejected. Source/build test syntax issues were corrected before the passing final build. One prior browser cleanup run ended with143 after writing all18 checks; final identical-workflow rerun exits0. Final regression/teardown still to be entered below.
+- Same handoff updated, pre-training major snapshot saved once, earlier history/refinement artifacts retained. No Git commit created.
+
+
+### 2026-11-18 — Practical training final verified handoff
+
+- Final packaged build `index-Bk5P8NB2.js` PASS (1,050.16KB /287.53KB gzip; CSS34.59KB /8.29KB gzip).32 headless tests pass; no physics gains/parameters/integrator rewrite or new runtime dependency.
+-18/18 training browser checks and13/13 preserved reference checks PASS, both exit0 on the same final bundle, zero page/console/request errors.13 training screenshots captured and inspected, including both complete synthetic-RC routes, fixed VLOS, strict mock, calibration, scoring/replay/telemetry and mobile.
+- Visual review found the duplicate scene status strip covered the aircraft at H. It is now hidden in training views; procedural/replay status remains in the side panel. Training captures and18-check workflow rerun after this CSS-only correction; reference13-check regression also rerun on the final package.
+- Full browser Figure Eight fixture has a0.738m landing error against the provisional0.6m training target; LANDING_POSITION warning retained and final outcome is HUMAN_REVIEW_REQUIRED, never pass. Outer fixture landing error0.543m. Both have zero missed route gates; synthetic test inputs are explicitly marked and do not establish human VLOS competence.
+- Final Low reference30-frame mean7.004FPS, median116.7ms, p95250ms,115calls/22,696triangles; observed200 physics steps/wall second. SwiftShader only. No hardware60FPS, physical RC, surveyed station, calibrated aircraft or official exam equivalence claim.
+- Seven requested engineering documents, source register, README/assumptions, example exported incomplete report and this same handoff saved. Pre-training snapshot retained once under `docs/HANDOFF_BEFORE_TRAINING.md`; previous history preserved. No commit created. `git diff --check` passes; owned preview4175 stopped at teardown.

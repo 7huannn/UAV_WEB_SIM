@@ -2037,3 +2037,570 @@ svg {
     top: 154px;
   }
 }
+
+/* Practical training workspaces reuse the existing live world and reference desk. */
+.app-shell {
+  grid-template-rows: 76px 43px minmax(0, 1fr) 31px;
+}
+.workspace-navigation {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: stretch;
+  background: #eef1e6;
+  border-bottom: 1px solid #d2dccc;
+  gap: 3px;
+  padding: 0 16px;
+  z-index: 11;
+  overflow-x: auto;
+}
+.workspace-navigation button {
+  border: 0;
+  background: transparent;
+  padding: 0 13px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.workspace-navigation button.active {
+  color: #233d2c;
+  background: #dbe5c6;
+  box-shadow: inset 0 -3px #476044;
+  font-weight: 700;
+}
+.training-mode {
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+.training-mode .sidebar {
+  display: none;
+}
+.training-mode .stage {
+  grid-column: 2;
+  grid-row: 3;
+}
+.training-mode .stage > :not(.viewport) {
+  display: none;
+}
+.training-mode .statusbar {
+  grid-row: 4;
+}
+.strict-exam .statusbar .keyboard-hint,
+.strict-exam .statusbar > span:last-child {
+  display: none;
+}
+.training-panel {
+  grid-column: 1;
+  grid-row: 3;
+  overflow: auto;
+  min-height: 0;
+  position: relative;
+  background: #f7f8f2;
+  border-right: 1px solid #d6dfcf;
+  padding: 23px 21px 35px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+}
+.training-panel h1 {
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+}
+.training-panel h2 {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 650;
+}
+.training-panel p {
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.training-eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #65795e;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.training-eyebrow span {
+  letter-spacing: 0.3px;
+  font-size: 8px;
+}
+.training-intro {
+  color: #64715f;
+}
+.training-callout {
+  font-size: 11px;
+  line-height: 1.6;
+  background: #edf0df;
+  border-left: 3px solid #899f6f;
+  padding: 11px 12px;
+}
+.training-panel fieldset {
+  margin: 0;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid #dce3d3;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.training-panel legend {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding-right: 10px;
+}
+.training-panel label {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  gap: 6px;
+  line-height: 1.5;
+}
+.training-panel input:not([type="checkbox"]):not([type="range"]),
+.training-panel select,
+.training-panel textarea {
+  width: 100%;
+  background: #fffef8;
+  color: #2d4130;
+  border: 1px solid #cfd8c6;
+  border-radius: 5px;
+  padding: 8px 9px;
+  min-width: 0;
+}
+.training-panel textarea {
+  min-height: 78px;
+  resize: vertical;
+  font: inherit;
+}
+.training-panel button {
+  border: 1px solid #ccd6c1;
+  border-radius: 5px;
+  background: #fdfef8;
+  padding: 9px 11px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.training-panel .training-primary {
+  background: #38513d;
+  color: #f1f6df;
+  border-color: #38513d;
+  font-weight: 650;
+}
+.training-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.training-actions > * {
+  flex: 1;
+}
+.training-muted {
+  color: #75816e;
+  font-size: 10px !important;
+}
+.training-panel .training-check {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.training-check input {
+  accent-color: #476044;
+  margin: 3px 0 0;
+  flex-shrink: 0;
+}
+.procedure-card {
+  border: 1px solid #dbe2d0;
+  padding: 14px;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fdfef8;
+}
+.procedure-card ol {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.training-panel progress {
+  accent-color: #738e4b;
+  width: 100%;
+  height: 7px;
+}
+.training-keyboard {
+  padding-top: 14px;
+  border-top: 1px solid #dbe2d0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.training-keyboard b {
+  font-size: 11px;
+}
+.training-keyboard p {
+  font-size: 10px;
+  color: #708067;
+}
+.training-notice {
+  padding: 12px;
+  background: #e9eddf;
+  border-radius: 5px;
+  font-size: 11px !important;
+}
+.training-result {
+  border-left: 3px solid #7c8d54;
+  padding-left: 10px;
+}
+.training-scene-tools {
+  position: absolute;
+  left: 365px;
+  right: 24px;
+  top: 142px;
+  z-index: 6;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+.training-scene-label {
+  background: #f7faeddf;
+  backdrop-filter: blur(6px);
+  padding: 9px 12px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  border-radius: 4px;
+}
+.training-camera-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  pointer-events: auto;
+  padding: 4px;
+  background: #f6f8edeb;
+  border: 1px solid #d5dfca;
+  border-radius: 5px;
+}
+.training-camera-buttons button {
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 7px 10px;
+}
+.training-camera-buttons .active {
+  background: #dce6c7;
+  color: #314b35;
+  font-weight: 700;
+}
+.training-scene-tools p {
+  font-size: 10px;
+  line-height: 1.7;
+  background: #f6f8e9d9;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: #53654b;
+}
+.training-scene-status {
+  position: absolute;
+  bottom: 55px;
+  left: 365px;
+  right: 24px;
+  background: #f5f8e8e8;
+  border: 1px solid #d5dfc8;
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 6;
+  padding: 14px 18px;
+  border-radius: 6px;
+}
+.training-scene-status b {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.training-scene-status span {
+  font-size: 12px;
+  flex: 1;
+}
+.training-scene-status small {
+  color: #6d7c5d;
+  font-size: 10px;
+}
+.rc-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rc-bars > div {
+  display: grid;
+  grid-template-columns: 55px 1fr 40px;
+  gap: 8px;
+  align-items: center;
+  font-size: 10px;
+}
+.rc-bars meter {
+  width: 100%;
+  height: 14px;
+}
+.calibration-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+}
+.training-panel summary {
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.training-panel details {
+  border-top: 1px solid #dde4d3;
+  padding-top: 10px;
+}
+.training-panel details p {
+  margin-top: 10px;
+}
+.rule-list {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+  font-size: 10px;
+  gap: 8px;
+}
+.rule-list > div,
+.result-metrics > div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  border-bottom: 1px solid #e6eadc;
+  padding-bottom: 6px;
+}
+.rule-list dd {
+  text-align: right;
+  margin: 0;
+  overflow-wrap: anywhere;
+  max-width: 60%;
+}
+.training-tag {
+  color: #7a663a;
+  font-size: 9px !important;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.attempt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+}
+.attempt-list button {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.attempt-list button.selected {
+  background: #e6edd7;
+  border-color: #80966e;
+}
+.attempt-list span,
+.attempt-list small {
+  font-size: 9px;
+  color: #728068;
+}
+.training-map {
+  width: 100%;
+  height: auto;
+  min-height: 120px;
+}
+.result-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  font-size: 10px;
+}
+.result-metrics dd {
+  margin: 0;
+  text-align: right;
+  max-width: 60%;
+}
+.event-timeline {
+  max-height: 300px;
+  overflow: auto;
+}
+.event-timeline li {
+  margin-bottom: 7px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.event-timeline button {
+  padding: 2px 4px;
+  margin-right: 5px;
+  font-size: 9px;
+}
+.file-button {
+  padding: 8px;
+  border: 1px dashed #9dac8e;
+  border-radius: 5px;
+  font-size: 10px !important;
+}
+.file-button input {
+  font-size: 9px;
+  max-width: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.training-panel .exports {
+  border-top: 1px solid #dce3d2;
+  padding-top: 14px;
+}
+@media (min-width: 1450px) {
+  .training-mode:has(.wide-panel) {
+    grid-template-columns: 420px minmax(0, 1fr);
+  }
+  .training-mode:has(.wide-panel) .training-scene-tools,
+  .training-mode:has(.wide-panel) .training-scene-status {
+    left: 445px;
+  }
+}
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-rows: 65px 42px minmax(0, 1fr) 28px;
+  }
+  .workspace-navigation {
+    padding: 0 5px;
+  }
+  .workspace-navigation button {
+    padding: 0 10px;
+  }
+  .training-mode {
+    grid-template-columns: 290px minmax(0, 1fr);
+  }
+  .training-panel {
+    padding: 18px 14px;
+  }
+  .training-scene-tools {
+    left: 305px;
+    top: 123px;
+    right: 12px;
+  }
+  .training-scene-status {
+    left: 305px;
+    right: 12px;
+    bottom: 40px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .training-scene-status span {
+    flex-basis: 100%;
+  }
+  .training-camera-buttons button {
+    padding: 6px;
+  }
+  .training-scene-tools p {
+    font-size: 9px;
+  }
+  .training-scene-status small {
+    display: none;
+  }
+}
+@media (max-width: 620px) {
+  body {
+    overflow: auto;
+  }
+  .training-mode {
+    height: 100dvh;
+    min-height: 700px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 58px 42px 42vh minmax(240px, 1fr) 26px;
+  }
+  .training-mode .stage {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 0;
+  }
+  .training-panel {
+    grid-row: 4;
+    grid-column: 1;
+    border-right: 0;
+    padding: 18px;
+  }
+  .training-mode .statusbar {
+    grid-row: 5;
+  }
+  .training-scene-tools {
+    left: 10px;
+    top: 110px;
+    right: 10px;
+    gap: 6px;
+  }
+  .training-scene-tools p {
+    display: none;
+  }
+  .training-scene-label {
+    padding: 6px;
+    font-size: 8px;
+  }
+  .training-camera-buttons button {
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+  .training-scene-status {
+    top: calc(100px + 42vh - 56px);
+    bottom: auto;
+    left: 10px;
+    right: 10px;
+    padding: 9px 10px;
+    gap: 6px;
+  }
+  .training-scene-status span {
+    font-size: 10px;
+    flex-basis: auto;
+  }
+  .training-scene-status b {
+    font-size: 9px;
+  }
+  .training-mode .app-header {
+    padding: 0 14px;
+  }
+  .training-mode .project-name {
+    display: none;
+  }
+}
+.training-panel > *,
+.attempt-list > button {
+  flex-shrink: 0;
+}
+.telemetry-plots svg {
+  width: 100%;
+  height: auto;
+}
+.telemetry-plots p {
+  font-size: 10px;
+}
+.training-mode .stage > .error-message {
+  display: block;
+}
+.training-mode .stage > .loading-chip {
+  display: flex;
+}
+/* Procedure/replay panels carry status; keep the pilot's aircraft view unobstructed. */
+.training-mode .training-scene-status {
+  display: none;
+}

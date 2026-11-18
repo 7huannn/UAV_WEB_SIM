@@ -22,6 +22,10 @@ export type FlightMode =
 const clamp = (n: number, min: number, max: number) =>
   Math.max(min, Math.min(max, n));
 export class DroneDynamics {
+  manualOnly = false;
+  resetGuard?: () => boolean;
+  beforeStep?: (dt: number) => void;
+  afterStep?: (dt: number) => void;
   position = new Vector3(-20, p.gearHeight, 0);
   previousPosition = this.position.clone();
   velocity = new Vector3();
@@ -74,10 +78,19 @@ export class DroneDynamics {
         );
   }
   reset() {
+    if (this.resetGuard?.() === false) return false;
     const weather = this.weather,
-      selected = this.selectedMission;
+      selected = this.selectedMission,
+      manualOnly = this.manualOnly,
+      resetGuard = this.resetGuard,
+      beforeStep = this.beforeStep,
+      afterStep = this.afterStep;
     Object.assign(this, new DroneDynamics(weather));
     this.selectedMission = selected;
+    this.manualOnly = manualOnly;
+    this.resetGuard = resetGuard;
+    this.beforeStep = beforeStep;
+    this.afterStep = afterStep;
   }
   clearController() {
     this.positionIntegral.set(0, 0, 0);
@@ -97,6 +110,7 @@ export class DroneDynamics {
     this.clearController();
   }
   takeoff() {
+    if (this.manualOnly) return false;
     this.abortMission();
     if (this.mode === "Crashed") return;
     if (!this.armed) this.arm();
@@ -115,6 +129,7 @@ export class DroneDynamics {
     this.missionPaused = false;
   }
   land() {
+    if (this.manualOnly) return false;
     this.abortMission();
     if (!this.armed) return;
     this.mode = "Landing";
@@ -152,6 +167,7 @@ export class DroneDynamics {
     this.missionPaused = false;
   }
   mission() {
+    if (this.manualOnly) return false;
     // Starting condition is reviewable and explicit: landed at H, never relocated.
     if (
       this.missionActive ||
@@ -267,6 +283,14 @@ export class DroneDynamics {
       } else this.setPhase(mission.legs[this.missionLeg].phase);
     }
   }
+  engageManual() {
+    if (!this.armed || this.missionActive) return false;
+    this.target.copy(this.position);
+    this.targetVelocity.set(0, 0, 0);
+    this.clearController();
+    this.mode = "Manual";
+    return true;
+  }
   manual(command: Vector3, yawRate: number, dt: number) {
     if (!this.armed || this.mode === "Armed" || this.mode === "Landing") return;
     if (command.lengthSq() || yawRate) {
@@ -276,9 +300,15 @@ export class DroneDynamics {
       }
       this.yaw += yawRate * dt;
       this.target.addScaledVector(command, dt);
-      this.target.x = clamp(this.target.x, -21, 21);
-      this.target.z = clamp(this.target.z, -12, 12);
-      this.target.y = clamp(this.target.y, p.gearHeight + 0.2, 12);
+      if (!this.manualOnly) {
+        this.target.x = clamp(this.target.x, -21, 21);
+        this.target.z = clamp(this.target.z, -12, 12);
+      }
+      this.target.y = clamp(
+        this.target.y,
+        p.gearHeight + (this.manualOnly ? -0.15 : 0.2),
+        12,
+      );
       this.targetVelocity.copy(command);
     } else if (this.mode === "Manual") this.targetVelocity.set(0, 0, 0);
   }
@@ -351,6 +381,7 @@ export class DroneDynamics {
     );
   }
   step(dt = p.fixedDt, overrideThrust?: number[]) {
+    this.beforeStep?.(dt);
     this.previousPosition.copy(this.position);
     this.previousOrientation.copy(this.orientation);
     this.time += dt;
@@ -418,6 +449,7 @@ export class DroneDynamics {
       Math.abs(this.velocity.y) < 0.15
     )
       this.mode = "Position hold";
+    this.afterStep?.(dt);
   }
   private collide(dt: number) {
     if (Math.abs(this.position.x) > 30 || Math.abs(this.position.z) > 21) {

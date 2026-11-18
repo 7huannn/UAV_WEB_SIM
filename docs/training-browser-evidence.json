@@ -1,0 +1,129 @@
+{
+  "date": "2026-11-18T05:47:58.811Z",
+  "url": "http://localhost:4175",
+  "browser": "147.0.7727.101",
+  "initial": {
+    "camera": "PILOT VLOS",
+    "station": [
+      -25,
+      1.615,
+      0
+    ],
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "quality": "Low"
+  },
+  "checks": [
+    "Training default and fixed provisional Pilot VLOS",
+    "VLOS head look and wheel preserve eye and zoom",
+    "Calibration profile edited, normalized diagnostics visible and persisted",
+    "Operating mode cannot change during a live training attempt",
+    "Manual stick climb through motors, procedure/trace and figure-eight training attempt",
+    "Actual browser keyboard body-frame input changes force-integrated aircraft",
+    "Pause/resume/abort and offline persistence",
+    "Mock camera, aids, station, reference automation and navigation locked at API and UI",
+    "Stored recording replay with RC, attitude/position and task timeline",
+    "Instructor annotation preserves original attempt hashes",
+    "JSON, CSV and readable report downloads",
+    "Recorded camera pose replay preserves fixed eye",
+    "Malformed recording import is rejected without replacing original evidence",
+    "Provisional station configuration and rule provenance",
+    "Active focus loss marks attempt incomplete and neutralizes input",
+    "figure-eight: synthetic RC full force-integrated route, manual descent/disarm, postflight, sealed review-required outcome and replay",
+    "outer-circuit: synthetic RC full force-integrated route, manual descent/disarm, postflight, sealed review-required outcome and replay",
+    "390px responsive navigation/calibration without horizontal overflow"
+  ],
+  "screenshots": [
+    "pilot-vlos",
+    "controller-calibration",
+    "manual-figure-eight-attempt",
+    "manual-outer-circuit-attempt",
+    "mock-examination",
+    "replay-telemetry",
+    "replay-telemetry-history",
+    "scoring-report",
+    "instructor",
+    "examination-profiles",
+    "complete-figure-eight-debrief",
+    "complete-outer-circuit-debrief",
+    "mobile-calibration"
+  ],
+  "completeFlights": [
+    {
+      "id": "figure-eight",
+      "state": "TASK_COMPLETE",
+      "maxStep": 0.0065092993709446436,
+      "completed": [
+        "takeoff",
+        "hover",
+        "route"
+      ],
+      "samples": 3683,
+      "simSeconds": 73.64399999999831,
+      "result": {
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "practiceScore": 100,
+        "violations": {},
+        "completedTasks": [
+          "takeoff",
+          "hover",
+          "route"
+        ],
+        "missedRouteGates": 0,
+        "maxLateral": 0.37985269289546286,
+        "maxAltitudeError": 0.02516685995341561,
+        "maxSpeed": 1.6273248427361857,
+        "landingError": 0.7377345168854633,
+        "limitations": [
+          "Practice only; no official examination equivalence",
+          "Rules and pilot station provisional; human review required",
+          "Illustrative uncalibrated aircraft and ideal state telemetry",
+          "RC hardware, display perceptual fidelity and field transfer unverified",
+          "Replay is recorded-state playback, not resimulation or device-signed evidence",
+          "Synthetic software-generated RC fixture; not human flight or physical controller validation"
+        ]
+      }
+    },
+    {
+      "id": "outer-circuit",
+      "state": "TASK_COMPLETE",
+      "maxStep": 0.006378087883024408,
+      "completed": [
+        "takeoff",
+        "hover",
+        "route"
+      ],
+      "samples": 4612,
+      "simSeconds": 92.22400000002106,
+      "result": {
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "practiceScore": 100,
+        "violations": {},
+        "completedTasks": [
+          "takeoff",
+          "hover",
+          "route"
+        ],
+        "missedRouteGates": 0,
+        "maxLateral": 0.36718394119597697,
+        "maxAltitudeError": 0.02516685995341561,
+        "maxSpeed": 1.5945219707560765,
+        "landingError": 0.5427445707898322,
+        "limitations": [
+          "Practice only; no official examination equivalence",
+          "Rules and pilot station provisional; human review required",
+          "Illustrative uncalibrated aircraft and ideal state telemetry",
+          "RC hardware, display perceptual fidelity and field transfer unverified",
+          "Replay is recorded-state playback, not resimulation or device-signed evidence",
+          "Synthetic software-generated RC fixture; not human flight or physical controller validation"
+        ]
+      }
+    }
+  ],
+  "bundle": "/assets/index-Bk5P8NB2.js",
+  "errors": [],
+  "limitations": [
+    "SwiftShader software rendering, not hardware GPU acceptance",
+    "Synthetic software stick commands include both full force-integrated courses and partial keyboard attempts; no human full-course or physical RC validation",
+    "Original attempt hashes preserved by separate annotations"
+  ]
+}

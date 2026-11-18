@@ -1,0 +1,44 @@
+SIMULATED / PRACTICE EXAMINATION - not a licence or certificate
+Candidate: Browser figure-eight manual attempt
+Attempt: 650349bc-0682-4512-ad08-50bd959b9e08 · 2026-11-18T05:46:56.080Z
+Software: uav-arena-0.2.0 · geometry assets/reference/arena-layout.png
+Status: ABORTED · INCOMPLETE_ATTEMPT
+Profile: Full Figure Eight 1.0.0 · training-rules-1.0.0
+Provenance: TRAINING_ONLY · Engineering assumptions; no verified Vietnamese scoring tolerance
+Flight mode: Position-stabilized body-frame velocity / climb / yaw-rate; release holds last target; no attitude mode
+Pilot station: {"x":-25,"z":0,"groundY":-0.035,"eyeHeight":1.65,"verticalFov":60,"source":"Engineering assumption: west turf, distinct from H and examiner area; diagram has no pilot station","confidence":"Low; requires authority and surveyed-site confirmation","verification":"PROVISIONAL"}
+Controller: Keyboard · Keyboard fallback · hardware UNVERIFIED
+Physics: 0.004s fixed step · state recording every 5 steps
+Samples: 937 · dropped wall time: 3.966s
+Practice score: 100.0/100 (engineering deduction, NOT official pass/fail)
+Completed tasks: takeoff, hover
+Missing gates at stop: 174
+Max lateral: 0.01m · max altitude error: 0.05m · max speed: 2.59m/s
+Landing error: NOT OBSERVED
+Rule exceedance seconds: {}
+Preflight: true,true,true,true · Postflight: false,false
+LIMITATIONS
+Practice only; no official examination equivalence
+Rules and pilot station provisional; human review required
+Illustrative uncalibrated aircraft and ideal state telemetry
+RC hardware, display perceptual fidelity and field transfer unverified
+Replay is recorded-state playback, not resimulation or device-signed evidence
+Attempt paused/interrupted
+EVENT TIMELINE
+0.000s STATE: PREFLIGHT
+0.200s CHECKLIST: preflight 1: true
+0.400s CHECKLIST: preflight 2: true
+0.600s CHECKLIST: preflight 3: true
+0.800s CHECKLIST: preflight 4: true
+1.000s STATE: READY
+1.400s STATE: ACTIVE
+7.756s TASK_COMPLETE: Manual climb to 5 m; settle for 2 s
+12.756s TASK_COMPLETE: Hold over H for 5 s
+18.536s STATE: PAUSED
+18.536s PAUSE: Practice interrupted; human review required
+18.536s STATE: ACTIVE
+18.736s ABORT: Candidate aborted
+18.736s STATE: ABORTED
+18.736s RESULT: INCOMPLETE_ATTEMPT
+APPENDED HUMAN REVIEW (original recording unchanged)
+4.00s Instructor NOTE: Synthetic browser QA review: partial attempt, not a completed flight or certification.

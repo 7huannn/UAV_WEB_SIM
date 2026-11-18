@@ -1,0 +1,23 @@
+# Controller input architecture
+
+## Supported path
+
+`ControllerInput` in `src/training/input.ts` polls the browser Gamepad API, or explicitly selected keyboard fallback. A USB/RC simulator controller works only if its driver/adapter exposes a browser gamepad. No blanket RC-device compatibility, WebUSB serial protocol, receiver link, calibrated latency or physical hardware validation is claimed. A device may require a button press before browsers expose it. The UI reports slot, connection, ID, raw axes/buttons and normalized channels. Disconnected Gamepad input never silently switches to keyboard.
+
+Mode 2 default: left vertical axis 1 = climb, left horizontal axis 0 = yaw; right vertical axis 3 = pitch, right horizontal axis 2 = roll. Vertical channels invert conventional negative-up browser axes. These are provisional mappings, not a universal RC standard. Calibration permits axis reassignment, min/center/max, inversion and deadzone per channel. Use Restart range sweep, sweep each axis, release to neutral, Capture center and Use observed range; inspect all channels before saving. Min < center < max is required. Up to 20 named profiles persist locally; load a mapping and save it to activate it. Attempts lock a copy. HardwareVerified remains false.
+
+For raw r and calibrated min/mid/max, normalize each half-range independently, clamp [-1,1], remove the central deadzone and rescale the remaining range. Missing/non-finite axes or invalid calibration yield neutral input and a fault. Deadzone must be 0–0.49. This centered climb channel is a velocity demand, not unipolar motor power or an authentic transmitter throttle failsafe. Non-centering throttle sticks require a deliberate neutral/hover point and validation; they are not automatically assumed compatible.
+
+## Flight-control meaning
+
+Manual training uses the existing cascaded position/velocity → attitude → rate → motor controller. Roll/right and pitch/forward demand ±2 m/s in the aircraft's current horizontal heading frame, climb ±2 m/s and yaw ±0.7 rad/s. Positive RC yaw is right; the existing mathematical +Y rotation is left, so conversion negates yaw demand. Body +X is right, body -Z is nose/forward, world +Y is up. Input is held between browser polls and applied inside every 0.004 s physics step. Browser polling/render stalls remain a latency/fidelity limitation.
+
+Manual start requires neutral normalized demand (±0.08 training tolerance) and a connected selected gamepad, then captures the current position with no automatic climb. Candidate input moves the stabilization target; forces and motor dynamics move the aircraft. Release zeros velocity demand and retains the last position/heading target. This is explicitly **position-stabilized velocity/climb/yaw-rate control**, not rate/attitude mode, raw throttle physics or an unassisted aircraft. No attitude flight mode is advertised. Automatic reference missions, fixed-height takeoff and automatic landing are blocked while manual-only policy is active. Manual descent can reach the ground; the pilot must disarm. No lateral target clamp silently pulls a manual attempt back into V1; the evaluator detects a boundary event instead.
+
+## Focus, interruption and recovery
+
+Keyboard: W/S forward/back, A/D lateral, R/F climb/descent, Q/E yaw. Keyboard fallback is explicit, recorded and not equivalent to physical RC ergonomics. Flight shortcuts are ignored during text entry. Buttons and guidance checkboxes remain usable. Window blur/hidden-tab clears keys; text/select editing neutralizes inputs. Active input loss/disconnect interrupts the attempt as INCOMPLETE, records the reason and captures a stabilized hold. It does not report a pass or execute a return/landing route. Simulation pause is separately logged and requires review. A new attempt requires a deliberate grounded H reset and checklist.
+
+## Verification and pending hardware checks
+
+Headless tests cover asymmetric calibration, inversion, deadzone, unavailable axes, keyboard mapping, neutral focus/disconnect behavior, force-driven manual climb/descent and cadence independence. Browser tests exercise the real keyboard path, calibration persistence, focus interruption and mock locks. Synthetic gamepads are software fixtures only. Before hardware acceptance: record make/model/firmware/adapter/OS/browser, identify every axis/button and throttle convention, measure neutral noise and full range, test reconnect/focus/unplug on a safe simulator bench, measure end-to-end latency and compare the actual transmitter ergonomics with the declared mode. No physical RC device was available for this implementation.
