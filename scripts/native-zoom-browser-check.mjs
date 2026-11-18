@@ -21,9 +21,11 @@ page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => {
   if (m.type() === "error") errors.push(m.text());
 });
-page.on("requestfailed", (r) =>
-  errors.push(r.url() + ": " + r.failure()?.errorText),
-);
+page.on("requestfailed", (r) => {
+  // Chrome's own settings page may cancel lazy assets when we leave for the app.
+  if (!r.url().startsWith("chrome://"))
+    errors.push(r.url() + ": " + r.failure()?.errorText);
+});
 const frames = () =>
   page.evaluate(
     () =>
@@ -87,12 +89,6 @@ try {
   await candidate.focus();
   await page.keyboard.type("Nguoi dung chu lon");
   assert.equal(await candidate.inputValue(), "Nguoi dung chu lon");
-  const slider = page.getByLabel("Mức gió", { exact: true });
-  await slider.focus();
-  await page.keyboard.press("Home");
-  await page.keyboard.press("ArrowRight");
-  assert.equal(await slider.inputValue(), "1");
-  await page.getByLabel("Mức mưa", { exact: true }).fill("4");
   await overflow();
   await capture("native-zoom-200-redesign-options");
   const prepare = page.getByRole("button", {
@@ -103,6 +99,16 @@ try {
   await prepare.focus();
   await page.keyboard.press("Space");
   await page.waitForFunction(() => window.__UAV__.session?.state === "READY");
+  await page.locator(".conditions-control>summary").focus();
+  await page.keyboard.press("Enter");
+  const slider = page.getByLabel("Mức gió", { exact: true });
+  await slider.focus();
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowRight");
+  assert.equal(await slider.inputValue(), "1");
+  await page.getByLabel("Mức mưa", { exact: true }).fill("4");
+  await capture("native-zoom-200-conditions");
+  await page.keyboard.press("Escape");
   assert.equal(
     await page.getByText("Kiểm tra trước bay", { exact: true }).count(),
     0,

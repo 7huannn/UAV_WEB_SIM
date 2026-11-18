@@ -10,6 +10,7 @@ import { TrainingDesk, ControlGuide } from "./TrainingDesk";
 import { Settings } from "./Settings";
 import { Review } from "./Review";
 import { Icon } from "./Design";
+import { FlightConditions } from "./FlightConditions";
 import { storedWeather, preference } from "./LearnerControls";
 import { vi } from "./vi";
 const initial = new DroneDynamics(new Weather()).telemetry();
@@ -459,6 +460,7 @@ function Reference({ w, t }: { w: World; t: typeof initial }) {
         </p>
       </section>
       <div className="reference-controls">
+        <FlightConditions w={w} onUpdate={() => refresh((n) => n + 1)} />
         <label>
           Bài bay mẫu
           <select

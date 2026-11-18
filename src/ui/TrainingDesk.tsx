@@ -5,13 +5,8 @@ import { profiles, type ProfileId } from "../training/profiles";
 import type { Attempt } from "../training/Session";
 import { isFinal, seal, download } from "../training/records";
 import { Icon, exerciseInfo, exerciseOrder, RouteArt } from "./Design";
-import {
-  InputCheck,
-  WindSelector,
-  preference,
-  remember,
-} from "./LearnerControls";
-import { weatherSummary } from "../training/weatherPresets";
+import { InputCheck, preference, remember } from "./LearnerControls";
+import { FlightConditions } from "./FlightConditions";
 import { vi } from "./vi";
 const time = (n: number) =>
   `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(Math.floor(n % 60)).padStart(2, "0")}`;
@@ -241,17 +236,12 @@ export function TrainingDesk({
               </ol>
               <details className="setup-options">
                 <summary>
-                  Điều khiển & điều kiện bay <Icon name="settings" size={18} />
+                  Điều khiển & thông tin <Icon name="settings" size={18} />
                 </summary>
                 <InputCheck w={w} onUpdate={update} />
-                {strict ? (
-                  <p>
-                    Điều kiện cố định: {weatherSummary(w.weather.target)}. Bạn
-                    có thể chọn điều kiện cho lần thi sau trong Cài đặt.
-                  </p>
-                ) : (
-                  <WindSelector w={w} onUpdate={update} />
-                )}
+                <p className="muted">
+                  Chọn gió và mưa ngay trong sân, trước khi bắt đầu bay.
+                </p>
                 <label>
                   Tên của bạn <span className="optional">· không bắt buộc</span>
                   <input
@@ -640,7 +630,8 @@ export function TrainingDesk({
         {!final && (
           <>
             <div className="view-tools">
-              <details>
+              <FlightConditions w={w} onUpdate={update} />
+              <details name="flight-tools">
                 <summary>
                   <Icon name="eye" size={19} />
                   <span>Góc nhìn</span>
@@ -731,8 +722,13 @@ export function TrainingDesk({
                   )}
                 </div>
               </details>
-              <button aria-pressed={help} onClick={() => setHelp(!help)}>
-                <Icon name="help" size={19} /> Phím điều khiển
+              <button
+                aria-label="Phím điều khiển"
+                aria-pressed={help}
+                onClick={() => setHelp(!help)}
+              >
+                <Icon name="help" size={19} />{" "}
+                <span className="flight-help-label">Phím điều khiển</span>
               </button>
               <button
                 aria-label="Toàn màn hình"

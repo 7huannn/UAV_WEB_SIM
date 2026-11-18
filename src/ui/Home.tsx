@@ -1,5 +1,4 @@
 import { DroneArt, Icon } from "./Design";
-import { remember } from "./LearnerControls";
 export function Home({ navigate }: { navigate: (page: string) => void }) {
   return (
     <main className="home page-enter" id="main-content" tabIndex={-1}>
@@ -99,26 +98,39 @@ export function Home({ navigate }: { navigate: (page: string) => void }) {
           </button>
         ))}
       </section>
-      <section className="first-flight">
-        <span className="first-flight-icon">
-          <Icon name="drone" size={25} />
-        </span>
-        <div>
-          <h2>Lần đầu cầm lái?</h2>
+      <section className="learn-strip" aria-labelledby="learn-heading">
+        <div className="learn-intro">
+          <span className="eyebrow">QUAN SÁT · THẤU HIỂU · TỰ THỬ</span>
+          <h2 id="learn-heading">Tìm hiểu trước khi bay</h2>
           <p>
-            Bắt đầu với cất cánh và giữ vị trí. Cứ thong thả, bạn có thể thử lại
-            bất cứ lúc nào.
+            Lần đầu cầm lái? Làm quen với mục tiêu và đường bay trước khi vào
+            sân.
           </p>
         </div>
-        <button
-          className="text-button"
-          onClick={() => {
-            remember("uav-preferred-profile", "foundations");
-            navigate("Training");
-          }}
-        >
-          Khám phá bài cơ bản <Icon name="arrow" size={18} />
-        </button>
+        <div className="learn-links">
+          <button
+            aria-label="Bài bay và tiêu chí"
+            onClick={() => navigate("Examination Profiles")}
+          >
+            <Icon name="target" size={22} />
+            <span>
+              <b>Bài bay và tiêu chí</b>
+              <small>Hiểu từng bước cần thực hiện</small>
+            </span>
+            <Icon name="arrow" size={18} />
+          </button>
+          <button
+            aria-label="Xem bay mẫu tự động"
+            onClick={() => navigate("Reference missions")}
+          >
+            <Icon name="play" size={22} />
+            <span>
+              <b>Xem bay mẫu tự động</b>
+              <small>Quan sát đường bay, không chấm điểm</small>
+            </span>
+            <Icon name="arrow" size={18} />
+          </button>
+        </div>
       </section>
       <footer className="home-footer">
         <span>

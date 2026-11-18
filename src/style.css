@@ -647,35 +647,64 @@ kbd {
   right: 22px;
   bottom: 25px;
 }
-.first-flight {
+.learn-strip {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 40px;
+  align-items: center;
+  padding: 32px 0;
+  margin-top: 10px;
+}
+.learn-intro .eyebrow {
+  font-size: 8px;
+}
+.learn-intro h2 {
+  font-size: 20px;
+  margin: 9px 0 7px;
+}
+.learn-intro p {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 340px;
+}
+.learn-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.learn-links button {
   display: flex;
   align-items: center;
-  gap: 19px;
-  padding: 26px 0;
-  margin-top: 11px;
+  gap: 13px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 16px 20px;
+  border-radius: 0;
 }
-.first-flight-icon {
-  width: 47px;
-  height: 47px;
-  border-radius: 50%;
-  border: 1px solid #ccd6bf;
-  display: grid;
-  place-items: center;
+.learn-links button + button {
+  border-left: 1px solid var(--line);
+}
+.learn-links button:hover {
+  background: #e8eddf;
+}
+.learn-links button > svg {
   flex-shrink: 0;
-  color: #71855c;
+  color: #657e52;
 }
-.first-flight h2 {
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-.first-flight p {
-  font-size: var(--text-small);
-  color: var(--muted);
-}
-.first-flight .text-button {
+.learn-links button > svg:last-child {
   margin-left: auto;
-  white-space: nowrap;
+  width: 16px;
+}
+.learn-links b {
   font-size: 13px;
+  font-weight: 600;
+  display: block;
+}
+.learn-links small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
 }
 .home-footer {
   border-top: 1px solid var(--line);
@@ -1088,12 +1117,18 @@ kbd {
   background: #f8faf2f5;
   box-shadow: 0 4px 16px #20362612;
   border: 1px solid #e1e5db;
-  min-height: 47px;
+  height: 52px;
+  min-height: 52px;
   border-radius: 9px;
   font-size: 12px;
+  line-height: 1.25;
 }
 .view-tools > button {
   padding: 10px 15px;
+}
+.view-tools > button[aria-label="Toàn màn hình"] {
+  width: 52px;
+  padding-inline: 0;
 }
 .view-tools > details {
   position: relative;
@@ -1121,6 +1156,153 @@ kbd {
   font-size: 14px;
   max-height: 60dvh;
   overflow: auto;
+}
+.conditions-control {
+  position: relative;
+}
+.conditions-control[open] {
+  z-index: 8;
+}
+.view-tools > .conditions-control > summary,
+.conditions-control > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 19px auto;
+  align-content: center;
+  column-gap: 8px;
+  row-gap: 1px;
+  padding: 8px 13px;
+  background: #f8faf2f5;
+  border: 1px solid #e1e5db;
+  min-height: 47px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.conditions-control > summary svg {
+  grid-row: span 2;
+  align-self: center;
+}
+.conditions-control > summary small {
+  font-size: 9px;
+  color: var(--muted);
+}
+.conditions-control[open] > summary {
+  background: #244a3b;
+  color: #fff;
+  margin-bottom: 0;
+}
+.conditions-control[open] > summary small {
+  color: #d6e0c9;
+}
+.conditions-panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: 345px;
+  max-height: min(580px, calc(100dvh - 230px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 10px 40px #122b2430;
+  font-size: 13px;
+  animation: reveal 0.2s var(--ease) both;
+}
+.conditions-heading {
+  position: sticky;
+  top: -20px;
+  background: #fff;
+  z-index: 1;
+  padding: 5px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.conditions-heading .eyebrow {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.conditions-heading h2 {
+  font-size: 22px;
+  margin-top: 5px;
+}
+.conditions-panel .conditions-heading button {
+  flex: 0 0 44px;
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+}
+.conditions-timing {
+  margin: 15px 0 18px;
+  padding-left: 11px;
+  border-left: 2px solid #c8d6ab;
+  color: #57654d;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.conditions-panel fieldset {
+  min-width: 0;
+}
+.conditions-panel fieldset > label {
+  display: block;
+  margin-top: 17px;
+}
+.conditions-panel label > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+.conditions-panel label output {
+  color: #61734e;
+  font-size: 12px;
+}
+.conditions-panel input[type="range"] {
+  width: 100%;
+  min-height: 32px;
+  margin: 4px 0 0;
+}
+.conditions-panel .range-endpoints {
+  color: var(--muted);
+  font-size: 10px;
+}
+.conditions-summary {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 15px 0 3px;
+  line-height: 1.6;
+}
+.conditions-reset {
+  font-size: 12px;
+  padding: 8px 0;
+  min-height: 44px;
+}
+.conditions-advanced {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+.conditions-advanced > summary {
+  font-size: 12px;
+  min-height: 44px;
+  padding: 13px 0;
+}
+.conditions-advanced label {
+  display: block;
+  margin-bottom: 14px;
+}
+.conditions-advanced select {
+  margin-top: 8px;
+}
+.conditions-footnote {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
 }
 .head-controls {
   display: flex;
@@ -1386,10 +1568,6 @@ kbd {
   gap: 25px;
   align-items: start;
 }
-.settings-column {
-  display: grid;
-  gap: 25px;
-}
 .settings-section,
 .procedure-card {
   padding: 27px 29px;
@@ -1469,32 +1647,6 @@ button[aria-pressed="true"] {
   margin-top: 13px;
   font-size: 12px;
 }
-.simple-weather {
-  margin: 20px 0;
-}
-.simple-weather legend {
-  font-size: 14px;
-}
-.simple-weather label {
-  margin: 17px 0;
-  font-size: 13px;
-}
-.simple-weather label > b {
-  font-weight: 500;
-}
-.simple-weather > p {
-  font-size: 12px;
-  color: #6e7d63;
-  margin-top: 13px;
-}
-.simple-weather .training-muted {
-  font-size: 11px;
-}
-.simple-weather > button {
-  margin-top: 12px;
-  font-size: 12px;
-  min-height: 42px;
-}
 .range-endpoints {
   display: flex;
   justify-content: space-between;
@@ -1503,20 +1655,6 @@ button[aria-pressed="true"] {
 }
 .setup-options .input-check {
   padding: 0 0 10px;
-}
-.settings-links > button {
-  width: 100%;
-  justify-content: space-between;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  padding: 18px 0;
-  background: transparent;
-  margin: 10px 0 0;
-  font-size: 14px;
-}
-.settings-links h2 {
-  font-size: 21px;
 }
 .advanced-settings {
   grid-column: 1/-1;
@@ -2075,6 +2213,10 @@ button[aria-pressed="true"] {
   flex: 1;
   max-width: 240px;
 }
+.reference-controls .conditions-panel label {
+  max-width: none;
+  min-width: 0;
+}
 .reference-controls select {
   font-size: 13px;
   min-height: 44px;
@@ -2358,9 +2500,6 @@ button[aria-pressed="true"] {
   .destination p {
     font-size: 12px;
   }
-  .first-flight p {
-    max-width: 420px;
-  }
   .exercise-layout {
     gap: 25px;
   }
@@ -2554,16 +2693,6 @@ button[aria-pressed="true"] {
   }
   .destination-top {
     margin-bottom: 17px;
-  }
-  .first-flight {
-    flex-wrap: wrap;
-    gap: 13px;
-  }
-  .first-flight > div {
-    flex: 1;
-  }
-  .first-flight .text-button {
-    margin-left: 60px;
   }
   .home-footer {
     flex-wrap: wrap;
@@ -2948,31 +3077,6 @@ button[aria-pressed="true"] {
     grid-row: 1/3;
     align-self: center;
   }
-  .first-flight {
-    padding: 24px 0;
-    align-items: flex-start;
-    margin-top: 9px;
-  }
-  .first-flight-icon {
-    width: 39px;
-    height: 39px;
-  }
-  .first-flight > div {
-    min-width: calc(100% - 60px);
-  }
-  .first-flight .text-button {
-    flex-basis: calc(100% - 52px);
-  }
-  .first-flight h2 {
-    font-size: 15px;
-  }
-  .first-flight p {
-    font-size: 13px;
-  }
-  .first-flight .text-button {
-    margin: -3px 0 0 52px;
-    font-size: 12px;
-  }
   .home-footer {
     padding: 22px 0;
     gap: 10px;
@@ -3155,9 +3259,6 @@ button[aria-pressed="true"] {
   }
   .view-tools > button {
     padding: 11px;
-  }
-  .view-tools > button:nth-child(2) {
-    flex: 1;
   }
   .view-tools > details > summary {
     padding: 12px;
@@ -3530,5 +3631,139 @@ button[aria-pressed="true"] {
   }
   .session-card {
     margin: 0 auto;
+  }
+}
+
+@media (max-width: 1100px) {
+  .reference-controls {
+    flex-wrap: wrap;
+  }
+  .reference-controls > label {
+    min-width: 160px;
+  }
+  .learn-strip {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .learn-intro p {
+    max-width: none;
+  }
+  .learn-links button:first-child {
+    padding-left: 0;
+  }
+  .view-tools {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 600px) {
+  .reference-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+  .reference-controls > label {
+    min-width: 0;
+    max-width: none;
+  }
+  .reference-controls > label:nth-of-type(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .reference-controls > label:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .reference-controls > .conditions-control {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .reference-controls > .primary {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 47px;
+  }
+  .reference-controls > button {
+    min-width: 0;
+  }
+  .reference-controls .reference-manual > summary {
+    white-space: normal;
+  }
+  .reference-telemetry {
+    top: 177px;
+    bottom: auto;
+    left: 12px;
+    right: 12px;
+    padding: 10px 12px;
+    gap: 10px;
+    font-size: 10px;
+  }
+  .learn-strip {
+    padding: 26px 0;
+    gap: 15px;
+  }
+  .learn-intro h2 {
+    font-size: 19px;
+  }
+  .learn-links {
+    grid-template-columns: 1fr;
+  }
+  .learn-links button {
+    padding: 16px 0;
+  }
+  .learn-links button + button {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .learn-links small {
+    font-size: 12px;
+  }
+  .view-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 52px 52px;
+    gap: 7px;
+  }
+  .view-tools > details {
+    min-width: 0;
+  }
+  .view-tools > details > summary {
+    padding: 10px;
+    gap: 6px;
+  }
+  .view-tools .conditions-control > summary {
+    padding: 8px;
+  }
+  .view-tools > button {
+    padding: 10px;
+  }
+  .flight-help-label {
+    display: none;
+  }
+  .conditions-panel {
+    width: min(345px, calc(100vw - 24px));
+    max-height: calc(100dvh - 210px);
+    padding: 17px;
+  }
+  .conditions-heading {
+    top: -17px;
+  }
+  .reference-controls .conditions-control {
+    flex: 1 0 100%;
+  }
+  .reference-controls .conditions-control > summary {
+    width: max-content;
+  }
+  .reference-controls .conditions-panel {
+    max-height: calc(100dvh - 365px);
+  }
+}
+@media (max-height: 600px) {
+  .conditions-panel,
+  .reference-controls .conditions-panel {
+    position: fixed;
+    top: 82px;
+    left: 16px;
+    bottom: auto;
+    max-height: calc(100dvh - 98px);
+    z-index: 12;
   }
 }

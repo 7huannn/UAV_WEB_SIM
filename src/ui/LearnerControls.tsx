@@ -1,13 +1,10 @@
-import { useId, useState } from "react";
+import { useState } from "react";
 import type { World } from "../scene/World";
 import { config } from "../arena/geometry";
 import { frontPilotStation, type PilotStation } from "../training/pilot";
 import {
   simpleWeather,
-  weatherSummary,
   weatherAtLevels,
-  windLevelOf,
-  levelDescription,
   validLevel,
 } from "../training/weatherPresets";
 import { channels } from "../training/input";
@@ -25,115 +22,6 @@ export function remember(key: string, value: string) {
   } catch {
     /* preference is optional */
   }
-}
-export function WindSelector({
-  w,
-  assessment = false,
-  disabled = false,
-  onUpdate,
-}: {
-  w: World;
-  assessment?: boolean;
-  disabled?: boolean;
-  onUpdate: () => void;
-}) {
-  const tickId = useId();
-  const prefix = assessment ? "uav-assessment" : "uav-practice";
-  const [chosen, setChosen] = useState(() => storedWeather(assessment));
-  const p = assessment ? chosen : w.weather.target;
-  const wind = windLevelOf(p),
-    rain = Math.round(p.rain * 10),
-    customRain = Math.abs(p.rain * 10 - rain) > 1e-6;
-  function apply(a?: number, b?: number) {
-    if (
-      disabled ||
-      w.session?.locked ||
-      (!assessment && !w.setWeatherLevels(a, b))
-    )
-      return;
-    const next = weatherAtLevels(p, a, b);
-    setChosen(next);
-    if (a !== undefined) remember(prefix + "-wind-level", String(a));
-    if (b !== undefined) remember(prefix + "-rain-level", String(b));
-    onUpdate();
-  }
-  return (
-    <fieldset
-      disabled={disabled || !!w.session?.locked}
-      className="simple-weather"
-    >
-      <legend>
-        {assessment ? "Thời tiết thi thử" : "Thời tiết luyện tập"}
-      </legend>
-      <label>
-        <b>
-          Gió:{" "}
-          {wind === null
-            ? "Tùy chỉnh"
-            : `${wind}/10 — ${levelDescription(wind)}`}
-        </b>
-        <input
-          aria-label={assessment ? "Mức gió thi thử" : "Mức gió"}
-          aria-valuetext={
-            wind === null
-              ? `Tùy chỉnh, gió nền ${p.wind.toFixed(1)} mét mỗi giây`
-              : `${wind} trên 10, ${levelDescription(wind)}, gió nền ${p.wind.toFixed(1)} mét mỗi giây`
-          }
-          type="range"
-          min="0"
-          max="10"
-          step="1"
-          value={wind ?? Math.round(p.wind / 0.9)}
-          onChange={(e) => apply(+e.target.value)}
-          list={tickId}
-        />
-        <span className="range-endpoints">
-          <span>0 · Không gió</span>
-          <span>10 · Mạnh</span>
-        </span>
-      </label>
-      <label>
-        <b>
-          Mưa:{" "}
-          {customRain
-            ? `Tùy chỉnh · ${Math.round(p.rain * 100)}%`
-            : `${rain}/10 — ${levelDescription(rain, true)}`}
-        </b>
-        <input
-          aria-label={assessment ? "Mức mưa thi thử" : "Mức mưa"}
-          aria-valuetext={
-            customRain
-              ? `Tùy chỉnh, ${Math.round(p.rain * 100)} phần trăm`
-              : `${rain} trên 10, ${levelDescription(rain, true)}`
-          }
-          type="range"
-          min="0"
-          max="10"
-          step="1"
-          value={rain}
-          onChange={(e) => apply(undefined, +e.target.value)}
-          list={tickId}
-        />
-        <span className="range-endpoints">
-          <span>0 · Không mưa</span>
-          <span>10 · Mưa mạnh</span>
-        </span>
-      </label>
-      <datalist id={tickId}>
-        {Array.from({ length: 11 }, (_, i) => (
-          <option key={i} value={i} label={String(i)} />
-        ))}
-      </datalist>
-      <p>{weatherSummary(p)}</p>
-      <button type="button" onClick={() => apply(0, 0)}>
-        Đặt lại: không gió, không mưa
-      </button>
-      <p className="training-muted">
-        Mức mô phỏng để luyện tập, không phải giới hạn bay thực tế. Mưa chỉ tác
-        động hình ảnh, chưa quy đổi sang mm/giờ.
-      </p>
-    </fieldset>
-  );
 }
 export function storedWeather(assessment = false) {
   const prefix = assessment ? "uav-assessment" : "uav-practice";

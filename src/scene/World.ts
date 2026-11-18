@@ -786,30 +786,45 @@ export class World {
     }
     return true;
   }
-  private canConfigureWeather() {
+  get canAdjustFlightConditions() {
     return (
-      this.workspace !== "Mock Examination" &&
-      !this.session?.strict &&
+      ["Training", "Mock Examination", "Reference missions"].includes(
+        this.workspace,
+      ) &&
       !this.replay &&
-      !this.session?.locked
+      (!this.session ||
+        this.session.state === "READY" ||
+        (this.workspace === "Training" &&
+          ["ACTIVE", "TASK_COMPLETE", "LANDING", "PAUSED"].includes(
+            this.session.state,
+          ) &&
+          !this.session.strict))
     );
   }
+  private weatherChanged() {
+    if (this.session?.state === "READY") {
+      this.weather.current = { ...this.weather.target };
+      this.session.attempt.initialWeather = { ...this.weather.target };
+    }
+    if (this.session?.active)
+      this.session.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
+  }
   setWeatherPreset(p: Preset) {
-    if (!this.canConfigureWeather() || !Object.hasOwn(presets, p)) return false;
+    if (!this.canAdjustFlightConditions || !Object.hasOwn(presets, p)) return false;
     this.weather.setPreset(p);
-    this.session?.event("WEATHER_CHANGE", p);
+    this.weatherChanged();
     return true;
   }
   setSimpleWeather(wind: WindLevel, condition: Condition) {
-    if (!this.canConfigureWeather()) return false;
+    if (!this.canAdjustFlightConditions) return false;
     this.weather.target = simpleWeather(wind, condition);
-    this.session?.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
+    this.weatherChanged();
     return true;
   }
   setWeatherLevels(wind?: number, rain?: number) {
-    if (!this.canConfigureWeather() || (wind !== undefined && !validLevel(wind)) || (rain !== undefined && !validLevel(rain))) return false;
+    if (!this.canAdjustFlightConditions || (wind !== undefined && !validLevel(wind)) || (rain !== undefined && !validLevel(rain))) return false;
     this.weather.target = weatherAtLevels(this.weather.target, wind, rain);
-    this.session?.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
+    this.weatherChanged();
     return true;
   }
   setAdvancedWeather(key: keyof Weather["target"], value: number) {
@@ -824,7 +839,7 @@ export class World {
       timeOfDay: [7, 18],
     };
     if (
-      !this.canConfigureWeather() ||
+      !this.canAdjustFlightConditions ||
       !Object.hasOwn(bounds, key) ||
       !Number.isFinite(value) ||
       value < bounds[key][0] ||
@@ -832,7 +847,7 @@ export class World {
     )
       return false;
     this.weather.target[key] = value;
-    this.session?.event("WEATHER_CHANGE", `${key}=${value}`);
+    this.weatherChanged();
     return true;
   }
   recenterPilot() {

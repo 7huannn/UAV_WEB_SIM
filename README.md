@@ -23,7 +23,7 @@ npm test            # native Node geometry/physics checks, no browser needed
 
 The Vietnamese interface opens on a home hub with one primary **Bắt đầu luyện tập** action and secondary access to **Thi thử**, **Xem lại bài bay**, and **Cài đặt**. There is no instructor workspace or permanent destination menu. A contextual **Trang chủ** control returns home; a compact closed menu switches between idle tasks.
 
-1. Choose one of four illustrated exercises, read its objectives, then select **Vào sân bay**. The foundations exercise is the default for first-time users. Input selection, optional name and weather are disclosed only when needed.
+1. Choose one of four illustrated exercises, read its objectives, then select **Vào sân bay**. The foundations exercise is the default for first-time users. Input selection and an optional name are disclosed only when needed. Adjust weather inside the map after entering.
 2. The simulator reports field loading and controller availability automatically. No physical pre-flight or post-flight checklist is required. **Bắt đầu bay** arms and starts the manual session together, retaining neutral-input, device-connection and starting-position checks. The simulation clock remains paused while reading the introductory controls.
 3. W/S moves forward/backward relative to the aircraft, A/D sideways, R/F climbs/descends, Q/E turns. Release to hold the resulting target. The existing 250 Hz PID/motor/force model remains unchanged; this is a position-stabilized velocity mode, not direct motor throttle or attitude control.
 4. The field fills the flight screen. The current objective, essential telemetry, pause/resume and emergency stop remain accessible. Camera/head-look and optional training aids are contextual. Space pauses; text entry, window blur and controller faults neutralize input and interrupt unsafe continuation. Looking around never moves the fixed pilot station or changes aircraft scale.
@@ -31,21 +31,21 @@ The Vietnamese interface opens on a home hub with one primary **Bắt đầu luy
 6. Leaving an active session pauses it and offers staying or saving before returning home. An unstarted session can return to exercise selection directly. Finished sessions offer replay, a fresh exercise, and JSON backup; failed local saves offer retry/export.
 7. **Xem lại bài bay** lists local recordings and supports 3D playback, timeline scrubbing, speed, camera selection, telemetry plots, personal notes and JSON/CSV/Vietnamese report export. Original finalized recordings remain immutable. Legacy records, including their original checklist fields and annotations, still import unchanged.
 
-**Thi thử** fixes the pilot view, selected profile and conditions for the session and disables training aids. Choose conditions for the next test from **Cài đặt → Điều kiện cho lần thi thử tiếp theo**. Scores are practice feedback, not official examination results.
+**Thi thử** fixes the pilot view and selected profile and disables training aids. Choose conditions directly on the map before **Bắt đầu bay**; they lock for the entire started attempt, including pauses. Scores are practice feedback, not official examination results.
 
-**Cài đặt** groups controls, graphics and weather. Controller calibration and saved mappings remain available. Advanced settings retain numerical weather controls, pilot setback/eye height/FOV and technical overlays. All assets work locally, with no account, cloud service, remote fonts or new runtime dependencies. The UI respects reduced motion and supports keyboard navigation, focus restoration, responsive layouts and browser zoom.
+**Cài đặt** groups controls and graphics. Controller calibration and saved mappings remain available. Advanced settings retain pilot setback/eye height/FOV and technical overlays. All assets work locally, with no account, cloud service, remote fonts or new runtime dependencies. The UI respects reduced motion and supports keyboard navigation, focus restoration, responsive layouts and browser zoom.
 
 Attempts checkpoint to IndexedDB every 10 simulated seconds, seal on completion/abort, and serialize writes to avoid stale checkpoints replacing final records. Recording is bounded to 600 simulated seconds; JSON imports are limited to 100 MB and validate schema, finite values, timestamps, quaternions and checksum. Export backups because browser storage can be cleared or quota-limited.
 
 ## Reference demonstrations
 
-Open **Cài đặt → Xem bay mẫu tự động** to observe the preserved figure-eight or M1–M5 automatic course. Select a mission and camera, then start, pause/resume or stop the demonstration. **Đặt lại về H** recovers the aircraft. Automatic flight stays separate from manual task evaluation and never counts as learner performance.
+Open **Trang chủ → Tìm hiểu trước khi bay → Xem bay mẫu tự động** to observe the preserved figure-eight or M1–M5 automatic course. Select a mission and camera, then start, pause/resume or stop the demonstration. **Đặt lại về H** recovers the aircraft. Automatic flight stays separate from manual task evaluation and never counts as learner performance.
 
 Overview, Orbit and Ground support orbit/zoom; Follow tracks the aircraft, FPV follows its attitude, and Top down provides an overhead view. The fixed pilot station remains at the existing provisional location and field geometry is unchanged.
 
 ## Environment and graphics
 
-Six blendable presets: clear skies, partly cloudy, overcast, light rain, heavy rain and wind/gusts. Use **Cài đặt → Cài đặt nâng cao** to adjust wind, direction, gusts, turbulence, cloud cover, rain, visibility and time of day. **Direction is wind towards**, measured from world +X towards +Z. Rain intensity is normalized 0–1, not measured mm/h. Rain affects visuals only.
+Six blendable presets: clear skies, partly cloudy, overcast, light rain, heavy rain and wind/gusts. Open **Điều kiện bay** in the map’s control dock for 0–10 wind/rain levels. Practice flights pause while editing; changes blend through the existing weather model after resuming, preserving position and progress. Demonstration conditions can change live. **Tinh chỉnh môi trường** retains all presets and numerical wind, direction, gusts, turbulence, cloud cover, rain, visibility and time controls. Starting-weather metadata updates while READY; later changes are logged without overwriting the original starting conditions. **Direction is wind towards**, measured from world +X towards +Z. Rain intensity is normalized 0–1, not measured mm/h. Rain affects visuals only.
 
 The same deterministic wind field drives body-relative drag, grass bending, rain slant and slow cloud advection. Sunlight, sky scattering, three stable cloud-height layers, continuous fog/ambient colors, PBR roughness and surface wetness respond to weather. Cloud structures use a seeded filtered noise atlas with no screen-space jitter or per-frame regeneration. Sky/cloud reflections refresh once a weather/time transition settles, rather than on every frame.
 
@@ -85,12 +85,15 @@ Browser validation uses installed Chrome and Playwright:
 # Start a dev/preview server and use its printed port.
 UAV_URL=http://127.0.0.1:4175 npm run test:browser
 UAV_URL=http://127.0.0.1:4175 npm run test:native-zoom-browser
+UAV_URL=http://127.0.0.1:4175 npm run test:conditions-browser
 # Optional: CHROME_PATH=/path/to/chrome
 ```
 
 The current browser suite is `scripts/redesign-browser-check.mjs`; earlier `test:training-browser`, `test:task-ux-browser` and `test:ux-browser` commands alias that suite. It covers navigation, exercise selection, automatic readiness, real keyboard input, pause/resume, full force-integrated course completion and manual landing, final save, replay/scrub/speed/camera, annotations, legacy/invalid imports, exports, settings/calibration, device recovery, safe exit, responsive layouts and reduced motion. Native zoom has its own disposable-profile Chrome check.
 
-Current screenshots/evidence are in `docs/redesign-screenshots/`, `docs/redesign-browser-evidence.json` and `docs/redesign-native-zoom-evidence.json`. Earlier screenshots and selector-bound scripts remain as historical references. Synthetic flight inputs establish software behavior, not human skill or physical RC compatibility. Hardware performance, screen-reader validation and participant usability testing remain unverified.
+The focused conditions suite checks all four practice maps, recording integrity, physical weather blending, mock locks, demo isolation and responsive panels. Its evidence is in `docs/conditions-browser-evidence.json` and `docs/conditions-screenshots/`.
+
+Redesign screenshots/evidence are in `docs/redesign-screenshots/`, `docs/redesign-browser-evidence.json` and `docs/redesign-native-zoom-evidence.json`. Earlier screenshots and selector-bound scripts remain as historical references. Synthetic flight inputs establish software behavior, not human skill or physical RC compatibility. Hardware performance, screen-reader validation and participant usability testing remain unverified.
 
 ## Known limits
 

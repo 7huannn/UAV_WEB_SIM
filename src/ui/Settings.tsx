@@ -1,16 +1,10 @@
 import { useState } from "react";
 import type { World } from "../scene/World";
-import { presets, type Preset } from "../weather/Weather";
 import { frontPilotStation, validFrontStation } from "../training/pilot";
 import { profiles, rules } from "../training/profiles";
 import { Calibration } from "./Calibration";
 import { Icon } from "./Design";
-import {
-  InputCheck,
-  PilotDiagram,
-  remember,
-  WindSelector,
-} from "./LearnerControls";
+import { InputCheck, PilotDiagram, remember } from "./LearnerControls";
 import { vi } from "./vi";
 export function Settings({
   w,
@@ -46,13 +40,16 @@ export function Settings({
       {(calibration || criteria) && (
         <button
           className="text-button back-link"
-          onClick={() => navigate("System Configuration")}
+          onClick={() => navigate(criteria ? "Home" : "System Configuration")}
         >
-          <Icon name="back" size={18} /> Về cài đặt
+          <Icon name="back" size={18} />{" "}
+          {criteria ? "Về trang chủ" : "Về cài đặt"}
         </button>
       )}
       <div className="page-heading">
-        <span className="eyebrow">THEO CÁCH CỦA BẠN</span>
+        <span className="eyebrow">
+          {criteria ? "TÌM HIỂU TRƯỚC KHI BAY" : "THEO CÁCH CỦA BẠN"}
+        </span>
         <h1>
           {calibration
             ? "Tay điều khiển"
@@ -96,8 +93,8 @@ export function Settings({
             <dl className="rule-list">
               {Object.entries(rules).map(([k, v]) => (
                 <div key={k}>
-                  <dt>{k}</dt>
-                  <dd>{String(v)}</dd>
+                  <dt>{vi(k)}</dt>
+                  <dd>{vi(String(v))}</dd>
                 </div>
               ))}
             </dl>
@@ -109,146 +106,60 @@ export function Settings({
         </div>
       ) : (
         <div className="settings-layout">
-          <div className="settings-column">
-            <section className="settings-section">
-              <div className="section-title">
-                <span className="section-icon">
-                  <Icon name="keyboard" />
-                </span>
-                <div>
-                  <span className="eyebrow">01 / ĐIỀU KHIỂN</span>
-                  <h2>Chọn cách cầm lái</h2>
-                </div>
+          <section className="settings-section">
+            <div className="section-title">
+              <span className="section-icon">
+                <Icon name="keyboard" />
+              </span>
+              <div>
+                <span className="eyebrow">01 / ĐIỀU KHIỂN</span>
+                <h2>Chọn cách cầm lái</h2>
               </div>
-              <InputCheck w={w} onUpdate={update} />
-              <button
-                className="text-button"
-                onClick={() => navigate("Controller Calibration")}
+            </div>
+            <InputCheck w={w} onUpdate={update} />
+            <button
+              className="text-button"
+              onClick={() => navigate("Controller Calibration")}
+            >
+              Hiệu chỉnh tay điều khiển <Icon name="arrow" size={17} />
+            </button>
+          </section>
+          <section className="settings-section">
+            <div className="section-title">
+              <span className="section-icon">
+                <Icon name="eye" />
+              </span>
+              <div>
+                <span className="eyebrow">02 / HIỂN THỊ</span>
+                <h2>Hình ảnh vừa sức thiết bị</h2>
+              </div>
+            </div>
+            <label>
+              Chất lượng hình ảnh
+              <select
+                aria-label="Hiển thị"
+                value={w.quality}
+                onChange={(e) =>
+                  run(() => {
+                    w.setQuality(e.target.value as World["quality"]);
+                    remember("uav-display-quality", e.target.value);
+                  })
+                }
               >
-                Hiệu chỉnh tay điều khiển <Icon name="arrow" size={17} />
-              </button>
-            </section>
-            <section className="settings-section">
-              <div className="section-title">
-                <span className="section-icon">
-                  <Icon name="eye" />
-                </span>
-                <div>
-                  <span className="eyebrow">02 / HIỂN THỊ</span>
-                  <h2>Hình ảnh vừa sức thiết bị</h2>
-                </div>
-              </div>
-              <label>
-                Chất lượng hình ảnh
-                <select
-                  aria-label="Hiển thị"
-                  value={w.quality}
-                  onChange={(e) =>
-                    run(() => {
-                      w.setQuality(e.target.value as World["quality"]);
-                      remember("uav-display-quality", e.target.value);
-                    })
-                  }
-                >
-                  <option value="Low">Ưu tiên mượt</option>
-                  <option value="Medium">Cân bằng</option>
-                  <option value="High">Ưu tiên hình ảnh</option>
-                  <option value="Ultra">Chi tiết tối đa</option>
-                </select>
-              </label>
-              <p className="muted">
-                Nếu hình ảnh bị giật, chọn Ưu tiên mượt. Chất lượng hình ảnh
-                không thay đổi mô hình bay.
-              </p>
-            </section>
-          </div>
-          <div className="settings-column">
-            <section className="settings-section">
-              <div className="section-title">
-                <span className="section-icon">
-                  <Icon name="wind" />
-                </span>
-                <div>
-                  <span className="eyebrow">03 / ĐIỀU KIỆN BAY</span>
-                  <h2>Thử sức theo từng mức độ</h2>
-                </div>
-              </div>
-              <WindSelector w={w} onUpdate={update} />
-              <details>
-                <summary>Điều kiện cho lần thi thử tiếp theo</summary>
-                <WindSelector w={w} assessment onUpdate={update} />
-                <p className="muted">Được cố định khi bắt đầu thi thử.</p>
-              </details>
-            </section>
-            <section className="settings-section settings-links">
-              <h2>Khám phá thêm</h2>
-              <button onClick={() => navigate("Examination Profiles")}>
-                <span>Bài bay và tiêu chí</span>
-                <Icon name="arrow" size={18} />
-              </button>
-              <button onClick={() => navigate("Reference missions")}>
-                <span>Xem bay mẫu tự động</span>
-                <Icon name="arrow" size={18} />
-              </button>
-              <p className="muted">
-                Bay mẫu chỉ để quan sát, không tính vào kết quả luyện tập.
-              </p>
-            </section>
-          </div>
+                <option value="Low">Ưu tiên mượt</option>
+                <option value="Medium">Cân bằng</option>
+                <option value="High">Ưu tiên hình ảnh</option>
+                <option value="Ultra">Chi tiết tối đa</option>
+              </select>
+            </label>
+            <p className="muted">
+              Nếu hình ảnh bị giật, chọn Ưu tiên mượt. Chất lượng hình ảnh không
+              thay đổi mô hình bay.
+            </p>
+          </section>
           <details className="settings-section advanced-settings">
             <summary>Cài đặt nâng cao</summary>
             <div className="advanced-grid">
-              <fieldset>
-                <legend>Thời tiết chi tiết</legend>
-                <label>
-                  Kịch bản thời tiết
-                  <select
-                    aria-label="Kịch bản thời tiết luyện tập"
-                    defaultValue=""
-                    onChange={(e) =>
-                      run(() => w.setWeatherPreset(e.target.value as Preset))
-                    }
-                  >
-                    <option value="" disabled>
-                      Chọn kịch bản…
-                    </option>
-                    {Object.keys(presets).map((p) => (
-                      <option key={p} value={p}>
-                        {vi(p)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {(
-                  [
-                    ["wind", 0, 15, 0.1, "Gió nền (m/s)"],
-                    ["direction", 0, 360, 1, "Hướng gió (độ)"],
-                    ["gust", 0, 7, 0.1, "Gió giật (m/s)"],
-                    ["turbulence", 0, 1, 0.05, "Nhiễu gió"],
-                    ["rain", 0, 1, 0.05, "Cường độ mưa"],
-                    ["cloud", 0, 1, 0.05, "Mức mây"],
-                    ["visibility", 60, 800, 10, "Tầm nhìn (m)"],
-                    ["timeOfDay", 7, 18, 0.1, "Giờ trong ngày"],
-                  ] as const
-                ).map(([key, min, max, step, label]) => (
-                  <label key={key}>
-                    <span>
-                      {label} <b>{w.weather.target[key].toFixed(1)}</b>
-                    </span>
-                    <input
-                      type="range"
-                      aria-label={`Chi tiết ${key}`}
-                      min={min}
-                      max={max}
-                      step={step}
-                      value={w.weather.target[key]}
-                      onChange={(e) =>
-                        run(() => w.setAdvancedWeather(key, +e.target.value))
-                      }
-                    />
-                  </label>
-                ))}
-              </fieldset>
               <fieldset>
                 <legend>Góc nhìn người lái</legend>
                 <PilotDiagram station={station} />

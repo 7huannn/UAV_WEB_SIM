@@ -1,5 +1,14 @@
 # UAV ARENA — AGENT HANDOFF & LIVE PROJECT CONTEXT
 
+## Latest implementation — in-map conditions and learning discovery (2026-11-18)
+
+This section and `docs/FLIGHT_CONDITIONS_UX.md` supersede the historical UX/weather-navigation descriptions below. Current UI has a homepage hub, four manual exercise maps with automatic READY, saved-flight review, settings/calibration, and separate automatic demos. Instructor UI and physical checklists were removed in the preceding redesign; archived checklist fields still import.
+
+Weather now belongs to the map’s compact **Điều kiện bay** disclosure. READY edits synchronize actual and recorded starting weather. Practice editing pauses without resetting; after explicit resume, target conditions blend through the existing engine and changes remain logged. Mock allows READY edits, then locks every weather setter after starting, including paused attempts. Demo edits work live and remain isolated from saved practice levels. Advanced presets/eight numeric weather parameters are retained inside the map panel; replay/finalized recordings remain protected.
+
+Homepage **Tìm hiểu trước khi bay** links to criteria and automatic demonstrations. Settings no longer contains weather or discovery links. Current source, README and `docs/FLIGHT_CONDITIONS_UX.md` describe the implemented flow. New checks: `src/tests/conditions.test.ts`, `npm run test:conditions-browser`; current evidence: `docs/conditions-browser-evidence.json`, `docs/redesign-browser-evidence.json`, `docs/redesign-native-zoom-evidence.json`. Keep historical reports as historical evidence. Final verification: 39/39 Node tests, production build, 16 browser check groups and 54 screenshots across all three suites passed with zero app errors on the final build (`index-By_fCJN0.js`). The owned preview server was stopped at delivery. No commit/publication created.
+
+
 Authoritative requirements: `UAV_ARENA_WEB_SIM_SPEC.md`, `docs/UAV_PRACTICAL_TRAINING_SPEC.md`, `docs/VIETNAMESE_UX_REQUEST.md`, and latest `docs/HUMAN_CENTERED_UX_REQUEST.md` (task-centered UX, fixed pilot optics and Training-only ground assistance supersede cosmetic refinement). Read these and this entire document before continuing. Source and actual test/browser evidence govern status. Updated 2026-11-18, Asia/Ho_Chi_Minh.
 
 ## 1. CURRENT SNAPSHOT

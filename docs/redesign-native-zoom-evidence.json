@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-18T11:29:48.748Z",
+  "date": "2026-11-18T13:18:07.125Z",
   "browser": "147.0.7727.101",
-  "bundle": "/src/main.tsx?t=1795001378414",
+  "bundle": "/assets/index-By_fCJN0.js",
   "setting": "chrome://settings/appearance #zoomLevel = 2 (200%)",
   "measured": {
     "width": 683,
@@ -15,26 +15,26 @@
   "screenshots": [
     "native-zoom-200-redesign-home",
     "native-zoom-200-redesign-options",
+    "native-zoom-200-conditions",
     "native-zoom-200-redesign-ready",
     "native-zoom-200-redesign-flight"
   ],
   "controls": [
     {
       "text": "Tạm dừng",
-      "width": 133.578125,
-      "height": 49,
+      "width": 126.6171875,
+      "height": 64.390625,
       "font": "13px"
     },
     {
       "text": "Tắt động cơ",
-      "width": 102.5703125,
-      "height": 46,
+      "width": 97.6640625,
+      "height": 57.59375,
       "font": "12px"
     }
   ],
   "errors": [],
   "limitations": [
     "Automated Chrome only, no real participant or screen-reader audit"
-  ],
-  "screenshotDirectory": "docs/redesign-screenshots"
+  ]
 }

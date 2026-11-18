@@ -200,7 +200,9 @@ try {
       scale: (w.loadedAirframe ?? w.airframe.group).scale.toArray(),
     };
   });
-  await page.locator(".view-tools>details>summary").click();
+  await page
+    .locator(".view-tools>details:not(.conditions-control)>summary")
+    .click();
   await button("Nhìn trái").click();
   await frames();
   assert.deepEqual(
@@ -216,7 +218,9 @@ try {
   await page.getByLabel("Hiện vị trí dưới máy bay", { exact: true }).check();
   assert.equal(optics.zoom, 1);
   assert.deepEqual(optics.scale, [1, 1, 1]);
-  await page.locator(".view-tools>details>summary").click();
+  await page
+    .locator(".view-tools>details:not(.conditions-control)>summary")
+    .click();
   checks.push(
     "Contextual look controls preserve fixed eye, unit aircraft scale and zoom; training ground-guide toggle remains functional",
   );
@@ -299,22 +303,19 @@ try {
   await page.getByLabel("Hiển thị", { exact: true }).selectOption("Medium");
   assert.equal(await page.evaluate(() => window.__UAV__.quality), "Medium");
   await page.getByLabel("Hiển thị", { exact: true }).selectOption("Low");
-  await page.getByLabel("Mức gió", { exact: true }).fill("2");
-  assert.equal(
-    await page.evaluate(() => window.__UAV__.weather.target.wind),
-    1.8,
-  );
+  assert.equal(await page.getByLabel("Mức gió", { exact: true }).count(), 0);
   await button("Hiệu chỉnh tay điều khiển").click();
   await page
     .getByText("Cài đặt nâng cao · hiệu chỉnh tay điều khiển", { exact: true })
     .click();
   await capture("calibration");
   await button("Về cài đặt").click();
+  await home();
   await button("Bài bay và tiêu chí").click();
   await capture("criteria");
-  await button("Về cài đặt").click();
+  await page.locator(".back-link").click();
   checks.push(
-    "Context switch closes replay and restores weather; graphics, physical weather, calibration and criteria remain accessible",
+    "Context switch closes replay and restores weather; graphics and calibration remain in settings, learning criteria are accessible from home",
   );
   await home();
   await button("Thử sức với bài thi").click();
@@ -371,7 +372,7 @@ try {
     "mobile replay canvas aligns with its controls",
   );
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await switchTo("Cài đặt");
+  await home();
   await button("Xem bay mẫu tự động").click();
   await button("Xem bay mẫu").click();
   await page.waitForFunction(() => window.__UAV__.drone.missionActive);

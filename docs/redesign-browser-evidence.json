@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-18T11:34:02.322Z",
+  "date": "2026-11-18T13:20:04.132Z",
   "browser": "147.0.7727.101",
   "checks": [
     "Homepage uses one primary practice entry; no instructor or permanent destination menu",
@@ -7,7 +7,7 @@
     "Exercise enters READY without physical checks; one start action arms and starts; real keyboard climbs; pause/resume works",
     "Legacy recordings with physical checklist fields still import unchanged; invalid imports fail without losing existing records",
     "Aborted flight is saved to IndexedDB; replay opens, scrubs, plays, pauses, changes speed, saves personal notes and exports JSON",
-    "Context switch closes replay and restores weather; graphics, physical weather, calibration and criteria remain accessible",
+    "Context switch closes replay and restores weather; graphics and calibration remain in settings, learning criteria are accessible from home",
     "Full figure-eight through unchanged force integrator completes every ordered gate, manual landing and shutdown, final save and responsive replay; strict exam rejects aids",
     "Reference demo starts/pauses/resumes/stops; disconnected gamepad blocks entry with keyboard recovery; ready can return to selection; leaving active flight pauses, cancels safely or saves before returning home",
     "Test flight and accessible help modal open; Escape restores focus",

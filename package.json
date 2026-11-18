@@ -13,7 +13,8 @@
     "test:ux-browser": "node scripts/redesign-browser-check.mjs",
     "test:task-ux-browser": "node scripts/redesign-browser-check.mjs",
     "test:native-zoom-browser": "node scripts/native-zoom-browser-check.mjs",
-    "test:redesign-browser": "node scripts/redesign-browser-check.mjs"
+    "test:redesign-browser": "node scripts/redesign-browser-check.mjs",
+    "test:conditions-browser": "node scripts/conditions-browser-check.mjs"
   },
   "dependencies": {
     "react": "19.3.1",
