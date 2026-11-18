@@ -2,11 +2,21 @@ import * as T from "three";
 import { Sky } from "three/addons/objects/Sky.js";
 import type { Weather } from "../weather/Weather";
 import { seeded } from "./grass";
-const noise = `
-float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
-float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
-float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=noise3(p)*a;p=p*2.03+13.1;a*=.5;}return v;}
-`;
+// Deterministic periodic value-noise atlas, filtered/mipmapped by the GPU.
+function cloudNoise() {
+  const size = 256,
+    data = new Uint8Array(size * size),
+    rand = seeded(617);
+  const values = Array.from({ length: size * size }, () => rand() * 255);
+  for (let i = 0; i < data.length; i++) data[i] = values[i];
+  const texture = new T.DataTexture(data, size, size, T.RedFormat);
+  texture.wrapS = texture.wrapT = T.RepeatWrapping;
+  texture.magFilter = T.LinearFilter;
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
+}
 export function makeAtmosphere(scene: T.Scene) {
   const sky = new Sky();
   sky.scale.setScalar(900);
@@ -23,7 +33,7 @@ export function makeAtmosphere(scene: T.Scene) {
     depthWrite: false,
     uniforms: {
       uTime: { value: 0 },
-      uSteps: { value: 14 },
+      uSteps: { value: 5 },
       uCoverage: { value: 0.12 },
       uWind: { value: new T.Vector3() },
       uSun: { value: new T.Vector3() },
@@ -32,23 +42,42 @@ export function makeAtmosphere(scene: T.Scene) {
     vertexShader:
       "varying vec3 vWorld;void main(){vWorld=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(vWorld,1.);}",
     fragmentShader: `
-    varying vec3 vWorld;uniform float uTime,uCoverage,uRain,uSteps;uniform vec3 uWind,uSun;${noise}
-    void main(){vec3 rd=normalize(vWorld-cameraPosition);if(rd.y<.015)discard;
-      float t0=max(0.,(65.-cameraPosition.y)/rd.y),t1=(100.-cameraPosition.y)/rd.y;
-      float alpha=0.;vec3 col=vec3(0.);float stepSize=(t1-t0)/uSteps;float jitter=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);
-      for(int i=0;i<24;i++){if(float(i)>=uSteps)break;
-        float t=t0+(float(i)+jitter)*stepSize;vec3 p=cameraPosition+rd*t;p.xz+=uWind.xz*uTime*.35;
-        float h=clamp((p.y-65.)/35.,0.,1.);float shape=smoothstep(0.,.2,h)*(1.-smoothstep(.65,1.,h));
-        float n=fbm(p*.027);float density=smoothstep(.72-uCoverage*.45,.9-uCoverage*.32,n)*shape;
-        float shade=clamp(fbm((p+uSun*8.)*.027)-n+.65,.2,1.);
-        vec3 tint=mix(vec3(.53,.59,.63),vec3(1.05,1.04,1.0),shade)*(1.-uRain*.28);
-        float a=1.-exp(-density*stepSize*.15);col+=(1.-alpha)*tint*a;alpha+=(1.-alpha)*a;
+    varying vec3 vWorld;uniform float uCoverage,uRain,uSteps;uniform vec3 uSun;
+    uniform sampler2D uNoise;uniform vec2 uOffset;
+    float noise(vec2 p){
+      vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      vec2 uv=(i+.5)/256.;
+      return mix(mix(texture2D(uNoise,uv).r,texture2D(uNoise,uv+vec2(1./256.,0)).r,f.x),mix(texture2D(uNoise,uv+vec2(0,1./256.)).r,texture2D(uNoise,uv+vec2(1./256.)).r,f.x),f.y);
+    }
+    float mass(vec2 p){float n=0.,a=.54;for(int i=0;i<5;i++){if(float(i)>=uSteps)break;n+=noise(p)*a;p=p*2.02+vec2(17.3,9.1);a*=.49;}return n;}
+    void main(){
+      vec3 rd=normalize(vWorld-cameraPosition);if(rd.y<.008)discard;
+      float alpha=0.;vec3 color=vec3(0.);
+      float threshold=mix(.76,.12,uCoverage);
+      // Three coherent height shells suggest billowing depth without a screen-space ray march.
+      for(int layer=0;layer<3;layer++){
+        float h=float(layer),altitude=190.+h*80.;
+        vec2 p=(cameraPosition.xz+rd.xz*(altitude-cameraPosition.y)/max(rd.y,.008)-uOffset)*.0017;
+        float n=mass(p);
+        float density=smoothstep(threshold+.015*h,threshold+.13+.02*h,n);
+        float lighting=mass(p+uSun.xz*.24)-n;
+        float edge=1.-smoothstep(threshold,threshold+.16,n);
+        vec3 bottom=vec3(.62,.68,.72),top=vec3(1.9,1.87,1.78);
+        vec3 col=mix(bottom,top,clamp(.32+h*.23+lighting*3.+edge*.25,0.,1.));
+        col*=1.-uRain*.36;
+        float a=density*.78;
+        color+=(1.-alpha)*col*a;alpha+=(1.-alpha)*a;
       }
-      float horizon=smoothstep(.015,.16,rd.y);gl_FragColor=vec4(col/max(alpha,.001),alpha*horizon);
+      color/=max(alpha,.001);
+      color=mix(vec3(.78,.83,.86)*(1.-uRain*.18),color,smoothstep(.01,.17,rd.y));
+      alpha*=smoothstep(.008,.055,rd.y)*smoothstep(0.,.08,uCoverage);
+      gl_FragColor=vec4(color,alpha);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
     }`,
   });
+  cloudMaterial.uniforms.uNoise = { value: cloudNoise() };
+  cloudMaterial.uniforms.uOffset = { value: new T.Vector2() };
   const clouds = new T.Mesh(new T.SphereGeometry(700, 32, 16), cloudMaterial);
   clouds.renderOrder = -10;
   scene.add(clouds);
@@ -87,12 +116,28 @@ export function makeAtmosphere(scene: T.Scene) {
   scene.add(rain);
   scene.fog = new T.FogExp2("#c5d6da", 0.0018);
   const sunDirection = new T.Vector3();
+  const clearAmbient = new T.Color("#c0d9ed"),
+    overcastAmbient = new T.Color("#ccd6d8");
+  const clearFog = new T.Color("#cbdbe0"),
+    overcastFog = new T.Color("#a9b9bd");
+  let previousTime = 0;
+  let rainBudget = 3500;
   return {
     sky,
+    clouds,
     sun,
     hemi,
     cloudMaterial,
     rain,
+    setQuality: (quality: string) => {
+      cloudMaterial.uniforms.uSteps.value =
+        { Low: 3, Medium: 4, High: 5, Ultra: 5 }[quality] ?? 5;
+      rainBudget =
+        { Low: 1600, Medium: 3000, High: 5000, Ultra: 7000 }[quality] ?? 5000;
+    },
+    dispose: () => {
+      cloudMaterial.uniforms.uNoise.value.dispose();
+    },
     update: (weather: Weather, time: number, camera: T.Camera) => {
       const w = weather.current,
         elevation = Math.max(
@@ -107,18 +152,30 @@ export function makeAtmosphere(scene: T.Scene) {
       sky.material.uniforms.sunPosition.value.copy(sunDirection);
       sky.material.uniforms.turbidity.value = 3 + w.cloud * 6;
       sky.material.uniforms.rayleigh.value = 1.6 - w.cloud * 0.8;
-      sun.intensity = (3.3 - w.cloud * 2.8) * (0.6 + elevation * 0.4);
+      sun.intensity =
+        (3.1 * (1 - Math.pow(w.cloud, 1.7)) + 0.12) * (0.6 + elevation * 0.4);
       sun.color.setHSL(
         0.1 - elevation * 0.025,
         0.18 + (1 - elevation) * 0.25,
         0.88,
       );
-      hemi.intensity = 1.0 + w.cloud * 0.5;
-      hemi.color.set(w.cloud > 0.7 ? "#ccd6d8" : "#c0d9ed");
+      hemi.intensity = 1.25 + w.cloud * 0.6;
+      hemi.color
+        .copy(clearAmbient)
+        .lerp(overcastAmbient, T.MathUtils.smoothstep(w.cloud, 0.35, 0.95));
       const fog = scene.fog as T.FogExp2;
-      fog.color.set(w.cloud > 0.7 ? "#a9b9bd" : "#cbdbe0");
+      fog.color
+        .copy(clearFog)
+        .lerp(overcastFog, T.MathUtils.smoothstep(w.cloud, 0.35, 0.95));
       fog.density = (1 / Math.max(50, w.visibility)) * 0.75;
       const wind = weather.windAt(time);
+      const elapsed = Math.max(0, time - previousTime);
+      previousTime = time;
+      // Integrate displacement; changing wind never repositions the whole cloud field.
+      cloudMaterial.uniforms.uOffset.value.addScaledVector(
+        new T.Vector2(wind.x, wind.z),
+        elapsed * 0.3,
+      );
       cloudMaterial.uniforms.uTime.value = time;
       cloudMaterial.uniforms.uCoverage.value = w.cloud;
       cloudMaterial.uniforms.uWind.value.copy(wind);
@@ -126,7 +183,7 @@ export function makeAtmosphere(scene: T.Scene) {
       cloudMaterial.uniforms.uRain.value = w.rain;
       rain.visible = w.rain > 0.015;
       if (rain.visible) {
-        const count = Math.floor(rainCount * w.rain);
+        const count = Math.floor(rainBudget * w.rain);
         rainGeo.setDrawRange(0, count * 2);
         rainMat.opacity = 0.16 + w.rain * 0.22;
         for (let i = 0; i < count; i++) {

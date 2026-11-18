@@ -4,12 +4,19 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { Weather } from "../weather/Weather";
 import { DroneDynamics, type Telemetry } from "../simulation/DroneDynamics";
 import { aircraft, motorSpin } from "../simulation/parameters";
-import { figureEight, config } from "../arena/geometry";
-import { makePaint, makeLabels, ribbon } from "./paint";
+import { config } from "../arena/geometry";
+import {
+  makePaint,
+  makeLabels,
+  makeMarkerDots,
+  updateLabels,
+  ribbon,
+} from "./paint";
 import { makeDrone } from "./drone";
 import { makeGrass } from "./grass";
 import { makeGrassClumps } from "./grassClumps";
 import { makeAtmosphere } from "./atmosphere";
+import { missions, type MissionId } from "../simulation/missions";
 export type CameraMode =
   "Overview" | "Orbit" | "Top down" | "Ground" | "Follow" | "FPV";
 export type Quality = "Low" | "Medium" | "High" | "Ultra";
@@ -32,6 +39,7 @@ export class World {
   cameraMode: CameraMode = "Overview";
   quality: Quality = "High";
   labels: T.Group;
+  markerDots: T.Group;
   route: T.Mesh;
   debug: T.Group;
   grass: ReturnType<typeof makeGrass>;
@@ -40,6 +48,7 @@ export class World {
   airframe = makeDrone();
   concrete: T.MeshStandardMaterial;
   groundMaterial: T.MeshStandardMaterial;
+  context: T.Group;
   stats: WorldStats = {
     fps: 0,
     drawCalls: 0,
@@ -59,6 +68,9 @@ export class World {
   private physicsSteps = 0;
   private observer: ResizeObserver;
   private disposed = false;
+  private environmentScene = new T.Scene();
+  private pmrem: T.PMREMGenerator;
+  private environmentKey = "15.50:0.12";
   private environmentTarget: T.WebGLRenderTarget | null = null;
   private textures: T.Texture[] = [];
   private texturesLoaded = 0;
@@ -96,26 +108,26 @@ export class World {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.07;
     this.controls.minDistance = 1;
-    this.controls.maxDistance = 400;
+    this.controls.maxDistance = 160;
+    this.controls.minPolarAngle = 0.12;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.015;
     this.controls.target.set(0, 0, 0);
     this.atmosphere = makeAtmosphere(this.scene);
     this.atmosphere.update(this.weather, 0, this.camera);
-    const environmentScene = new T.Scene();
-    environmentScene.add(this.atmosphere.sky.clone());
-    const pmrem = new T.PMREMGenerator(this.renderer);
-    const environment = pmrem.fromScene(environmentScene, 0.04, 0.1, 1000);
-    this.scene.environment = environment.texture;
+    this.environmentScene.add(
+      this.atmosphere.sky.clone(),
+      this.atmosphere.clouds.clone(),
+    );
+    this.pmrem = new T.PMREMGenerator(this.renderer);
+    this.refreshEnvironment();
     this.scene.environmentIntensity = 0.06;
-    this.environmentTarget = environment;
-    pmrem.dispose();
-    const concreteMaps = this.loadMaps("concrete", 45 / 1.5, 27 / 1.5),
+    const concreteMaps = this.loadMaps("concrete", 45 / 0.7, 27 / 0.7),
       grassMaps = this.loadMaps("grass", 60 / 2, 42 / 2);
     this.concrete = new T.MeshStandardMaterial({
       ...concreteMaps,
       color: "#edede7",
       roughness: 0.9,
-      normalScale: new T.Vector2(0.22, 0.22),
+      normalScale: new T.Vector2(0.16, 0.16),
       metalness: 0,
     });
     const wet = { value: 0 };
@@ -138,8 +150,10 @@ export class World {
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <map_fragment>",
         `#include <map_fragment>
-        float gray=dot(diffuseColor.rgb,vec3(.299,.587,.114));diffuseColor.rgb=mix(vec3(gray),diffuseColor.rgb,.18)*1.32+vec3(.16,.155,.145);
-        float macro=sin(vSurfacePos.x*.31+sin(vSurfacePos.y*.23))*sin(vSurfacePos.y*.43)*.035;
+        float gray=dot(diffuseColor.rgb,vec3(.299,.587,.114));
+        diffuseColor.rgb=mix(vec3(.48,.485,.46),mix(vec3(gray),diffuseColor.rgb,.15),.58);
+        vec3 broad=texture2D(map,vMapUv*.071+vec2(.27,.53)).rgb;
+        float macro=(broad.r-.45)*.22+sin(vSurfacePos.x*.19+sin(vSurfacePos.y*.23))*sin(vSurfacePos.y*.17)*.045;
         diffuseColor.rgb*=1.+macro;diffuseColor.rgb*=1.-uWetness*.26;
       `,
       );
@@ -147,20 +161,22 @@ export class World {
         "#include <roughnessmap_fragment>",
         `#include <roughnessmap_fragment>
         float puddle=smoothstep(.72,.94,(sin(vSurfacePos.x*.77+sin(vSurfacePos.y*.9))*sin(vSurfacePos.y*.61)*.5+.5));
-        roughnessFactor=mix(roughnessFactor,max(.08,.32-puddle*.22),uWetness);
+        roughnessFactor=mix(roughnessFactor,max(.28,.44-puddle*.13),uWetness);
       `,
       );
     };
-    const court = new T.Mesh(new T.PlaneGeometry(45, 27), this.concrete);
+    const court = new T.Mesh(new T.PlaneGeometry(44.99, 26.99), this.concrete);
     court.rotation.x = -Math.PI / 2;
     court.receiveShadow = true;
     this.scene.add(court);
     const sideMat = new T.MeshStandardMaterial({
-      color: "#9c9e92",
+      color: "#b9b7ad",
+      normalMap: concreteMaps.normalMap,
+      normalScale: new T.Vector2(0.12, 0.12),
       roughness: 0.94,
     });
     const hiddenTop = new T.MeshBasicMaterial({ visible: false });
-    const edge = new T.Mesh(new T.BoxGeometry(45, 0.035, 27), [
+    const edge = new T.Mesh(new T.BoxGeometry(45, 0.03, 27), [
       sideMat,
       sideMat,
       hiddenTop,
@@ -168,15 +184,86 @@ export class World {
       sideMat,
       sideMat,
     ]);
-    edge.position.y = -0.0175;
+    edge.position.y = -0.02;
     edge.receiveShadow = true;
     this.scene.add(edge);
+    // Five-millimetre bevel: the overall concrete extent stays exactly 45×27m.
+    const bevelPositions: number[] = [],
+      bevelIndices: number[] = [];
+    const corners = [
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ];
+    for (let i = 0; i < 4; i++) {
+      const a = corners[i],
+        b = corners[(i + 1) % 4],
+        base = bevelPositions.length / 3;
+      bevelPositions.push(
+        a[0] * 22.495,
+        0,
+        a[1] * 13.495,
+        b[0] * 22.495,
+        0,
+        b[1] * 13.495,
+        a[0] * 22.5,
+        -0.005,
+        a[1] * 13.5,
+        b[0] * 22.5,
+        -0.005,
+        b[1] * 13.5,
+      );
+      bevelIndices.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
+    }
+    const bevelGeometry = new T.BufferGeometry();
+    bevelGeometry.setAttribute(
+      "position",
+      new T.Float32BufferAttribute(bevelPositions, 3),
+    );
+    bevelGeometry.setIndex(bevelIndices);
+    bevelGeometry.computeVertexNormals();
+    const bevel = new T.Mesh(
+      bevelGeometry,
+      new T.MeshStandardMaterial({
+        color: "#bfc0b6",
+        roughness: 0.94,
+        side: T.DoubleSide,
+      }),
+    );
+    bevel.receiveShadow = true;
+    this.scene.add(bevel);
     this.groundMaterial = new T.MeshStandardMaterial({
       ...grassMaps,
-      color: "#8eb95f",
+      color: "#91b477",
       roughness: 1,
       normalScale: new T.Vector2(0.75, 0.75),
     });
+    this.groundMaterial.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nvarying vec3 vTurfWorld;",
+        )
+        .replace(
+          "#include <begin_vertex>",
+          "#include <begin_vertex>\nvTurfWorld=(modelMatrix*vec4(position,1.)).xyz;",
+        );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nvarying vec3 vTurfWorld;",
+        )
+        .replace(
+          "#include <map_fragment>",
+          `#include <map_fragment>
+        vec3 second=texture2D(map,vMapUv*.173+vec2(.41,.73)).rgb;
+        diffuseColor.rgb=mix(diffuseColor.rgb,second*diffuse,.24);
+        float variation=sin(vTurfWorld.x*.21+sin(vTurfWorld.z*.31))*sin(vTurfWorld.z*.17+1.7);
+        diffuseColor.rgb*=.98+variation*.10;
+      `,
+        );
+    };
     // Four strips ensure the grass surface and blades never cross the concrete.
     for (const [w, h, x, z] of [
       [60, 7.5, 0, -17.25],
@@ -196,6 +283,55 @@ export class World {
       const mesh = new T.Mesh(geo, this.groundMaterial);
       mesh.rotation.x = -Math.PI / 2;
       mesh.position.set(x, -0.035, z);
+      mesh.receiveShadow = true;
+      this.scene.add(mesh);
+    }
+    // Optional atmospheric context matte. No collider/vegetation; official ground remains 60×42m.
+    this.context = new T.Group();
+    this.context.name = "Visual context only · noninteractive";
+    const contextMat = this.groundMaterial.clone();
+    contextMat.transparent = true;
+    contextMat.depthWrite = false;
+    contextMat.onBeforeCompile = (shader) => {
+      this.groundMaterial.onBeforeCompile(shader, this.renderer);
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <dithering_fragment>",
+        `#include <dithering_fragment>
+        gl_FragColor.a*=1.-smoothstep(35.+cameraPosition.y*4.,200.+cameraPosition.y*4.,length(vTurfWorld.xz-cameraPosition.xz));
+      `,
+      );
+    };
+    for (const [w, h, x, z] of [
+      [600, 279, 0, -160.5],
+      [600, 279, 0, 160.5],
+      [270, 42, -165, 0],
+      [270, 42, 165, 0],
+    ]) {
+      const geo = new T.PlaneGeometry(w, h),
+        uv = geo.attributes.uv;
+      for (let i = 0; i < uv.count; i++)
+        uv.setXY(
+          i,
+          (geo.attributes.position.getX(i) + x + 30) / 60,
+          (-geo.attributes.position.getY(i) + z + 21) / 42,
+        );
+      const mesh = new T.Mesh(geo, contextMat);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, -0.036, z);
+      this.context.add(mesh);
+    }
+    this.scene.add(this.context);
+    // A 9cm soil/contact band grounds the shallow edge without moving the court boundary.
+    const soil = new T.MeshStandardMaterial({ color: "#6c7050", roughness: 1 });
+    for (const [w, h, x, z] of [
+      [45.18, 0.09, 0, -13.545],
+      [45.18, 0.09, 0, 13.545],
+      [0.09, 27, -22.545, 0],
+      [0.09, 27, 22.545, 0],
+    ]) {
+      const mesh = new T.Mesh(new T.PlaneGeometry(w, h), soil);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, -0.033, z);
       mesh.receiveShadow = true;
       this.scene.add(mesh);
     }
@@ -220,7 +356,7 @@ export class World {
     }
     this.scene.add(makePaint());
     this.grass = makeGrass();
-    this.scene.add(this.grass.mesh);
+    this.scene.add(this.grass.group);
     this.clumps = makeGrassClumps(
       () => {
         this.stats.loading = this.texturesLoaded < 6;
@@ -231,10 +367,18 @@ export class World {
       },
     );
     this.scene.add(this.clumps.group);
+    this.markerDots = makeMarkerDots();
+    this.scene.add(this.markerDots);
     this.labels = makeLabels();
     this.labels.visible = false;
     this.scene.add(this.labels);
-    this.route = ribbon(figureEight(), 0.035, "#86d1c8", false, 5.32);
+    this.route = ribbon(
+      missions[this.drone.selectedMission].preview,
+      0.055,
+      "#56b7ae",
+      false,
+      0.035,
+    );
     (this.route.material as T.MeshStandardMaterial).emissive.set("#549b91");
     (this.route.material as T.MeshStandardMaterial).emissiveIntensity = 0.3;
     this.route.visible = false;
@@ -283,6 +427,17 @@ export class World {
     document.addEventListener("visibilitychange", this.visibility);
     this.frame = requestAnimationFrame(this.tick);
   }
+  private refreshEnvironment() {
+    const environment = this.pmrem.fromScene(
+      this.environmentScene,
+      0.04,
+      0.1,
+      1000,
+    );
+    this.scene.environment = environment.texture;
+    this.environmentTarget?.dispose();
+    this.environmentTarget = environment;
+  }
   private loadMaps(name: string, x: number, y: number) {
     const load = (suffix: string, srgb = false) => {
       const tex = new T.TextureLoader().load(
@@ -324,26 +479,50 @@ export class World {
   }
   setCamera(mode: CameraMode) {
     this.cameraMode = mode;
-    const fit = Math.max(
-      1,
-      1.45 / (this.host.clientWidth / this.host.clientHeight || 1),
-    );
     this.controls.enabled =
       mode === "Overview" || mode === "Orbit" || mode === "Ground";
-    this.camera.fov = mode === "FPV" ? 85 : 43;
+    this.controls.minPolarAngle = mode === "Top down" ? 0 : 0.12;
+    this.camera.fov = mode === "FPV" ? 85 : 45;
+    this.camera.aspect = this.host.clientWidth / this.host.clientHeight || 1;
     this.camera.up.set(0, 1, 0);
-    if (mode === "Overview" || mode === "Orbit") {
-      this.camera.position.set(28, 47, 57).multiplyScalar(fit);
-      this.controls.target.set(0, -4, 0);
-    }
-    if (mode === "Top down") {
-      this.camera.position.set(0, 66, 0.001).multiplyScalar(fit);
+    if (mode === "Overview" || mode === "Orbit" || mode === "Top down") {
+      const direction =
+        mode === "Top down"
+          ? new T.Vector3(0, 1, 0.00001)
+          : new T.Vector3(8, 46, 38).normalize();
+      const right = new T.Vector3()
+        .crossVectors(new T.Vector3(0, 1, 0), direction)
+        .normalize();
+      const up = new T.Vector3().crossVectors(direction, right).normalize();
+      const tan = Math.tan(T.MathUtils.degToRad(this.camera.fov / 2));
+      let distance = 0;
+      // Fit court plus a useful turf margin in both axes, including portrait viewports.
+      for (const x of [-25, 25])
+        for (const z of [-16, 16]) {
+          const v = new T.Vector3(x, 0, z),
+            depth = v.dot(direction);
+          distance = Math.max(
+            distance,
+            depth + Math.abs(v.dot(right)) / (tan * this.camera.aspect * 0.9),
+            depth +
+              Math.abs(v.dot(up)) /
+                (tan *
+                  (mode === "Top down" && this.host.clientWidth > 650
+                    ? 0.55
+                    : 0.75)),
+          );
+        }
+      this.camera.position.copy(direction.multiplyScalar(distance));
       this.controls.target.set(0, 0, 0);
-      this.camera.lookAt(0, 0, 0);
+      if (mode === "Top down" && this.host.clientWidth > 650) {
+        this.camera.position.z -= 3.4;
+        this.controls.target.z = -3.4;
+      }
+      this.camera.lookAt(this.controls.target);
     }
     if (mode === "Ground") {
-      this.camera.position.set(-24.2, 1.1, 8);
-      this.controls.target.set(-13, 0.3, 0);
+      this.camera.position.set(-22.9, 1.65, 5.6);
+      this.controls.target.set(-13, -0.1, -1.5);
     }
     if (mode === "Follow") {
       this.camera.position
@@ -361,14 +540,9 @@ export class World {
       High: [1.7, 130000, 2048],
       Ultra: [2, 220000, 4096],
     }[q];
-    this.atmosphere.cloudMaterial.uniforms.uSteps.value = {
-      Low: 6,
-      Medium: 10,
-      High: 14,
-      Ultra: 24,
-    }[q];
+    this.atmosphere.setQuality(q);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, settings[0]));
-    this.grass.mesh.count = settings[1];
+    this.grass.setQuality(q);
     this.clumps.setQuality(q);
     this.atmosphere.sun.shadow.mapSize.set(settings[2], settings[2]);
     this.atmosphere.sun.shadow.map?.dispose();
@@ -382,6 +556,20 @@ export class World {
   }
   setLabels(v: boolean) {
     this.labels.visible = v;
+  }
+  selectMission(id: MissionId) {
+    if (!this.drone.selectMission(id)) return false;
+    this.route.geometry.dispose();
+    const replacement = ribbon(
+      missions[id].preview,
+      0.055,
+      "#56b7ae",
+      false,
+      0.035,
+    );
+    this.route.geometry = replacement.geometry;
+    replacement.material.dispose();
+    return true;
   }
   setRoute(v: boolean) {
     this.route.visible = v;
@@ -500,20 +688,26 @@ export class World {
           .add(this.drone.position),
       );
       this.camera.quaternion.copy(this.drone.orientation);
-    } else if (this.cameraMode === "Top down") this.camera.lookAt(0, 0, 0);
+    } else if (this.cameraMode === "Top down")
+      this.camera.lookAt(this.controls.target);
     else {
       this.controls.update();
       if (this.camera.position.y < 0.2) this.camera.position.y = 0.2;
     }
     this.atmosphere.update(this.weather, this.drone.time, this.camera);
-    const bladeBudget = {
-      Low: 25000,
-      Medium: 70000,
-      High: 130000,
-      Ultra: 220000,
-    }[this.quality];
-    this.grass.mesh.count =
-      this.camera.position.y < 8 ? Math.min(30000, bladeBudget) : bladeBudget;
+    const current = this.weather.current,
+      target = this.weather.target;
+    const environmentKey = `${target.timeOfDay.toFixed(2)}:${target.cloud.toFixed(2)}`;
+    // Refresh reflections once a weather/time transition settles, never every frame.
+    if (
+      environmentKey !== this.environmentKey &&
+      Math.abs(current.cloud - target.cloud) < 0.02 &&
+      Math.abs(current.timeOfDay - target.timeOfDay) < 0.04
+    ) {
+      this.refreshEnvironment();
+      this.environmentKey = environmentKey;
+    }
+    this.grass.update(this.camera);
     this.grass.time.value = this.drone.time;
     this.grass.wind.value.copy(this.drone.wind);
     this.grass.wet.value = this.weather.wetness;
@@ -525,8 +719,30 @@ export class World {
     );
     this.concrete.userData.wet.value = this.weather.wetness;
     this.groundMaterial.color
-      .set("#8eb95f")
+      .set("#91b477")
       .multiplyScalar(1 - this.weather.wetness * 0.22);
+    this.context.children.forEach((mesh) => {
+      (
+        mesh as T.Mesh<T.BufferGeometry, T.MeshStandardMaterial>
+      ).material.color.copy(this.groundMaterial.color);
+    });
+    this.scene.environmentIntensity = 0.06 + 0.025 * this.weather.current.cloud;
+    updateLabels(
+      this.labels,
+      this.camera,
+      this.host.clientWidth,
+      this.host.clientHeight,
+      this.drone.missionActive ? this.drone.activeWaypoint : "",
+    );
+    for (const dot of this.markerDots.children) {
+      const active =
+        dot.userData.id === this.drone.activeWaypoint &&
+        this.drone.missionActive;
+      dot.scale.setScalar(active ? 1.7 : 1);
+      (dot as T.Mesh<T.BufferGeometry, T.MeshBasicMaterial>).material.color.set(
+        active ? "#d2e96e" : "#4b7667",
+      );
+    }
     this.renderer.render(this.scene, this.camera);
     this.samples++;
     this.sampleTime += rawDt;
@@ -580,8 +796,10 @@ export class World {
     });
     this.textures.forEach((t) => t.dispose());
     this.clumps.dispose();
+    this.atmosphere.dispose();
     this.atmosphere.sun.shadow.map?.dispose();
     this.environmentTarget?.dispose();
+    this.pmrem.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }

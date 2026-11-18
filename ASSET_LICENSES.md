@@ -11,4 +11,6 @@ All downloads are local at runtime. No remote scripts, CDN or remote imagery are
 
 The concrete/grass textures are general outdoor assets, not photographs of the actual competition venue.
 
-- **Grass Medium 01**: Rico Cilliers (modeling), Rob Tuytel (photography), Poly Haven, https://polyhaven.com/a/grass_medium_01 — CC0 1.0. Original 1K glTF, binary geometry, diffuse/OpenGL-normal/ARM maps and alpha mask are stored under `public/assets/models/grass-medium-01/`. Three selected small/medium tuft variants are instanced near the camera; the full original glTF and all its local dependencies are retained so regeneration is reproducible. Metadata: https://api.polyhaven.com/files/grass_medium_01.
+- **Grass Medium 01**: Rico Cilliers (modeling), Rob Tuytel (photography), Poly Haven, https://polyhaven.com/a/grass_medium_01 — CC0 1.0. Original 1K glTF, binary geometry, diffuse/OpenGL-normal/ARM maps and alpha mask are stored under `public/assets/models/grass-medium-01/`. Three selected small/medium tuft variants are instanced in deterministic world-space tiles; the full original glTF and all its local dependencies are retained so regeneration is reproducible. Metadata: https://api.polyhaven.com/files/grass_medium_01.
+
+- Refinement assets: no additional external downloads. The filtered cloud-noise atlas, tile distribution, middle-distance blade clusters, concrete bevel and context geometry are authored in project source. The optional visual context matte reuses the already licensed Leafy Grass maps.

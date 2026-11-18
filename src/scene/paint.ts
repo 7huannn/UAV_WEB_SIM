@@ -4,7 +4,6 @@ import {
   config,
   outerEight,
   figureEight,
-  sampleRoute,
   rectangle,
   type Point,
 } from "../arena/geometry";
@@ -13,7 +12,7 @@ export function ribbon(
   width: number,
   color: string,
   dashed = false,
-  height = 0.007,
+  height = 0.0015,
 ) {
   const positions: number[] = [];
   const uvs: number[] = [];
@@ -133,7 +132,7 @@ function letter(text: string, x: number, z: number, size = 1.1) {
   });
   const m = new T.Mesh(new T.PlaneGeometry(size * 2, size), mat);
   m.rotation.x = -Math.PI / 2;
-  m.position.set(x, 0.01, z);
+  m.position.set(x, 0.002, z);
   m.receiveShadow = true;
   return m;
 }
@@ -166,7 +165,7 @@ export function makePaint() {
     g.add(
       ribbon(circle(c[0], c[1], config.figureEight.innerRadius), 0.1, white),
     );
-  g.add(ribbon(figureEight(), 0.1, yellow, true, 0.009));
+  g.add(ribbon(figureEight(), 0.1, yellow, true, 0.002));
   g.add(
     ribbon(
       [
@@ -200,64 +199,101 @@ export function makePaint() {
   );
   return g;
 }
-function directionArrow(x: number, z: number, dx: number, dz: number) {
-  const l = Math.hypot(dx, dz);
-  dx /= l;
-  dz /= l;
-  const shape: Point[] = [
-    [-0.55, -0.06],
-    [0.04, -0.06],
-    [0.04, -0.23],
-    [0.55, 0],
-    [0.04, 0.23],
-    [0.04, 0.06],
-    [-0.55, 0.06],
-    [-0.55, -0.06],
-  ];
-  return ribbon(
-    shape.map(([a, b]) => [x + a * dx - b * dz, z + a * dz + b * dx]),
-    0.025,
-    "#e8efde",
-    false,
-    0.025,
-  );
-}
 export function makeLabels() {
   const g = new T.Group();
   for (const m of config.markers) {
     const c = document.createElement("canvas");
-    c.width = 256;
-    c.height = 100;
+    c.width = 240;
+    c.height = 72;
     const ctx = c.getContext("2d")!;
-    ctx.fillStyle = "rgba(20,33,29,.88)";
-    ctx.roundRect(0, 0, 256, 100, 18);
+    ctx.fillStyle = "rgba(248,250,239,.94)";
+    ctx.beginPath();
+    ctx.roundRect(1, 1, 238, 70, 12);
     ctx.fill();
-    ctx.font = "500 38px monospace";
-    ctx.fillStyle = "#e8f4d2";
+    ctx.strokeStyle = "rgba(82,105,67,.45)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.font = "500 32px monospace";
+    ctx.fillStyle = "#344b38";
     ctx.textAlign = "center";
-    ctx.fillText(m.id + (m.id.startsWith("M") ? " · 5m" : ""), 128, 63);
+    ctx.textBaseline = "middle";
+    ctx.fillText(m.id + (m.id.startsWith("M") ? " · 5m" : ""), 120, 38);
     const tex = new T.CanvasTexture(c);
     tex.colorSpace = T.SRGBColorSpace;
-    const s = new T.Sprite(
-      new T.SpriteMaterial({ map: tex, depthTest: false }),
+    const sprite = new T.Sprite(
+      new T.SpriteMaterial({ map: tex, depthTest: true, depthWrite: false }),
     );
-    s.position.set(m.x, 0.5, m.z);
-    s.scale.set(2.6, 1, 1);
-    g.add(s);
+    sprite.position.set(m.x, 0.32, m.z);
+    sprite.userData.id = m.id;
+    g.add(sprite);
   }
-  for (const distance of [8, 24, 45, 63]) {
-    const a = sampleRoute(distance),
-      b = sampleRoute(distance + 0.2);
-    g.add(directionArrow(a[0], a[1], b[0] - a[0], b[1] - a[1]));
-  }
-  for (const [x, z, dx, dz] of [
-    [-8, -9, 1, 0],
-    [8, -9, 1, 0],
-    [18, -3, 0, 1],
-    [9, 9, -1, 0],
-    [-9, 9, -1, 0],
-    [-17, 4, 0, -1],
-  ])
-    g.add(directionArrow(x, z, dx, dz));
   return g;
+}
+export function makeMarkerDots() {
+  const group = new T.Group();
+  for (const m of config.markers) {
+    const dot = new T.Mesh(
+      new T.RingGeometry(0.055, 0.1, 20),
+      new T.MeshBasicMaterial({
+        color: "#4b7667",
+        side: T.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
+        depthWrite: false,
+      }),
+    );
+    dot.rotation.x = -Math.PI / 2;
+    dot.position.set(m.x, 0.015, m.z);
+    dot.userData.id = m.id;
+    group.add(dot);
+  }
+  return group;
+}
+export function updateLabels(
+  group: T.Group,
+  camera: T.PerspectiveCamera,
+  width: number,
+  height: number,
+  active: string,
+) {
+  const rectangles: number[][] = [];
+  const sorted = [...group.children].sort(
+    (a, b) =>
+      Number(b.userData.id === active) - Number(a.userData.id === active),
+  );
+  for (const object of sorted) {
+    const sprite = object as T.Sprite,
+      distance = camera.position.distanceTo(sprite.position),
+      p = sprite.position.clone().project(camera);
+    const w = sprite.userData.id === active ? 78 : 66,
+      h = 22,
+      x = ((p.x + 1) * width) / 2,
+      y = ((1 - p.y) * height) / 2;
+    sprite.visible =
+      distance < 140 &&
+      p.z < 1 &&
+      p.z > -1 &&
+      x > w / 2 &&
+      x < width - w / 2 &&
+      y > h &&
+      y < height - h;
+    const rect = [x - w / 2, y - h / 2, x + w / 2, y + h / 2];
+    if (
+      rectangles.some(
+        (r) =>
+          rect[0] < r[2] + 5 &&
+          rect[2] > r[0] - 5 &&
+          rect[1] < r[3] + 4 &&
+          rect[3] > r[1] - 4,
+      )
+    )
+      sprite.visible = false;
+    if (sprite.visible) rectangles.push(rect);
+    const units =
+      (2 * distance * Math.tan(T.MathUtils.degToRad(camera.fov / 2))) / height;
+    sprite.scale.set(w * units, h * units, 1);
+    sprite.material.color.set(
+      sprite.userData.id === active ? "#def1bc" : "#ffffff",
+    );
+  }
 }

@@ -106,18 +106,6 @@ test("fixed clock is independent of render cadence, pause discards hidden time",
   assert.ok(a.time - time < 0.101);
   assert.ok(a.droppedTime > 4);
 });
-test("autonomous figure eight completes a lap within the court; pause holds", () => {
-  const d = new DroneDynamics(calm());
-  d.mission();
-  run(d, 80);
-  assert.ok(d.missionDistance > routeLength, JSON.stringify(d.telemetry()));
-  assert.ok(insideCourt(d.position.x, d.position.z, 1));
-  d.toggleMissionPause();
-  const distance = d.missionDistance;
-  run(d, 3);
-  assert.equal(d.missionDistance, distance);
-  assert.ok(d.velocity.length() < 0.3);
-});
 
 test("motor saturation, differential reaction torque, and disarm lag stay finite", () => {
   const d = new DroneDynamics(calm());

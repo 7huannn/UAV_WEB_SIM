@@ -1,7 +1,8 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { Quality } from "./World";
-import { seeded } from "./grass";
+import { seeded } from "./random";
+import { grassTiles } from "./grassTiles";
 
 // CC0 authored blade geometry preserves leaf folds, UVs and natural tuft structure.
 export function makeGrassClumps(
@@ -32,8 +33,8 @@ export function makeGrassClumps(
       vec2 localWind=vec2(dot(normalize(instanceMatrix[0].xyz),uClumpWind),dot(normalize(instanceMatrix[2].xyz),uClumpWind));
       float wave=.65+.35*sin(origin.x*1.3+origin.z*.8+uClumpTime*2.);
       transformed.xz+=localWind*.008*height*height*wave;
-      float distanceToEye=length(origin.xz-cameraPosition.xz);
-      transformed.y*=1.-smoothstep(3.,5.5,distanceToEye);
+      float distanceToEye=distance(origin,cameraPosition);
+      transformed.y*=1.-smoothstep(2.5,5.5,distanceToEye);
       vClumpWorld=(modelMatrix*instanceMatrix*vec4(transformed,1.)).xyz;
     `,
     );
@@ -60,8 +61,11 @@ export function makeGrassClumps(
   function setQuality(q: Quality) {
     quality = q;
     for (const m of meshes) {
-      m.count = { Low: 160, Medium: 450, High: 900, Ultra: 1200 }[q];
-      m.castShadow = q === "High" || q === "Ultra";
+      m.count = Math.floor(
+        m.userData.capacity *
+          { Low: 0.35, Medium: 0.6, High: 0.8, Ultra: 1 }[q],
+      );
+      m.castShadow = q === "Ultra";
     }
   }
   Promise.all([
@@ -82,18 +86,14 @@ export function makeGrassClumps(
         material.transparent = false;
         material.alphaTest = 0.45;
         material.alphaToCoverage = true;
-        material.color.setRGB(1.35, 1.45, 1.2);
+        material.color.setRGB(1.3, 1.4, 1.15);
         material.alphaMap = alpha;
         material.depthWrite = true;
         material.roughness = 1;
         material.normalScale.set(0.7, 0.7);
         material.onBeforeCompile = bend;
         material.customProgramCacheKey = () => "grass-clump-pbr";
-        const mesh = new T.InstancedMesh(
-          source.geometry.clone(),
-          material,
-          1200,
-        );
+        const geometry = source.geometry.clone();
         const depth = new T.MeshDepthMaterial({
           depthPacking: T.RGBADepthPacking,
           alphaMap: alpha,
@@ -101,28 +101,36 @@ export function makeGrassClumps(
           side: T.DoubleSide,
         });
         depth.onBeforeCompile = bend;
-        mesh.customDepthMaterial = depth;
-        const rand = seeded(78 + meshes.length * 11),
-          object = new T.Object3D(),
-          color = new T.Color();
-        for (let i = 0; i < 1200; i++) {
-          object.position.set((rand() - 0.5) * 8, -0.034, (rand() - 0.5) * 8);
-          object.rotation.set(0, rand() * Math.PI * 2, 0);
-          const scale = 0.65 + rand() * 0.55;
-          object.scale.set(scale * (0.85 + rand() * 0.3), scale, scale);
-          object.updateMatrix();
-          mesh.setMatrixAt(i, object.matrix);
-          color.setRGB(
-            0.8 + rand() * 0.3,
-            0.85 + rand() * 0.25,
-            0.8 + rand() * 0.25,
+        for (const tile of grassTiles(
+          28,
+          78 + meshes.length * 11 + name.length * 19,
+          2,
+        )) {
+          const mesh = new T.InstancedMesh(
+            geometry,
+            material,
+            tile.points.length,
           );
-          mesh.setColorAt(i, color);
+          mesh.position.set(tile.x, 0, tile.z);
+          mesh.userData.capacity = tile.points.length;
+          const rand = seeded(Math.round(tile.x * 231 + tile.z * 97)),
+            color = new T.Color();
+          tile.points.forEach((matrix, i) => {
+            mesh.setMatrixAt(i, matrix);
+            color.setRGB(
+              0.86 + rand() * 0.2,
+              0.88 + rand() * 0.18,
+              0.8 + rand() * 0.18,
+            );
+            mesh.setColorAt(i, color);
+          });
+          mesh.receiveShadow = true;
+          mesh.customDepthMaterial = depth;
+          mesh.computeBoundingSphere();
+          mesh.boundingSphere!.radius += 0.4;
+          meshes.push(mesh);
+          group.add(mesh);
         }
-        mesh.frustumCulled = false;
-        mesh.receiveShadow = true;
-        meshes.push(mesh);
-        group.add(mesh);
       }
       // Selected geometries are cloned; the layout/unused variants need no GPU resources.
       gltf.scene.traverse((o) => {
@@ -169,12 +177,17 @@ export function makeGrassClumps(
       windVector: T.Vector3,
       wetness: number,
     ) => {
-      group.visible = state.ready && camera.position.y < 4;
-      group.position.set(
-        Math.round(camera.position.x / 2) * 2,
-        0,
-        Math.round(camera.position.z / 2) * 2,
-      );
+      group.visible = state.ready && camera.position.y < 6;
+      for (const mesh of meshes) {
+        const distance = Math.hypot(
+          camera.position.x - mesh.position.x,
+          camera.position.y,
+          camera.position.z - mesh.position.z,
+        );
+        mesh.visible = distance < 7.1;
+        // Ultra shadows use the same wind/LOD shader, fading before tile culling.
+        mesh.castShadow = quality === "Ultra";
+      }
       time.value = t;
       wind.value.copy(windVector);
       wet.value = wetness;

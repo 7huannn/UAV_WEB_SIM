@@ -1,0 +1,558 @@
+{
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1600,
+    1000
+  ],
+  "bundle": "/assets/index-CWunFRAi.js",
+  "shots": [
+    {
+      "name": "aerial-clear",
+      "quality": "High",
+      "camera": "Overview",
+      "time": 0.3960000000000003,
+      "weather": "Clear skies",
+      "wetness": 0,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 98,
+        "textures": 15
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425246105296403,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425246105296403,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.9026690919918616,
+          -0.02835674692847667,
+          1.585322246456459
+        ],
+        "progress": 0,
+        "time": 0.3960000000000003,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "overview-partly-cloudy",
+      "quality": "High",
+      "camera": "Overview",
+      "time": 14.395999999998859,
+      "weather": "Partly cloudy",
+      "wetness": 0,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 98,
+        "textures": 15
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425232654395149,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425232654395149,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.7878018861981624,
+          -0.017812661837646956,
+          3.6178634041099214
+        ],
+        "progress": 0,
+        "time": 14.395999999998859,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "overcast",
+      "quality": "High",
+      "camera": "Overview",
+      "time": 28.39600000000282,
+      "weather": "Overcast",
+      "wetness": 0,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 98,
+        "textures": 15
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.001142504068472678,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.001142504068472678,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          -1.5173203032928304,
+          0.08471175574774777,
+          3.654426001519903
+        ],
+        "progress": 0,
+        "time": 28.39600000000282,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "rain-overcast",
+      "quality": "High",
+      "camera": "Overview",
+      "time": 42.39599999999826,
+      "weather": "Heavy rain",
+      "wetness": 0.7704016474477663,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 116,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 99,
+        "textures": 15
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.001142593898949313,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.001142593898949313,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          -3.3053570866735877,
+          -0.1642060563810949,
+          5.870061367769898
+        ],
+        "progress": 0,
+        "time": 42.39599999999826,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "top-down-reference",
+      "quality": "High",
+      "camera": "Top down",
+      "time": 156.3959999999983,
+      "weather": "Clear skies",
+      "wetness": 0.02375678108669884,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 99,
+        "textures": 15
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425167366311544,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425167366311544,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.8310177043633719,
+          0.04737360629542201,
+          1.63046012110967
+        ],
+        "progress": 0,
+        "time": 156.3959999999983,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "ground-concrete-detail",
+      "quality": "High",
+      "camera": "Ground",
+      "time": 156.3959999999983,
+      "weather": "Clear skies",
+      "wetness": 0.02375678108669884,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 111,
+      "triangles": 119758,
+      "memory": {
+        "geometries": 103,
+        "textures": 19
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425167366311544,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425167366311544,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.8310177043633719,
+          0.04737360629542201,
+          1.63046012110967
+        ],
+        "progress": 0,
+        "time": 156.3959999999983,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "concrete-grass-transition",
+      "quality": "High",
+      "camera": "Ground",
+      "time": 156.3959999999983,
+      "weather": "Clear skies",
+      "wetness": 0.02375678108669884,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 133,
+      "triangles": 486932,
+      "memory": {
+        "geometries": 103,
+        "textures": 19
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425167366311544,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425167366311544,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.8310177043633719,
+          0.04737360629542201,
+          1.63046012110967
+        ],
+        "progress": 0,
+        "time": 156.3959999999983,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "grass-closeup",
+      "quality": "High",
+      "camera": "Ground",
+      "time": 156.3959999999983,
+      "weather": "Clear skies",
+      "wetness": 0.02375678108669884,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 95,
+      "triangles": 737656,
+      "memory": {
+        "geometries": 103,
+        "textures": 19
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425167366311544,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425167366311544,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.8310177043633719,
+          0.04737360629542201,
+          1.63046012110967
+        ],
+        "progress": 0,
+        "time": 156.3959999999983,
+        "droppedTime": 2.966488,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "label": "High overview",
+      "frames": 30,
+      "meanFps": 5.844421499678557,
+      "medianFrameMs": 166.70000000000073,
+      "p95FrameMs": 183.40000000000055,
+      "quality": "High",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 98,
+        "textures": 15
+      },
+      "resolution": [
+        1308,
+        887
+      ]
+    },
+    {
+      "label": "High grass closeup",
+      "frames": 30,
+      "meanFps": 1.2380170268608426,
+      "medianFrameMs": 800,
+      "p95FrameMs": 1383.2000000000044,
+      "quality": "High",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 95,
+      "triangles": 737656,
+      "memory": {
+        "geometries": 103,
+        "textures": 19
+      },
+      "resolution": [
+        1308,
+        887
+      ]
+    }
+  ],
+  "checks": [],
+  "errors": [],
+  "requests": [],
+  "note": "Real Chrome WebGL2 captures. Software-renderer results are not hardware GPU performance. Inspect images for subjective visual quality."
+}

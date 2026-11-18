@@ -23,19 +23,23 @@ npm test            # native Node geometry/physics checks, no browser needed
 
 1. Arm motors, then **Take off** for a controlled climb to a 5 m landing-gear altitude. Take off also arms automatically when disarmed.
 2. **Hold** captures the current position. **Land** descends and disarms on contact. Disarming in flight removes thrust; it does not freeze the aircraft.
-3. **Start mission** approaches the central crossing M7, then follows the diagram's circle/tangent figure-eight at 2.1 m/s. Pause mission holds position. Start/Resume and Hold provide mission continuation/cancellation.
+3. While landed at **H**, select **Mission 01 — Figure Eight** or **Mission 02 — Outer Circuit**. Start mission arms, climbs to 5 m, flies one complete course, returns to H, lands and disarms before reporting completion. Figure Eight uses the existing exact circle/tangent course, entered from its westernmost point. Outer Circuit follows M1 → M2 → M3 → M4 → M5, then returns along the left perimeter and H gate. Pause holds while retaining phase/progress; Resume continues. Abort/Hold cancels safely into position hold. Selection is locked during a mission; Reset restores H and retains the selected mission.
 4. WASD command world-frame horizontal velocity (W=−Z, D=+X); R/F climb/descend; Q/E change yaw. Commands go through the controller and rotor dynamics. Release keys to hold the resulting position. Space pauses the entire simulation.
 5. Reset returns the aircraft to landing zone H. A hard or severely tilted landing triggers crash/disarm; Reset recovers.
 
-Mouse drag/scroll orbit and zoom in Overview, Orbit and Ground. Follow tracks the aircraft; FPV follows its full attitude. Top down includes a 10 m scale bar for reference checks. Flight path, engineering markers and collider overlays can be toggled. The model tab exposes RPM, individual thrusts, world position, body rates and local wind.
+Mouse drag/scroll orbit and zoom in Overview, Orbit and Ground. Follow tracks the aircraft; FPV follows its full attitude. Top down includes a 10 m scale bar for reference checks. Flight path, compact engineering labels, collider overlays and the optional distant Context matte can be toggled. Labels retain actual marker positions, use screen-sized text and suppress overlaps. The Context matte is visual only; the simulated grass field remains 60 × 42 m. The model tab exposes RPM, individual thrusts, world position, body rates and local wind.
 
 ## Environment and graphics
 
 Six blendable presets: clear skies, partly cloudy, overcast, light rain, heavy rain and wind/gusts. Expand the environment card to adjust wind, direction, gusts, turbulence, cloud cover, rain, visibility and time of day. **Direction is wind towards**, measured from world +X towards +Z. Rain intensity is normalized 0–1, not measured mm/h. Rain affects visuals only.
 
-The same deterministic wind field drives body-relative drag, grass bending, rain slant and cloud movement. Sunlight, sky scattering, ray-marched cloud density, fog, PBR roughness and surface wetness respond to weather. Concrete uses actual 2K albedo/normal/roughness maps with restrained joints and macro variation. Turf combines PBR ground with curved instanced background blades and licensed Poly Haven tuft geometry near the camera. The tufts retain authored leaf folds, 1K diffuse/normal/roughness/alpha maps, instancing, wind bending and alpha-tested shadows; density and shadow casting follow quality settings. The original detailed airframe is exported to a local GLB, with named independently spinning rotors and static meshes merged by material.
+The same deterministic wind field drives body-relative drag, grass bending, rain slant and slow cloud advection. Sunlight, sky scattering, three stable cloud-height layers, continuous fog/ambient colors, PBR roughness and surface wetness respond to weather. Cloud structures use a seeded filtered noise atlas with no screen-space jitter or per-frame regeneration. Sky/cloud reflections refresh once a weather/time transition settles, rather than on every frame.
 
-Low/Medium/High/Ultra use 25k/70k/130k/220k grass blades, pixel-ratio caps and 1K/1K/2K/4K shadow maps. Detected software renderers default to Low. Camera-local tuft instances add density near the viewer, with far blades reduced at low camera heights. Cloud ray-march steps also scale with quality. These are selectable quality limits, **not universal FPS promises**. The footer reports measured frame rate, actual simulated steps per wall second and draw calls. Severe frame stalls cap catch-up to 100 ms per frame; simulated time slows and the footer reports it. Hidden-tab time is discarded instead of causing a catch-up burst.
+Concrete retains the local 2K albedo/normal/roughness maps, now sampled at micro/mid/macro scales. Its shallow 3.5 cm edge includes a 5 mm bevel and narrow soil/contact band; paint sits 1.5–2 mm above the surface with polygon offset. Wet roughness is restrained to avoid a mirror finish.
+
+Turf uses deterministic **world-anchored tiles**: authored Poly Haven tufts in 2 m tiles fade over 2.5–5.5 m; simple three-blade clusters in 4 m tiles fade over 13–23 m; multi-scale PBR turf covers the far field. All representations share weather wind and wetness. Instance transforms never move with the camera. Tile visibility and renderer frustum culling bound work. High avoids broad grass shadow passes; Ultra uses matching wind/LOD depth shaders for tuft shadows. The original airframe GLB and independently spinning rotors are preserved.
+
+Low/Medium/High/Ultra vary pixel ratio, grass density, 1K/1K/2K/4K shadow maps, cloud noise detail and rain particle budgets. All use the same local textures. Software renderers default to Low. The footer reports measured FPS, actual simulated steps per wall second and draw calls. Frame stalls cap catch-up to 100 ms; hidden-tab time is discarded. These presets are quality limits, not universal FPS promises.
 
 ## Physics and coordinate convention
 
@@ -59,24 +63,23 @@ node --import tsx scripts/export-drone.ts
 
 ## Verification
 
-Headless tests cover dimension calibration, analytic route length/containment, true paint-mesh widths and mitered V1 extent, freefall/collision, balanced thrust, controlled takeoff/hover/movement/landing, motor bounds, wind compensation, seeded replay, fixed-clock cadence, pause and a complete mission lap.
+Headless tests cover calibrated dimensions, actual paint widths, analytical figure-eight length, motor/force/contact behavior, deterministic wind, clock cadence, and both complete finite missions. Mission checks include exact M1–M5 ordering, physical corridor containment, phase order, pause/resume, return to H, landing before completion and bounded integrated displacement. Vegetation checks cover reproducible world tiles and stable density prefixes.
 
-Browser checks use installed Chrome and Playwright:
+Browser validation uses installed Chrome and Playwright:
 
 ```sh
-# Start the dev server first. Set the URL to its actual port.
-UAV_URL=http://localhost:5174 npm run test:browser
-# Optional: CHROME_PATH=/path/to/chrome, or UAV_HARDWARE=1 to omit forced SwiftShader.
+# Start a dev/preview server and use its actual printed port.
+UAV_URL=http://localhost:4175 npm run test:browser
+UAV_URL=http://localhost:4175 node scripts/visual-check.mjs
+# Optional: CHROME_PATH=/path/to/chrome; UAV_HARDWARE=1 omits forced SwiftShader.
 ```
 
-`node scripts/visual-check.mjs` refreshes the ground and grass High-quality views after material/vegetation changes.
+The visual matrix opens a fresh browser for environment, temporal and mission sections to bound software-renderer memory. It captures the requested weather, map, ground/grass distances, both previews, H approach, follow/FPV and mobile views. Frozen raw WebGL frames are compared exactly; cloud motion and camera travel have multiple captured frames. For targeted work use `UAV_VISUAL_SECTION=environment|temporal|missions`, `UAV_PAINT_ONLY=1`, or `UAV_VISUAL_QUICK=1`.
 
-The recorded 30-frame software-renderer profile averaged 3.04 FPS on Low at 1600×1000 (Chrome 147/ANGLE SwiftShader). This is a software fallback limit, not a hardware GPU result. Full photorealistic visual acceptance remains open.
-
-The browser test saves actual rendered screenshots in `docs/screenshots/` and writes `docs/browser-evidence.json`. Long scenarios forward-step the **same force-based 250 Hz integrator** to avoid waiting for slow software-renderer wall time. The test never assigns XYZ to fake flight. A screenshot proves a render occurred; photorealistic acceptance still needs visual judgment.
+Actual evidence is saved in `docs/browser-evidence.json`, `docs/visual-evidence.json` and `docs/screenshots/`. The pre-refinement images/evidence are retained under `docs/baseline-*`. Long flight tests advance the same force-based 250 Hz integrator and never assign aircraft XYZ. See `docs/REFINEMENT_REPORT.md` and the latest handoff for measured results and remaining visual limitations.
 
 ## Known limits
 
-The reference is a low-resolution drawing: small neck dimensions, exact dash spacing and minor marker placement remain estimates. Ground contact is a simplified height-field/foot model, not full body/propeller collision. Telemetry is ideal simulation state, not noisy sensors. Wetness uses PBR environment reflection/specular response, not planar ray tracing. Clouds use a bounded ray-march approximation. Near-camera tufts fade to the ground/blade layer with distance; the finite patch and texture detail can still be apparent in closeups. The finite field deliberately has no surrounding buildings or landscape.
+The reference is a low-resolution drawing: small neck dimensions, exact dash spacing and minor marker placement remain estimates. Ground contact is a simplified height-field/foot model, not full body/propeller collision. Telemetry is ideal simulation state, not noisy sensors. Wetness uses PBR environment reflection/specular response, not planar ray tracing. Clouds use a stable layered approximation and still lack fully convincing volumetric billows at low angles. Grass is world anchored, but closeups still expose texture/geometry differences; full photorealistic acceptance remains open. The optional visual context matte has no facilities, colliders or vegetation instances outside the official field. Hardware GPU performance is unverified.
 
 This is an implemented simulator undergoing visual acceptance, **not a claim that every photorealism criterion is met**. Check the latest `AGENT_HANDOFF_CONTEXT.md` for actual build/browser evidence, remaining gaps and exact next actions.

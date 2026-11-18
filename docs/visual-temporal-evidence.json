@@ -1,0 +1,144 @@
+{
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1600,
+    1000
+  ],
+  "bundle": "/assets/index-CWunFRAi.js",
+  "shots": [
+    {
+      "name": "grass-mid-distance",
+      "quality": "High",
+      "camera": "Ground",
+      "time": 0.3960000000000003,
+      "weather": "Clear skies",
+      "wetness": 0,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 115,
+      "triangles": 768525,
+      "memory": {
+        "geometries": 102,
+        "textures": 19
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425246105296403,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425246105296403,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.9026690919918616,
+          -0.02835674692847667,
+          1.585322246456459
+        ],
+        "progress": 0,
+        "time": 0.3960000000000003,
+        "droppedTime": 3.131354,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    },
+    {
+      "name": "grass-long-distance",
+      "quality": "High",
+      "camera": "Ground",
+      "time": 0.3960000000000003,
+      "weather": "Clear skies",
+      "wetness": 0,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "calls": 129,
+      "triangles": 538537,
+      "memory": {
+        "geometries": 102,
+        "textures": 19
+      },
+      "mission": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0,
+        "position": [
+          -20,
+          0.32,
+          0
+        ],
+        "speed": 0.0011425246105296403,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011425246105296403,
+        "roll": 0,
+        "pitch": 0,
+        "yaw": 0,
+        "rates": [
+          0,
+          0,
+          0
+        ],
+        "rpm": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "thrust": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "wind": [
+          0.9026690919918616,
+          -0.02835674692847667,
+          1.585322246456459
+        ],
+        "progress": 0,
+        "time": 0.3960000000000003,
+        "droppedTime": 3.131354,
+        "paused": true,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "IDLE",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": []
+      }
+    }
+  ],
+  "profiles": [],
+  "checks": [
+    "Vegetation instance/tile transforms stay fixed while camera crosses tile boundaries",
+    "Frozen raw WebGL frames are byte-identical; three cloud-motion frames use continuously integrated wind offsets"
+  ],
+  "errors": [],
+  "requests": [],
+  "note": "Real Chrome WebGL2 captures. Software-renderer results are not hardware GPU performance. Inspect images for subjective visual quality."
+}

@@ -12,7 +12,8 @@ import {
   type Preset,
   type WeatherParams,
 } from "../weather/Weather";
-import { config, figureEight, routeLength } from "../arena/geometry";
+import { config } from "../arena/geometry";
+import { missions, type MissionId } from "../simulation/missions";
 const iconPaths: Record<string, string> = {
   drone:
     "M8 8 4 4m12 4 4-4M8 16l-4 4m12-4 4 4M8 8h8v8H8zM2 4h4M4 2v4m14-2h4m-2-2v4M2 20h4m-2-2v4m14-2h4m-2-2v4",
@@ -78,7 +79,7 @@ const timeLabel = (t: number) =>
 const timeOfDay = (t: number) =>
   `${String(Math.floor(t)).padStart(2, "0")}:${String(Math.floor((t % 1) * 60)).padStart(2, "0")}`;
 function MiniMap({ t }: { t: Telemetry }) {
-  const pts = figureEight()
+  const pts = missions[t.selectedMission].preview
     .map(([x, z]) => `${(x + 22.5) * 4.5},${(z + 13.5) * 4.5}`)
     .join(" ");
   return (
@@ -181,13 +182,15 @@ function Toggle({
   label,
   checked,
   onChange,
+  hint,
 }: {
   label: string;
+  hint?: string;
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="toggle-row">
+    <label className="toggle-row" title={hint}>
       <span>{label}</span>
       <input
         type="checkbox"
@@ -213,6 +216,7 @@ export default function App() {
   const [labels, setLabels] = useState(false),
     [route, setRoute] = useState(false),
     [debug, setDebug] = useState(false),
+    [context, setContext] = useState(true),
     [tab, setTab] = useState("Flight desk"),
     [dialog, setDialog] = useState<"help" | "reference" | null>(null),
     [notice, setNotice] = useState("Ready when you are.");
@@ -273,10 +277,21 @@ export default function App() {
         setNotice("Holding the current position.");
         break;
       case "mission":
-        d.mission();
+        if (!d.mission()) {
+          setNotice("Start landed at H. Reset returns the aircraft to H.");
+          break;
+        }
         setRoute(true);
         world.current?.setRoute(true);
-        setNotice("Approaching M7, then flying the figure eight at 5 m.");
+        setNotice(
+          `${missions[d.selectedMission].name}: take off, fly the course, return to H and land.`,
+        );
+        break;
+      case "abort":
+        d.hold();
+        setNotice(
+          "Mission aborted. Holding current position; Land remains available.",
+        );
         break;
       case "mission-pause":
         d.toggleMissionPause();
@@ -313,7 +328,14 @@ export default function App() {
   }
   const disabled = t.mode === "Crashed",
     rain = weather.rain > 0,
-    activeMission = t.mode === "Figure eight";
+    activeMission = t.missionActive,
+    mission = missions[t.selectedMission];
+  function selectMission(id: MissionId) {
+    if (!world.current?.selectMission(id)) return;
+    setT(world.current.drone.telemetry());
+    setRoute(true);
+    world.current.setRoute(true);
+  }
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -432,27 +454,53 @@ export default function App() {
               <div className="mission-name">
                 <span className="infinity">∞</span>
                 <div>
-                  <h3>Figure eight</h3>
-                  <p>Reference course · 5 m altitude</p>
+                  <h3>{mission.name}</h3>
+                  <p>
+                    Mission {mission.number} · {mission.altitude} m altitude
+                  </p>
                 </div>
               </div>
+              <label className="mission-select-label">
+                Select mission
+                <select
+                  aria-label="Mission"
+                  value={t.selectedMission}
+                  disabled={activeMission}
+                  onChange={(e) => selectMission(e.target.value as MissionId)}
+                >
+                  {Object.values(missions).map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.number} — {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="mission-description">{mission.description}</p>
               <MiniMap t={t} />
               <div className="mission-info">
                 <span>
-                  {routeLength.toFixed(1)} m <small>course</small>
+                  {mission.length.toFixed(1)} m <small>incl. return</small>
                 </span>
                 <span>
                   2.1 m/s <small>target</small>
                 </span>
               </div>
               <div className="mission-progress">
-                <span
-                  style={{ width: `${activeMission ? t.progress * 100 : 0}%` }}
-                />
+                <span style={{ width: `${t.progress * 100}%` }} />
+              </div>
+              <div className="mission-phase" role="status">
+                <b>{t.missionPhase.replaceAll("_", " ")}</b>
+                <span>
+                  {activeMission
+                    ? `Next · ${t.activeWaypoint}`
+                    : t.missionPhase === "COMPLETED"
+                      ? "Landed at H"
+                      : "Start landed at H"}
+                </span>
               </div>
               <button
                 className="mission-button"
-                disabled={disabled}
+                disabled={disabled || (!activeMission && t.altitude > 0.12)}
                 onClick={() =>
                   action(activeMission ? "mission-pause" : "mission")
                 }
@@ -474,6 +522,14 @@ export default function App() {
                   )}
                 </span>
               </button>
+              {activeMission && (
+                <button
+                  className="abort-mission"
+                  onClick={() => action("abort")}
+                >
+                  Abort · Hold position
+                </button>
+              )}
             </div>
           </>
         ) : (
@@ -517,6 +573,25 @@ export default function App() {
             </div>
           </div>
         )}
+        <label className="mobile-mission-select">
+          <span className="sr-only">Mobile mission</span>
+          <select
+            aria-label="Mobile mission"
+            value={t.selectedMission}
+            disabled={activeMission}
+            onChange={(e) => selectMission(e.target.value as MissionId)}
+          >
+            {Object.values(missions).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.number} — {m.name}
+              </option>
+            ))}
+          </select>
+          <small>
+            {t.missionPhase.replaceAll("_", " ")} ·{" "}
+            {activeMission ? t.activeWaypoint : "Return + land"}
+          </small>
+        </label>
         <button
           className="mobile-mission mission-button"
           disabled={disabled}
@@ -762,6 +837,15 @@ export default function App() {
               world.current?.setDebug(v);
             }}
           />
+          <Toggle
+            label="Context"
+            hint="Optional distant visual backdrop. The simulated field stays 60 × 42 m."
+            checked={context}
+            onChange={(v) => {
+              setContext(v);
+              if (world.current) world.current.context.visible = v;
+            }}
+          />
           <label className="quality-select">
             <span>QUALITY</span>
             <select
@@ -946,9 +1030,10 @@ export default function App() {
                 <span className="eyebrow">FLIGHT LABORATORY</span>
                 <h2>Your controls, at a glance.</h2>
                 <p>
-                  Arm the aircraft, then take off to a 5 m hold. Start the
-                  mission to follow the reference figure eight, or fly manually
-                  through the cascaded controller.
+                  Select a mission while landed at H. Each mission takes off to
+                  5 m, flies its course, returns to H and lands. Pause holds
+                  position; Abort or Hold cancels. Manual flight uses Take off
+                  and the keyboard.
                 </p>
                 <div className="help-keys">
                   {[

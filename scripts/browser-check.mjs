@@ -218,37 +218,127 @@ try {
     .selectOption("Clear skies");
   await simulate(12);
   await page
-    .getByRole("button", { name: "Start mission", exact: true })
-    .first()
+    .getByRole("button", { name: "Reset", exact: true })
     .click({ noWaitAfter: true });
-  await simulate(88);
-  const mission = await page.evaluate(() => window.__UAV__.drone.telemetry());
-  assert.ok(mission.progress > 0);
-  assert.ok(
-    Math.abs(mission.position[0]) < 22.5 &&
-      Math.abs(mission.position[2]) < 13.5,
-  );
-  assert.ok(
-    (await page.evaluate(() => window.__UAV__.drone.missionDistance)) > 74,
-  );
-  checks.push(
-    "Autonomous mission completes a full lap, staying inside the court",
-  );
-  await page
-    .getByRole("button", { name: /^Pause mission/ })
-    .first()
-    .click({ noWaitAfter: true });
-  const distance = await page.evaluate(
-    () => window.__UAV__.drone.missionDistance,
-  );
-  await simulate(3);
-  assert.equal(
-    await page.evaluate(() => window.__UAV__.drone.missionDistance),
-    distance,
-  );
-  checks.push(
-    "Mission pause holds the current position and stops route progress",
-  );
+  const missionResults = [];
+  async function until(condition) {
+    await page.evaluate((condition) => {
+      const d = window.__UAV__.drone;
+      const matches = () =>
+        condition === "EXECUTING"
+          ? d.missionPhase === "EXECUTING"
+          : condition === "APPROACH"
+            ? d.missionPhase === "RETURN_TO_H" &&
+              Math.hypot(d.position.x + 20, d.position.z) < 4
+            : d.missionPhase === "COMPLETED";
+      for (let i = 0; i < 240 / 0.004 && !matches(); i++) {
+        const before = d.position.clone();
+        d.advance(0.004);
+        if (before.distanceTo(d.position) > 0.03)
+          throw new Error("Discontinuous aircraft position");
+        if (Math.abs(d.position.x) > 21.6 || Math.abs(d.position.z) > 12.6)
+          throw new Error("Aircraft outside safe court bounds");
+        if (d.missionPhase === "FAILED" || d.mode === "Crashed")
+          throw new Error("Mission failed");
+      }
+      if (!matches())
+        throw new Error("Mission condition timed out: " + condition);
+    }, condition);
+    await frames();
+  }
+  let previousPreview = "";
+  for (const id of ["figure-eight", "outer-circuit"]) {
+    // Trigger both selections even when Figure Eight is the initial option.
+    if (id === "figure-eight")
+      await page
+        .getByLabel("Mission", { exact: true })
+        .selectOption("outer-circuit");
+    await page.getByLabel("Mission", { exact: true }).selectOption(id);
+    await frames();
+    const preview = await page
+      .locator(".mini-map polyline")
+      .getAttribute("points");
+    assert.notEqual(preview, previousPreview);
+    previousPreview = preview;
+    assert.equal(
+      await page.evaluate(() => window.__UAV__.drone.selectedMission),
+      id,
+    );
+    await screenshot(
+      id === "figure-eight" ? "figure-eight-preview" : "outer-circuit-preview",
+    );
+    await page
+      .getByRole("button", { name: "Start mission", exact: true })
+      .first()
+      .click({ noWaitAfter: true });
+    await until("EXECUTING");
+    assert.equal(
+      await page.getByLabel("Mission", { exact: true }).isDisabled(),
+      true,
+    );
+    await page
+      .getByRole("button", { name: /^Pause mission/ })
+      .first()
+      .click({ noWaitAfter: true });
+    const distance = await page.evaluate(
+      () => window.__UAV__.drone.missionDistance,
+    );
+    await simulate(4);
+    assert.equal(
+      await page.evaluate(() => window.__UAV__.drone.missionDistance),
+      distance,
+    );
+    assert.equal(
+      await page.evaluate(() => window.__UAV__.drone.missionPhase),
+      "PAUSED",
+    );
+    await page
+      .getByRole("button", { name: /^Resume mission/ })
+      .first()
+      .click({ noWaitAfter: true });
+    await until("APPROACH");
+    const approach = await page.evaluate(() =>
+      window.__UAV__.drone.telemetry(),
+    );
+    assert.ok(approach.altitude > 4.5);
+    assert.ok(approach.progress < 1);
+    if (id === "figure-eight") {
+      await page
+        .getByRole("button", { name: "Follow", exact: true })
+        .click({ noWaitAfter: true });
+      await screenshot("return-to-h-approach");
+      await page
+        .getByRole("button", { name: "Overview", exact: true })
+        .click({ noWaitAfter: true });
+    }
+    await until("COMPLETED");
+    const result = await page.evaluate(() => ({
+      telemetry: window.__UAV__.drone.telemetry(),
+      phases: window.__UAV__.drone.phaseHistory,
+    }));
+    assert.equal(result.telemetry.mode, "Disarmed");
+    assert.ok(result.telemetry.altitude < 0.02);
+    assert.ok(
+      Math.hypot(
+        result.telemetry.position[0] + 20,
+        result.telemetry.position[2],
+      ) < 0.25,
+    );
+    assert.equal(result.telemetry.progress, 1);
+    if (id === "outer-circuit")
+      assert.deepEqual(
+        result.telemetry.visitedWaypoints.filter((x) => /^M/.test(x)),
+        ["M1", "M2", "M3", "M4", "M5"],
+      );
+    missionResults.push({ id, approach, ...result });
+    checks.push(
+      `${id}: selected preview/overlay, takeoff, route, pause/resume, H approach and physical landing before completion`,
+    );
+    await page
+      .getByRole("button", { name: "Reset", exact: true })
+      .click({ noWaitAfter: true });
+  }
+  const mission = missionResults;
   await page.getByRole("checkbox", { name: "Markers", exact: true }).check();
   assert.equal(await page.evaluate(() => window.__UAV__.labels.visible), true);
   await page.getByRole("checkbox", { name: "Markers", exact: true }).uncheck();
@@ -260,10 +350,7 @@ try {
   await page
     .getByLabel("Graphics quality", { exact: true })
     .selectOption("Low");
-  assert.equal(
-    await page.evaluate(() => window.__UAV__.grass.mesh.count),
-    25000,
-  );
+  assert.equal(await page.evaluate(() => window.__UAV__.quality), "Low");
   checks.push("Markers, collider overlay and graphics quality controls work");
   await page
     .getByRole("button", { name: "Pause simulation", exact: true })
@@ -278,6 +365,10 @@ try {
     .getByRole("button", { name: "Resume simulation", exact: true })
     .click({ noWaitAfter: true });
   checks.push("Global pause stops simulated time");
+  await page
+    .getByRole("button", { name: "Take off", exact: true })
+    .click({ noWaitAfter: true });
+  await simulate(16);
   await page
     .getByRole("button", { name: "Land", exact: true })
     .click({ noWaitAfter: true });
@@ -320,6 +411,13 @@ try {
       .getByRole("button", { name: "Start mission", exact: true })
       .last()
       .isVisible(),
+  );
+  await page
+    .getByLabel("Mobile mission", { exact: true })
+    .selectOption("figure-eight");
+  assert.equal(
+    await page.evaluate(() => window.__UAV__.drone.selectedMission),
+    "figure-eight",
   );
   checks.push(
     "390px mobile layout has accessible flight/mission controls and no horizontal overflow",

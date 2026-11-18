@@ -1,5 +1,13 @@
 import { Euler, Matrix4, Quaternion, Vector3 } from "three";
-import { sampleRoute, routeLength, insideCourt } from "../arena/geometry";
+import { insideCourt } from "../arena/geometry";
+import {
+  missions,
+  home,
+  samplePath,
+  missionIsActive,
+  type MissionId,
+  type MissionPhase,
+} from "./missions";
 import { Weather } from "../weather/Weather";
 import { aircraft as p, motorPositions, motorSpin } from "./parameters";
 export type FlightMode =
@@ -8,7 +16,7 @@ export type FlightMode =
   | "Takeoff"
   | "Position hold"
   | "Manual"
-  | "Figure eight"
+  | "Mission"
   | "Landing"
   | "Crashed";
 const clamp = (n: number, min: number, max: number) =>
@@ -28,7 +36,14 @@ export class DroneDynamics {
   time = 0;
   paused = false;
   missionDistance = 0;
-  missionEntered = false;
+  selectedMission: MissionId = "figure-eight";
+  missionPhase: MissionPhase = "IDLE";
+  resumePhase: MissionPhase = "IDLE";
+  missionLeg = 0;
+  legDistance = 0;
+  missionElapsed = 0;
+  phaseHistory: MissionPhase[] = ["IDLE"];
+  visitedWaypoints: string[] = [];
   missionPaused = false;
   yaw = 0;
   positionIntegral = new Vector3();
@@ -51,11 +66,18 @@ export class DroneDynamics {
     return Math.max(0, this.position.y - p.gearHeight);
   }
   get progress() {
-    return (this.missionDistance % routeLength) / routeLength;
+    return this.missionPhase === "COMPLETED"
+      ? 1
+      : Math.min(
+          0.98,
+          this.missionDistance / missions[this.selectedMission].length,
+        );
   }
   reset() {
-    const weather = this.weather;
+    const weather = this.weather,
+      selected = this.selectedMission;
     Object.assign(this, new DroneDynamics(weather));
+    this.selectedMission = selected;
   }
   clearController() {
     this.positionIntegral.set(0, 0, 0);
@@ -70,10 +92,12 @@ export class DroneDynamics {
     }
   }
   disarm() {
+    this.abortMission();
     this.mode = "Disarmed";
     this.clearController();
   }
   takeoff() {
+    this.abortMission();
     if (this.mode === "Crashed") return;
     if (!this.armed) this.arm();
     this.target.copy(this.position);
@@ -83,6 +107,7 @@ export class DroneDynamics {
     this.clearController();
   }
   hold() {
+    this.abortMission();
     if (!this.armed) return;
     this.mode = "Position hold";
     this.target.copy(this.position);
@@ -90,6 +115,7 @@ export class DroneDynamics {
     this.missionPaused = false;
   }
   land() {
+    this.abortMission();
     if (!this.armed) return;
     this.mode = "Landing";
     this.target.copy(this.position);
@@ -97,22 +123,148 @@ export class DroneDynamics {
     this.targetVelocity.set(0, -0.55, 0);
     this.clearController();
   }
-  mission() {
-    if (this.mode === "Crashed") return;
-    if (!this.armed) this.arm();
-    this.mode = "Figure eight";
+  get missionActive() {
+    return missionIsActive(this.missionPhase);
+  }
+  get activeWaypoint() {
+    if (this.missionPhase === "COMPLETED" || this.missionPhase === "LANDING")
+      return "H";
+    if (["IDLE", "ARMING", "TAKEOFF"].includes(this.missionPhase)) return "H";
+    return (
+      missions[this.selectedMission].legs[this.missionLeg]?.waypoint ?? "H"
+    );
+  }
+  selectMission(id: MissionId) {
+    if (this.missionActive || !missions[id]) return false;
+    this.selectedMission = id;
+    this.missionPhase = "IDLE";
     this.missionDistance = 0;
-    this.missionEntered = false;
+    this.visitedWaypoints = [];
+    this.phaseHistory = ["IDLE"];
+    return true;
+  }
+  private setPhase(phase: MissionPhase) {
+    this.missionPhase = phase;
+    this.phaseHistory.push(phase);
+  }
+  abortMission() {
+    if (this.missionActive) this.setPhase("ABORTED");
     this.missionPaused = false;
-    this.target.set(0.5, 5 + p.gearHeight, 0);
+  }
+  mission() {
+    // Starting condition is reviewable and explicit: landed at H, never relocated.
+    if (
+      this.missionActive ||
+      this.mode === "Crashed" ||
+      this.altitude > 0.12 ||
+      Math.hypot(this.position.x - home[0], this.position.z - home[1]) > 0.5
+    )
+      return false;
+    this.missionDistance = 0;
+    this.legDistance = 0;
+    this.missionLeg = 0;
+    this.missionElapsed = 0;
+    this.visitedWaypoints = [];
+    this.phaseHistory = ["IDLE"];
+    this.missionPaused = false;
+    this.arm();
+    this.mode = "Armed";
+    this.setPhase("ARMING");
+    this.target.set(
+      home[0],
+      missions[this.selectedMission].altitude + p.gearHeight,
+      home[1],
+    );
+    this.targetVelocity.set(0, 0, 0);
     this.clearController();
+    return true;
   }
   toggleMissionPause() {
-    if (this.mode !== "Figure eight") return;
-    this.missionPaused = !this.missionPaused;
-    if (this.missionPaused) {
+    if (!this.missionActive) return;
+    if (this.missionPhase === "PAUSED") {
+      this.setPhase(this.resumePhase);
+      this.missionPaused = false;
+      this.mode =
+        this.resumePhase === "ARMING"
+          ? "Armed"
+          : this.resumePhase === "LANDING"
+            ? "Landing"
+            : "Mission";
+      if (this.resumePhase === "LANDING") {
+        this.target.set(home[0], p.gearHeight - 0.15, home[1]);
+        this.targetVelocity.set(0, -0.55, 0);
+      }
+    } else {
+      this.resumePhase = this.missionPhase;
+      this.setPhase("PAUSED");
+      this.missionPaused = true;
+      this.mode = this.altitude < 0.02 ? "Armed" : "Position hold";
       this.target.copy(this.position);
       this.targetVelocity.set(0, 0, 0);
+    }
+  }
+  private updateMission(dt: number) {
+    if (!this.missionActive || this.missionPaused) return;
+    this.missionElapsed += dt;
+    if (this.missionElapsed > 360) {
+      this.abortMission();
+      this.setPhase("FAILED");
+      this.mode = "Position hold";
+      this.target.copy(this.position);
+      this.targetVelocity.set(0, 0, 0);
+      return;
+    }
+    const mission = missions[this.selectedMission];
+    if (this.missionPhase === "ARMING") {
+      if (this.missionElapsed > 0.6) {
+        this.mode = "Mission";
+        this.setPhase("TAKEOFF");
+      }
+      return;
+    }
+    if (this.missionPhase === "TAKEOFF") {
+      this.target.set(home[0], mission.altitude + p.gearHeight, home[1]);
+      if (
+        this.position.distanceTo(this.target) < 0.18 &&
+        this.velocity.length() < 0.2
+      )
+        this.setPhase("TRANSIT_TO_ROUTE");
+      return;
+    }
+    if (this.missionPhase === "LANDING") return;
+    const leg = mission.legs[this.missionLeg];
+    if (this.missionPhase !== leg.phase) this.setPhase(leg.phase);
+    const remaining = leg.path.length - this.legDistance;
+    // Ease to zero at exact waypoint coordinates; the PID/motor system rounds turns physically.
+    const speed = Math.min(2.1, Math.sqrt(Math.max(0, remaining) * 1.6));
+    if (this.position.distanceTo(this.target) < 0.7) {
+      const delta = Math.min(remaining, Math.max(0.08, speed) * dt);
+      this.legDistance += delta;
+      this.missionDistance += delta;
+    }
+    const [x, z] = samplePath(leg.path, this.legDistance);
+    this.target.set(x, mission.altitude + p.gearHeight, z);
+    const next = samplePath(leg.path, this.legDistance + 0.08);
+    this.targetVelocity.set(
+      ((next[0] - x) / 0.08) * speed,
+      0,
+      ((next[1] - z) / 0.08) * speed,
+    );
+    if (
+      this.legDistance >= leg.path.length &&
+      this.position.distanceTo(this.target) < 0.25 &&
+      this.velocity.length() < 0.3
+    ) {
+      this.visitedWaypoints.push(leg.waypoint);
+      this.missionLeg++;
+      this.legDistance = 0;
+      if (this.missionLeg === mission.legs.length) {
+        this.setPhase("LANDING");
+        this.mode = "Landing";
+        this.target.set(home[0], p.gearHeight - 0.15, home[1]);
+        this.targetVelocity.set(0, -0.55, 0);
+        this.clearController();
+      } else this.setPhase(mission.legs[this.missionLeg].phase);
     }
   }
   manual(command: Vector3, yawRate: number, dt: number) {
@@ -143,20 +295,6 @@ export class DroneDynamics {
   }
   private controller(dt: number): number[] {
     if (!this.armed || this.mode === "Armed") return [0, 0, 0, 0];
-    if (this.mode === "Figure eight" && !this.missionPaused) {
-      if (!this.missionEntered) {
-        this.target.set(0.5, 5 + p.gearHeight, 0);
-        if (this.position.distanceTo(this.target) < 0.5)
-          this.missionEntered = true;
-      } else {
-        if (this.position.distanceTo(this.target) < 2)
-          this.missionDistance += 2.1 * dt;
-        const [x, z] = sampleRoute(this.missionDistance);
-        this.target.set(x, 5 + p.gearHeight, z);
-        const next = sampleRoute(this.missionDistance + 0.1);
-        this.targetVelocity.set((next[0] - x) * 21, 0, (next[1] - z) * 21);
-      }
-    }
     const error = this.target.clone().sub(this.position);
     // Integrator clamps + output saturation provide anti-windup at each cascade.
     this.positionIntegral.addScaledVector(error, dt).clampScalar(-3, 3);
@@ -216,6 +354,7 @@ export class DroneDynamics {
     this.previousPosition.copy(this.position);
     this.previousOrientation.copy(this.orientation);
     this.time += dt;
+    if (!overrideThrust) this.updateMission(dt);
     const commands = overrideThrust ?? this.controller(dt);
     const bodyTorque = new Vector3();
     let thrust = 0;
@@ -282,6 +421,7 @@ export class DroneDynamics {
   }
   private collide(dt: number) {
     if (Math.abs(this.position.x) > 30 || Math.abs(this.position.z) > 21) {
+      if (this.missionActive) this.setPhase("FAILED");
       this.disarm();
     } // finite field safety shutdown
     const ground = insideCourt(this.position.x, this.position.z) ? 0 : -0.035;
@@ -298,6 +438,7 @@ export class DroneDynamics {
       this.position.y += ground - lowest;
       const up = new Vector3(0, 1, 0).applyQuaternion(this.orientation);
       if (this.lastContactSpeed > 3 || up.y < 0.55) {
+        if (this.missionActive) this.setPhase("FAILED");
         this.mode = "Crashed";
         this.clearController();
       }
@@ -316,6 +457,7 @@ export class DroneDynamics {
       this.velocity.z *= friction;
       this.angularVelocity.multiplyScalar(Math.exp(-15 * dt));
       if (this.mode === "Landing" && this.lastContactSpeed < 1.5) {
+        if (this.missionPhase === "LANDING") this.setPhase("COMPLETED");
         this.disarm();
       }
     }
@@ -342,6 +484,11 @@ export class DroneDynamics {
       droppedTime: this.droppedTime,
       paused: this.paused,
       missionPaused: this.missionPaused,
+      selectedMission: this.selectedMission,
+      missionPhase: this.missionPhase,
+      missionActive: this.missionActive,
+      activeWaypoint: this.activeWaypoint,
+      visitedWaypoints: [...this.visitedWaypoints],
     };
   }
 }
