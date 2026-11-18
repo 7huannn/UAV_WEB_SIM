@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-18T11:29:48.748Z",
+  "browser": "147.0.7727.101",
+  "bundle": "/src/main.tsx?t=1795001378414",
+  "setting": "chrome://settings/appearance #zoomLevel = 2 (200%)",
+  "measured": {
+    "width": 683,
+    "height": 384,
+    "dpr": 2,
+    "visualScale": 1
+  },
+  "checks": [
+    "Native Chrome Page zoom 200%: actual683×384 CSS/DPR2 on1366×768 viewport, no pinch scale; keyboard disclosure/input/sliders, automatic readiness, flight start and pause/resume retain functionality without horizontal overflow"
+  ],
+  "screenshots": [
+    "native-zoom-200-redesign-home",
+    "native-zoom-200-redesign-options",
+    "native-zoom-200-redesign-ready",
+    "native-zoom-200-redesign-flight"
+  ],
+  "controls": [
+    {
+      "text": "Tạm dừng",
+      "width": 133.578125,
+      "height": 49,
+      "font": "13px"
+    },
+    {
+      "text": "Tắt động cơ",
+      "width": 102.5703125,
+      "height": 46,
+      "font": "12px"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "Automated Chrome only, no real participant or screen-reader audit"
+  ],
+  "screenshotDirectory": "docs/redesign-screenshots"
+}

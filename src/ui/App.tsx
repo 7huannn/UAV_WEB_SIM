@@ -1,1221 +1,599 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  World,
-  type CameraMode,
-  type Quality,
-  type WorldStats,
-} from "../scene/World";
-import { DroneDynamics, type Telemetry } from "../simulation/DroneDynamics";
-import {
-  Weather,
-  presets,
-  type Preset,
-  type WeatherParams,
-} from "../weather/Weather";
-import { config } from "../arena/geometry";
+import { World, type WorldStats } from "../scene/World";
+import { DroneDynamics } from "../simulation/DroneDynamics";
+import { Weather, type WeatherParams } from "../weather/Weather";
 import { missions, type MissionId } from "../simulation/missions";
-import { Home, storedWeather, preference } from "./LearnerControls";
+import type { Attempt } from "../training/Session";
+import { saveAttempt, isFinal } from "../training/records";
+import { Home } from "./Home";
+import { TrainingDesk, ControlGuide } from "./TrainingDesk";
+import { Settings } from "./Settings";
+import { Review } from "./Review";
+import { Icon } from "./Design";
+import { storedWeather, preference } from "./LearnerControls";
 import { vi } from "./vi";
-import { TrainingDesk, workspaces } from "./TrainingDesk";
-const iconPaths: Record<string, string> = {
-  drone:
-    "M8 8 4 4m12 4 4-4M8 16l-4 4m12-4 4 4M8 8h8v8H8zM2 4h4M4 2v4m14-2h4m-2-2v4M2 20h4m-2-2v4m14-2h4m-2-2v4",
-  sun: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5",
-  cloud: "M6 18h12a4 4 0 0 0 .3-8 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 6 18",
-  wind: "M3 8h12a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h5a3 3 0 1 1-3 3",
-  rain: "M6 14h12a4 4 0 0 0 .3-8 6 6 0 0 0-11.6-1A4.5 4.5 0 0 0 6 14m2 3-1 3m6-3-1 3m6-3-1 3",
-  chevron: "m7 10 5 5 5-5",
-  play: "m9 5 10 7-10 7z",
-  pause: "M8 5v14M16 5v14",
-  reset: "M4 11a8 8 0 1 1 2 7M4 4v7h7",
-  up: "M12 19V5m-6 6 6-6 6 6M4 21h16",
-  down: "M12 4v14m-6-6 6 6 6-6M4 21h16",
-  target: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v4m0 12v4M2 12h4m12 0h4",
-  cube: "m12 2 9 5v10l-9 5-9-5V7zm0 10L3 7m9 5 9-5m-9 5v10",
-  map: "m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zm6-2v16m6-14v16",
-  expand: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
-  help: "M9 8a3 3 0 1 1 4 3c-1 1-1 1-1 3m0 3v.1M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20",
-  close: "m6 6 12 12M6 18 18 6",
-  check: "m5 12 4 4L19 6",
-  lock: "M5 10h14v11H5zM8 10V6a4 4 0 0 1 8 0v4",
-  settings: "M4 7h16M4 17h16M8 4v6m8 4v6",
-  arrow: "M5 12h14m-6-6 6 6-6 6",
-  eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7m10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6",
-};
-function Icon({ name, size = 18 }: { name: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d={iconPaths[name] ?? iconPaths.cube} />
-    </svg>
-  );
-}
 const initial = new DroneDynamics(new Weather()).telemetry();
 const initialStats: WorldStats = {
   fps: 0,
   drawCalls: 0,
   triangles: 0,
   physicsHz: 250,
-  gpu: "Connecting WebGL2",
+  gpu: "",
   loading: true,
   error: null,
 };
-const cameras: CameraMode[] = [
-  "PILOT VLOS",
-  "Overview",
-  "Orbit",
-  "Top down",
-  "Ground",
-  "Follow",
-  "FPV",
+const destinations = [
+  "Training",
+  "Mock Examination",
+  "Session Review",
+  "System Configuration",
 ];
-const timeLabel = (t: number) =>
-  `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
-const timeOfDay = (t: number) =>
-  `${String(Math.floor(t)).padStart(2, "0")}:${String(Math.floor((t % 1) * 60)).padStart(2, "0")}`;
-function MiniMap({ t }: { t: Telemetry }) {
-  const pts = missions[t.selectedMission].preview
-    .map(([x, z]) => `${(x + 22.5) * 4.5},${(z + 13.5) * 4.5}`)
-    .join(" ");
-  return (
-    <svg
-      className="mini-map"
-      viewBox="-8 -8 219 138"
-      aria-label="Vị trí máy bay nhìn từ trên"
-    >
-      <rect
-        x="0"
-        y="0"
-        width="202.5"
-        height="121.5"
-        rx="2"
-        fill="#dde2d0"
-        stroke="#b9c0ad"
-        strokeWidth=".7"
-      />
-      <path
-        d="M18 54V14h171v94H18V67"
-        fill="none"
-        stroke="#a1ab95"
-        strokeWidth=".6"
-      />
-      <polyline
-        points={pts}
-        fill="none"
-        stroke="#657755"
-        strokeDasharray="2 2"
-        strokeWidth=".9"
-      />
-      <circle
-        cx="11.25"
-        cy="60.75"
-        r="6"
-        fill="none"
-        stroke="#a1ab95"
-        strokeWidth=".8"
-      />
-      <text x="11.25" y="63" textAnchor="middle" fontSize="6" fill="#526044">
-        H
-      </text>
-      <circle
-        cx={(t.position[0] + 22.5) * 4.5}
-        cy={(t.position[2] + 13.5) * 4.5}
-        r="7"
-        fill="#e9efac"
-        opacity=".6"
-      />
-      <circle
-        cx={(t.position[0] + 22.5) * 4.5}
-        cy={(t.position[2] + 13.5) * 4.5}
-        r="2.8"
-        fill="#344a2d"
-        stroke="white"
-        strokeWidth="1"
-      />
-    </svg>
-  );
-}
-function Slider({
-  label,
-  value,
-  unit,
-  min,
-  max,
-  step = 1,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-  min: number;
-  max: number;
-  step?: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <label className="slider">
-      <span>
-        {label}
-        <b>
-          {value.toFixed(step < 1 ? 1 : 0)}
-          <small> {unit}</small>
-        </b>
-      </span>
-      <input
-        type="range"
-        aria-label={label}
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(+e.target.value)}
-      />
-    </label>
-  );
-}
-function Toggle({
-  label,
-  checked,
-  onChange,
-  hint,
-}: {
-  label: string;
-  hint?: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="toggle-row" title={hint}>
-      <span>{label}</span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span className="switch" />
-    </label>
-  );
-}
 export default function App() {
   const mount = useRef<HTMLDivElement>(null),
-    world = useRef<World | null>(null),
-    practiceEnvironment = useRef<WeatherParams | null>(null);
-  const [workspace, setWorkspace] = useState("Home");
-  const [t, setT] = useState(initial),
-    [stats, setStats] = useState(initialStats),
-    [camera, setCamera] = useState<CameraMode>("Overview"),
-    [quality, setQuality] = useState<Quality>("High");
-  const [preset, setPreset] = useState<Preset>("Clear skies"),
-    [weather, setWeather] = useState<WeatherParams>({
-      ...presets["Clear skies"],
-    }),
-    [weatherExpanded, setWeatherExpanded] = useState(false);
-  const [labels, setLabels] = useState(false),
-    [route, setRoute] = useState(false),
-    [debug, setDebug] = useState(false),
-    [context, setContext] = useState(true),
-    [tab, setTab] = useState("Flight desk"),
-    [dialog, setDialog] = useState<"help" | "reference" | null>(null),
-    [notice, setNotice] = useState("Ready when you are.");
-  const [constructionError, setConstructionError] = useState<string | null>(
-    null,
-  );
+    world = useRef<World | null>(null);
+  const practiceWeather = useRef<WeatherParams | null>(null);
+  const [workspace, setWorkspace] = useState("Home"),
+    [t, setT] = useState(initial),
+    [stats, setStats] = useState(initialStats);
+  const [error, setError] = useState(""),
+    [saveError, setSaveError] = useState("");
+  const [dialog, setDialog] = useState<"help" | "leave" | null>(null),
+    [leaving, setLeaving] = useState(false);
+  const pendingPage = useRef("Home"),
+    dialogRef = useRef<HTMLElement>(null),
+    restoreFocus = useRef<HTMLElement | null>(null);
+  const checkpoint = useRef({ id: "", time: -Infinity, final: false }),
+    saveQueue = useRef(Promise.resolve());
   useEffect(() => {
     if (!mount.current) return;
-    let w: World;
     try {
-      w = new World(mount.current, (telemetry, s) => {
+      const w = new World(mount.current, (telemetry, nextStats) => {
         setT(telemetry);
-        setStats(s);
+        setStats(nextStats);
       });
       world.current = w;
       w.setWorkspace("Home");
       w.setCamera("PILOT VLOS");
       w.weather.target = storedWeather();
+      w.drone.paused = true;
       if (preference("uav-input-source", "Keyboard") === "Gamepad")
         w.input.source = "Gamepad";
-      const savedQuality = preference("uav-display-quality", "");
-      if (["Low", "Medium", "High", "Ultra"].includes(savedQuality))
-        w.setQuality(savedQuality as Quality);
-      setQuality(w.quality);
-      if (w.quality === "Low")
-        setNotice("Software rendering detected. Low graphics selected.");
+      const quality = preference("uav-display-quality", "");
+      if (["Low", "Medium", "High", "Ultra"].includes(quality))
+        w.setQuality(quality as World["quality"]);
       Object.assign(window, { __UAV__: w });
+      return () => {
+        w.dispose();
+        world.current = null;
+        delete (window as unknown as Record<string, unknown>).__UAV__;
+      };
     } catch (e) {
-      setConstructionError(String(e));
-      return;
+      setError(
+        `Không mở được mô phỏng 3D. Kiểm tra hỗ trợ WebGL2 rồi tải lại trang. ${String(e)}`,
+      );
     }
-    return () => {
-      w.dispose();
-      world.current = null;
-      delete (window as unknown as Record<string, unknown>).__UAV__;
-    };
   }, []);
+  function persist(attempt: Attempt) {
+    const pending = saveQueue.current
+      .catch(() => {})
+      .then(() => saveAttempt(attempt));
+    saveQueue.current = pending;
+    return pending.then(() => {
+      setSaveError("");
+    });
+  }
+  const sessionState = world.current?.session?.state;
+  useEffect(() => {
+    const s = world.current?.session;
+    if (!s || s.state === "READY") return;
+    const prev = checkpoint.current,
+      final = isFinal(s.state);
+    if (
+      prev.id === s.attempt.id &&
+      (prev.final || (!final && t.time - prev.time < 10))
+    )
+      return;
+    checkpoint.current = { id: s.attempt.id, time: t.time, final };
+    const snapshot = s.snapshot();
+    void persist(snapshot).catch(() => {
+      setSaveError(
+        "Chưa lưu được bài bay. Xuất bản ghi JSON từ kết quả để giữ dữ liệu.",
+      );
+      if (final) checkpoint.current.final = false;
+    });
+  }, [t.time, sessionState]);
+  useEffect(() => {
+    document.title = `UAV ARENA · ${vi(workspace)}`;
+    const main = document.getElementById("main-content");
+    main?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  }, [workspace]);
   useEffect(() => {
     if (!dialog) return;
-    const previous = document.activeElement as HTMLElement;
-    const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDialog(null);
-      if (e.key === "Tab") {
-        const nodes = Array.from(
-          document.querySelectorAll<HTMLElement>(
-            '[role="dialog"] button,[role="dialog"] summary,[role="dialog"] input,[role="dialog"] a',
-          ),
-        );
-        const first = nodes[0],
-          last = nodes.at(-1);
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
+    restoreFocus.current = document.activeElement as HTMLElement;
+    const w = world.current;
+    if (
+      w?.session?.active &&
+      ["ACTIVE", "LANDING", "TASK_COMPLETE"].includes(w.session.state)
+    )
+      w.session.pause(w.drone);
+    const first = dialogRef.current?.querySelector<HTMLElement>("button");
+    first?.focus();
+    function key(e: KeyboardEvent) {
+      if (
+        e.key === "Escape" &&
+        dialogRef.current?.getAttribute("aria-busy") !== "true"
+      )
+        setDialog(null);
+      if (e.key !== "Tab") return;
+      const items = Array.from(
+          dialogRef.current?.querySelectorAll<HTMLElement>(
+            "button:not(:disabled),a,input,select,summary",
+          ) ?? [],
+        ),
+        first = items[0],
+        last = items.at(-1);
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
       }
-    };
+    }
     window.addEventListener("keydown", key);
     return () => {
       window.removeEventListener("keydown", key);
-      previous?.focus();
+      restoreFocus.current?.focus({ preventScroll: true });
     };
   }, [dialog]);
   function navigate(page: string) {
     const w = world.current;
-    if (
-      w?.session?.active &&
-      !["Training", "Mock Examination", "Instructor"].includes(page)
-    )
+    if (!w) {
+      if (page === "Home") setWorkspace("Home");
       return;
+    }
+    if (page === workspace) return;
+    if (w.session?.state === "READY") {
+      w.session = null;
+      w.drone.reset();
+    }
+    if (w.session?.active || w.drone.missionActive) {
+      pendingPage.current = page;
+      setDialog("leave");
+      return;
+    }
     const wasSeparate = ["Mock Examination", "Reference missions"].includes(
-      w?.workspace ?? "",
-    );
-    const nextSeparate = ["Mock Examination", "Reference missions"].includes(
-      page,
-    );
-    if (w?.setWorkspace(page)) {
-      if (!w.session?.active) {
-        if (nextSeparate && !wasSeparate)
-          practiceEnvironment.current = { ...w.weather.target };
-        if (!nextSeparate && wasSeparate && practiceEnvironment.current)
-          w.weather.target = { ...practiceEnvironment.current };
-        if (page === "Mock Examination") w.weather.target = storedWeather(true);
-        if (page === "Reference missions") {
-          w.weather.target = { ...weather };
-          w.weather.preset = preset;
-        }
+        w.workspace,
+      ),
+      nextSeparate = ["Mock Examination", "Reference missions"].includes(page);
+    if (!wasSeparate && nextSeparate)
+      practiceWeather.current = { ...w.weather.target };
+    if (!w.setWorkspace(page)) return;
+    if (wasSeparate && !nextSeparate && practiceWeather.current)
+      w.weather.target = { ...practiceWeather.current };
+    if (page === "Mock Examination") w.weather.target = storedWeather(true);
+    if (page === "Reference missions") {
+      w.session = null;
+      w.drone.reset();
+    }
+    if (
+      ["Training", "Mock Examination"].includes(page) &&
+      w.session &&
+      !w.session.active
+    ) {
+      w.session = null;
+      w.drone.reset();
+    }
+    if (!["Training", "Mock Examination", "Reference missions"].includes(page))
+      w.drone.paused = true;
+    setWorkspace(page);
+  }
+  async function leave() {
+    const w = world.current;
+    if (!w) return;
+    setLeaving(true);
+    try {
+      if (w.session?.active) {
+        w.session.abort("User ended session to return to navigation");
+        w.drone.hold();
+        w.drone.paused = true;
       }
-      setWorkspace(page);
-      setCamera(w.cameraMode);
+      if (w.session) await persist(w.session.snapshot());
+      if (w.drone.missionActive) {
+        w.drone.hold();
+        w.drone.reset();
+      }
+      w.drone.paused = true;
+      setDialog(null);
+      navigate(pendingPage.current);
+    } catch {
+      setSaveError(
+        "Chưa lưu được bài bay. Đóng hộp thoại và xuất bản ghi JSON để giữ dữ liệu.",
+      );
+    } finally {
+      setLeaving(false);
     }
   }
-  function action(name: string) {
-    const d = world.current?.drone;
-    if (!d) return;
-    if (world.current?.session?.active) {
-      setNotice("Reference controls are unavailable during a manual attempt.");
-      return;
-    }
-    switch (name) {
-      case "arm":
-        d.armed ? d.disarm() : d.arm();
-        setNotice(
-          d.armed ? vi("Motors armed. Select Take off.") : vi("Motors disarmed."),
-        );
-        break;
-      case "takeoff":
-        d.takeoff();
-        setNotice("Climbing to 5 m above the court.");
-        break;
-      case "land":
-        d.land();
-        setNotice("Descending for a controlled landing.");
-        break;
-      case "hold":
-        d.hold();
-        setNotice("Holding the current position.");
-        break;
-      case "mission":
-        if (!d.mission()) {
-          setNotice("Start landed at H. Reset returns the aircraft to H.");
-          break;
-        }
-        setRoute(true);
-        world.current?.setRoute(true);
-        setNotice(
-          `${vi(missions[d.selectedMission].name)}: tự cất cánh, bay đủ đường, về H và hạ cánh.`,
-        );
-        break;
-      case "abort":
-        d.hold();
-        setNotice(
-          "Mission aborted. Holding current position; Land remains available.",
-        );
-        break;
-      case "mission-pause":
-        d.toggleMissionPause();
-        setNotice(
-          d.missionPaused
-            ? vi("Mission paused. Holding position.")
-            : vi("Mission resumed."),
-        );
-        break;
-      case "pause":
-        d.paused = !d.paused;
-        setNotice(d.paused ? vi("Simulation paused.") : vi("Simulation resumed."));
-        break;
-      case "reset":
-        d.reset();
-        setNotice("Aircraft reset to landing zone H.");
-        break;
-    }
-    setT(d.telemetry());
-  }
-  function setView(c: CameraMode) {
-    setCamera(c);
-    world.current?.setCamera(c);
-  }
-  function changeWeather(p: Preset) {
-    setPreset(p);
-    world.current?.weather.setPreset(p);
-    setWeather({ ...presets[p] });
-    setNotice(`${vi(p)}. Thời tiết chuyển dần trong vài giây.`);
-  }
-  function param(k: keyof WeatherParams, v: number) {
-    setWeather((w) => ({ ...w, [k]: v }));
-    if (world.current) world.current.weather.target[k] = v;
-  }
-  const disabled = t.mode === "Crashed",
-    rain = weather.rain > 0,
-    activeMission = t.missionActive,
-    mission = missions[t.selectedMission];
-  function selectMission(id: MissionId) {
-    if (!world.current?.selectMission(id)) return;
-    setT(world.current.drone.telemetry());
-    setRoute(true);
-    world.current.setRoute(true);
-  }
+  const w = world.current,
+    flyPage = ["Training", "Mock Examination"].includes(workspace),
+    inField = flyPage && !!w?.session;
+  const sceneVisible =
+    inField ||
+    workspace === "Reference missions" ||
+    (workspace === "Session Review" && !!w?.replay);
+  useEffect(() => {
+    if (world.current) world.current.presentationActive = sceneVisible;
+  }, [sceneVisible]);
   return (
     <div
-      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""} ${workspace === "Home" ? "home-mode" : ""} ${["Training", "Mock Examination"].includes(workspace) ? "flight-workspace" : ""}`}
+      className={`app-shell ${workspace === "Home" ? "home-mode" : ""} ${inField ? "in-flight" : ""} ${workspace === "Session Review" ? "review-mode" : ""}`}
     >
-      <header className="app-header">
-        <button
-          className="brand"
-          onClick={() => navigate("Home")}
-          disabled={!!world.current?.session?.active}
-          aria-label="Về trang chủ UAV ARENA"
-        >
-          <span className="brand-mark">
-            <Icon name="drone" size={26} />
-          </span>
-          <span>
-            UAV<span className="brand-light"> ARENA</span>
-            <small>LUYỆN BAY THỰC HÀNH</small>
-          </span>
-        </button>
-        <div className="header-divider" />
-        <span className="project-name">
-          Mô phỏng đào tạo UAV <span> / </span> Sân 01
-        </span>
-        <div className="header-right">
-          <span className="local-badge">
-            <i /> MÔ PHỎNG TRÊN THIẾT BỊ
-          </span>
-          <button
-            className="icon-button help-button"
-            aria-label="Hướng dẫn sử dụng"
-            onClick={() => setDialog("help")}
-          >
-            <Icon name="help" />
-          </button>
-          <button
-            className="avatar"
-            onClick={() => setDialog("help")}
-            aria-label="Thông tin mô phỏng"
-          >
-            FL
-          </button>
-        </div>
-      </header>
       <a className="skip-link" href="#main-content">
         Bỏ qua đến nội dung chính
       </a>
-      <nav className="workspace-navigation" aria-label="Điều hướng chính">
-        {workspaces
-          .filter((p) =>
-            [
-              "Home",
-              "Training",
-              "Mock Examination",
-              "Session Review",
-              "System Configuration",
-              "Instructor",
-            ].includes(p),
-          )
-          .map((page) => (
-            <button
-              key={page}
-              className={workspace === page ? "active" : ""}
-              aria-current={workspace === page ? "page" : undefined}
-              disabled={
-                (!!world.current?.session?.strict && page !== workspace) ||
-                (activeMission && page !== "Reference missions") ||
-                (!!world.current?.session?.active &&
-                  page !== workspace &&
-                  page !== "Instructor" &&
-                  page !== world.current.session.attempt.mode)
-              }
-              onClick={() => navigate(page)}
-            >
-              {vi(page)}
-            </button>
-          ))}
-        <details className="workspace-more">
-          <summary>Công cụ khác</summary>
-          <div>
-            {workspaces
-              .filter((p) =>
-                [
-                  "Controller Calibration",
-                  "Examination Profiles",
-                  "Reference missions",
-                ].includes(p),
-              )
-              .map((page) => (
-                <button
-                  key={page}
-                  disabled={
-                    !!world.current?.session?.active ||
-                    (activeMission && page !== "Reference missions")
-                  }
-                  onClick={(e) => {
-                    navigate(page);
-                    e.currentTarget.closest("details")?.removeAttribute("open");
-                  }}
-                >
-                  {vi(page)}
-                </button>
-              ))}
-          </div>
-        </details>
-      </nav>
-      {workspace === "Home" ? (
-        <Home navigate={navigate} />
-      ) : (
-        workspace !== "Reference missions" && (
-          <TrainingDesk
-            w={world.current}
-            t={t}
-            page={workspace}
-            navigate={navigate}
-          />
-        )
-      )}
-      <aside className="sidebar">
-        <div className="section-eyebrow">{vi("WORKSPACE")}<span>01</span>
-        </div>
-        <div className="side-tabs">
-          {["Flight desk", "Airframe"].map((v) => (
-            <button
-              className={tab === v ? "active" : ""}
-              key={vi(v)}
-              onClick={() => setTab(v)}
-            >
-              {v === "Flight desk" ? (
-                <Icon name="target" size={16} />
-              ) : (
-                <Icon name="drone" size={16} />
-              )}{" "}
-              {vi(v)}
-            </button>
-          ))}
-        </div>
-        {tab === "Flight desk" ? (
-          <>
-            <div className="aircraft-card">
-              <div className="aircraft-title">
-                <span className="aircraft-glyph">
-                  <Icon name="drone" size={28} />
-                </span>
-                <div>
-                  <h2>{vi("Quadrotor 15")}</h2>
-                  <p>{vi("15 kg · X configuration")}</p>
-                </div>
-                <span className={`status-dot ${t.armed ? "armed" : ""}`} />
-              </div>
-              <div className="aircraft-meta">
-                <span>{vi("FLIGHT STATE")}</span>
-                <b>{vi(t.mode)}</b>
-              </div>
-            </div>
-            <div className="panel-title">{vi("Flight controls")}<span>250 Hz</span>
-            </div>
-            <button
-              className={`arm-button ${t.armed ? "is-armed" : ""}`}
-              onClick={() => action("arm")}
-              disabled={disabled}
-            >
-              <Icon name="lock" size={16} />
-              {t.armed ? vi("Disarm motors") : vi("Arm motors")}
-              <span>{t.armed ? vi("ON") : vi("OFF")}</span>
-            </button>
-            <div className="flight-grid">
-              <button
-                onClick={() => action("takeoff")}
-                disabled={disabled || t.altitude > 1}
-              >
-                <Icon name="up" />{vi("Take off")}</button>
-              <button
-                onClick={() => action("land")}
-                disabled={!t.armed || t.altitude < 0.1}
-              >
-                <Icon name="down" />{vi("Land")}</button>
-              <button onClick={() => action("hold")} disabled={!t.armed}>
-                <Icon name="target" />{vi("Hold")}</button>
-              <button onClick={() => action("reset")}>
-                <Icon name="reset" />{vi("Reset")}</button>
-            </div>
-            <div className="side-separator" />
-            <div className="panel-title">{vi("Flight mission")}<span className="tiny-tag">{vi("AUTO")}</span>
-            </div>
-            <div className="mission-card">
-              <div className="mission-name">
-                <span className="infinity">∞</span>
-                <div>
-                  <h3>{vi(mission.name)}</h3>
-                  <p>{vi("Mission")}{mission.number} · {mission.altitude} m độ cao
-                  </p>
-                </div>
-              </div>
-              <label className="mission-select-label">{vi("Select mission")}<select
-                  aria-label={vi("Mission")}
-                  value={t.selectedMission}
-                  disabled={activeMission}
-                  onChange={(e) => selectMission(e.target.value as MissionId)}
-                >
-                  {Object.values(missions).map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.number} — {vi(m.name)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p className="mission-description">{vi(mission.description)}</p>
-              <MiniMap t={t} />
-              <div className="mission-info">
-                <span>
-                  {mission.length.toFixed(1)} m <small>{vi("incl. return")}</small>
-                </span>
-                <span>
-                  2.1 m/s <small>{vi("target")}</small>
-                </span>
-              </div>
-              <div className="mission-progress">
-                <span style={{ width: `${t.progress * 100}%` }} />
-              </div>
-              <div className="mission-phase" role="status">
-                <b>{vi(t.missionPhase)}</b>
-                <span>
-                  {activeMission
-                    ? `Tiếp theo · ${t.activeWaypoint}`
-                    : t.missionPhase === "COMPLETED"
-                      ? vi("Landed at H")
-                      : vi("Start landed at H")}
-                </span>
-              </div>
-              <button
-                className="mission-button"
-                disabled={disabled || (!activeMission && t.altitude > 0.12)}
-                onClick={() =>
-                  action(activeMission ? "mission-pause" : "mission")
-                }
-              >
-                <Icon
-                  name={activeMission && !t.missionPaused ? vi("pause") : "play"}
-                  size={15}
-                />
-                {activeMission
-                  ? t.missionPaused
-                    ? vi("Resume mission")
-                    : vi("Pause mission")
-                  : vi("Start mission")}
-                <span>
-                  {activeMission ? (
-                    `${Math.round(t.progress * 100)}%`
-                  ) : (
-                    <Icon name="arrow" size={15} />
-                  )}
-                </span>
-              </button>
-              {activeMission && (
-                <button
-                  className="abort-mission"
-                  onClick={() => action("abort")}
-                >{vi("Abort · Hold position")}</button>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="airframe-spec">
-            <Icon name="drone" size={50} />
-            <h2>{vi("Quadrotor 15")}</h2>
-            <p>{vi("Illustrative airframe parameters")}</p>
-            {[
-              ["Mass", "15 kg"],
-              ["Motor span", "0.96 × 0.96 m"],
-              ["Motor response", "45 ms"],
-              ["Maximum rotor speed", "7,257 RPM"],
-              ["Thrust coefficient", "0.00019 N/(rad/s)²"],
-              ["Inertia X / Y / Z", "0.65 / 1.05 / 0.65 kg·m²"],
-            ].map(([a, b]) => (
-              <div key={vi(a)}>
-                <span>{vi(a)}</span>
-                <b>{b}</b>
-              </div>
-            ))}
-            <p className="model-note">{vi("6DOF rigid body · four independent motors · cascaded PID. Demonstration parameters, awaiting real-aircraft calibration.")}</p>
-            <div className="state-detail">
-              <span>{vi("World position X / Y / Z")}</span>
-              <b>{t.position.map((n) => n.toFixed(2)).join(" / ")} m</b>
-              <span>{vi("Body rates X / Y / Z")}</span>
-              <b>{t.rates.map((n) => n.toFixed(2)).join(" / ")} rad/s</b>
-              <span>{vi("Local wind X / Y / Z")}</span>
-              <b>{t.wind.map((n) => n.toFixed(2)).join(" / ")} m/s</b>
-            </div>
-            <div className="motor-detail">
-              {t.rpm.map((v, i) => (
-                <p key={i}>
-                  M{i + 1}
-                  <b>{Math.round(v)} RPM</b>
-                  <small>{t.thrust[i].toFixed(1)} N</small>
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-        <label className="mobile-mission-select">
-          <span className="sr-only">{vi("Mobile mission")}</span>
-          <select
-            aria-label={vi("Mobile mission")}
-            value={t.selectedMission}
-            disabled={activeMission}
-            onChange={(e) => selectMission(e.target.value as MissionId)}
-          >
-            {Object.values(missions).map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.number} — {vi(m.name)}
-              </option>
-            ))}
-          </select>
-          <small>
-            {vi(t.missionPhase)} ·{" "}
-            {activeMission ? t.activeWaypoint : vi("Return + land")}
-          </small>
-        </label>
+      <header className="app-header" inert={dialog ? true : undefined}>
         <button
-          className="mobile-mission mission-button"
-          disabled={disabled}
-          onClick={() => action(activeMission ? "mission-pause" : "mission")}
+          className="brand"
+          onClick={() => navigate("Home")}
+          aria-label="Về trang chủ UAV ARENA"
         >
-          <Icon
-            name={activeMission && !t.missionPaused ? vi("pause") : "play"}
-            size={14}
-          />
-          {activeMission
-            ? t.missionPaused
-              ? vi("Resume mission")
-              : vi("Pause mission")
-            : vi("Start mission")}
-        </button>
-        <div className="side-bottom">
-          <button
-            className="reference-link"
-            onClick={() => setDialog("reference")}
-          >
-            <Icon name="map" size={16} />{vi("Reference plan")}{" "}
-            <Icon name="arrow" size={15} />
-          </button>
-          <p>
-            <span className="small-dot" />{vi("Fixed-step dynamics")}<span>v0.1</span>
-          </p>
-        </div>
-      </aside>
-      <main className="stage">
-        <div ref={mount} className="viewport" />
-        <div className="scene-heading">
-          <span className="eyebrow">{vi("THE COMPETITION FIELD")}</span>
-          <h1>{vi("Arena 01")}<span> / </span>
-            <small>45 × 27 m</small>
-          </h1>
-          <div className="scene-subtitle">
-            <span className="small-dot" />{vi("Concrete court · natural grass perimeter")}</div>
-        </div>
-        <div className="viewport-tools">
-          <div className="camera-tabs" role="group" aria-label={vi("Camera views")}>
-            {cameras.map((c) => (
-              <button
-                className={camera === c ? "active" : ""}
-                key={c}
-                onClick={() => setView(c)}
-              >
-                {c === "Overview" && <Icon name="cube" size={14} />} {vi(c)}
-              </button>
-            ))}
-          </div>
-          <button
-            className="icon-button fullscreen-button"
-            aria-label={vi("Toggle fullscreen")}
-            onClick={() => {
-              if (document.fullscreenElement) document.exitFullscreen();
-              else
-                document.documentElement
-                  .requestFullscreen()
-                  .catch(() =>
-                    setNotice("Fullscreen is unavailable in this browser."),
-                  );
-            }}
-          >
-            <Icon name="expand" size={17} />
-          </button>
-        </div>
-        <div className="north-indicator">
-          <svg viewBox="0 0 42 54" width="35" height="45">
-            <text
-              x="21"
-              y="9"
-              textAnchor="middle"
-              fontSize="9"
-              fill="currentColor"
-            >
-              −Z
-            </text>
-            <path
-              d="m21 17 8 21-8-4-8 4z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-            />
-            <path d="m21 17 0 17-8 4z" fill="currentColor" opacity=".6" />
-          </svg>
-        </div>
-        <section
-          className={`weather-card ${weatherExpanded ? "expanded" : ""}`}
-        >
-          <button
-            className="weather-heading"
-            onClick={() => setWeatherExpanded(!weatherExpanded)}
-            aria-expanded={weatherExpanded}
-          >
-            <span className="weather-icon">
-              <Icon
-                name={rain ? "rain" : weather.cloud > 0.6 ? "cloud" : "sun"}
-                size={24}
-              />
-            </span>
-            <div>
-              <span>{vi("ENVIRONMENT")}</span>
-              <h2>{vi(preset)}</h2>
-            </div>
-            <Icon name="chevron" size={16} />
-          </button>
-          <label className="select-label">
-            <span className="sr-only">{vi("Weather preset")}</span>
-            <select
-              aria-label={vi("Weather preset")}
-              value={vi(preset)}
-              onChange={(e) => changeWeather(e.target.value as Preset)}
-            >
-              {Object.keys(presets).map((p) => (
-                <option key={p} value={p}>{vi(p)}</option>
-              ))}
-            </select>
-            <Icon name="chevron" size={13} />
-          </label>
-          <div className="weather-summary">
-            <span title={vi("Local wind at the aircraft, including gusts")}>
-              <Icon name="wind" size={16} />
-              <b>{Math.hypot(...t.wind).toFixed(1)}</b> m/s
-            </span>
-            <span>
-              <Icon name="sun" size={15} />
-              {timeOfDay(weather.timeOfDay)}
-            </span>
-          </div>
-          {weatherExpanded && (
-            <div className="weather-sliders">
-              <Slider
-                label={vi("Wind speed")}
-                value={weather.wind}
-                unit="m/s"
-                min={0}
-                max={15}
-                step={0.1}
-                onChange={(v) => param("wind", v)}
-              />
-              <Slider
-                label={vi("Wind towards · +X = 0°")}
-                value={weather.direction}
-                unit="°"
-                min={0}
-                max={360}
-                onChange={(v) => param("direction", v)}
-              />
-              <Slider
-                label={vi("Gust strength")}
-                value={weather.gust}
-                unit="m/s"
-                min={0}
-                max={7}
-                step={0.1}
-                onChange={(v) => param("gust", v)}
-              />
-              <Slider
-                label={vi("Turbulence")}
-                value={weather.turbulence}
-                unit=""
-                min={0}
-                max={1}
-                step={0.1}
-                onChange={(v) => param("turbulence", v)}
-              />
-              <Slider
-                label={vi("Cloud cover")}
-                value={weather.cloud * 100}
-                unit="%"
-                min={0}
-                max={100}
-                onChange={(v) => param("cloud", v / 100)}
-              />
-              <Slider
-                label={vi("Rain intensity")}
-                value={weather.rain * 100}
-                unit="%"
-                min={0}
-                max={100}
-                onChange={(v) => param("rain", v / 100)}
-              />
-              <Slider
-                label={vi("Visibility")}
-                value={weather.visibility}
-                unit="m"
-                min={60}
-                max={800}
-                onChange={(v) => param("visibility", v)}
-              />
-              <Slider
-                label={vi("Time of day")}
-                value={weather.timeOfDay}
-                unit="h"
-                min={7}
-                max={18}
-                step={0.1}
-                onChange={(v) => param("timeOfDay", v)}
-              />
-              <p className="weather-footnote">{vi("Wind acts on the airframe, grass and rain.")}<br />{vi("Rain intensity is normalized; visual effects only.")}</p>
-            </div>
-          )}
-          <button
-            className="tune-button"
-            onClick={() => setWeatherExpanded(!weatherExpanded)}
-          >
-            <Icon name="settings" size={14} />
-            {weatherExpanded
-              ? vi("Close environment settings")
-              : vi("Tune environment")}
-            <span>{weatherExpanded ? "−" : "+"}</span>
-          </button>
-        </section>
-        <div className="view-settings">
-          <Toggle
-            label={vi("Flight path")}
-            checked={route}
-            onChange={(v) => {
-              setRoute(v);
-              world.current?.setRoute(v);
-            }}
-          />
-          <Toggle
-            label={vi("Markers")}
-            checked={labels}
-            onChange={(v) => {
-              setLabels(v);
-              world.current?.setLabels(v);
-            }}
-          />
-          <Toggle
-            label={vi("Colliders")}
-            checked={debug}
-            onChange={(v) => {
-              setDebug(v);
-              world.current?.setDebug(v);
-            }}
-          />
-          <Toggle
-            label={vi("Context")}
-            hint={vi("Optional distant visual backdrop. The simulated field stays 60 × 42 m.")}
-            checked={context}
-            onChange={(v) => {
-              setContext(v);
-              if (world.current) world.current.context.visible = v;
-            }}
-          />
-          <label className="quality-select">
-            <span>{vi("QUALITY")}</span>
-            <select
-              aria-label={vi("Graphics quality")}
-              value={quality}
-              onChange={(e) => {
-                setQuality(e.target.value as Quality);
-                world.current?.setQuality(e.target.value as Quality);
-              }}
-            >
-              {["Low", "Medium", "High", "Ultra"].map((q) => (
-                <option key={q} value={q}>{vi(q)}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-        {camera === "Top down" && (
-          <div
-            className="scale-bar"
-            style={{ width: world.current?.scale10mPixels ?? 100 }}
-          >
-            <span>10 m</span>
-            <i />
-          </div>
-        )}
-        <div className="scene-caption">
-          <span>WEBGL 2.0</span>
-          <span>{vi("LIVE 6DOF SIMULATION")}</span>
-          <span>{vi("1 UNIT = 1 METER")}</span>
-        </div>
-        <div className="flight-toast" role="status" aria-live="polite">
-          <span className="small-dot" />
-          {vi(notice)}
-        </div>
-        <section
-          className="telemetry-dock"
-          aria-label={vi("Live aircraft telemetry")}
-        >
-          <div className="telemetry-live">
-            <span>
-              <i />{vi("TELEMETRY")}</span>
-            <b>{timeLabel(t.time)}</b>
-            <small>
-              {t.paused
-                ? vi("PAUSED")
-                : t.mode === "Crashed"
-                  ? vi("CRASH DETECTED")
-                  : t.armed
-                    ? vi("MOTORS ACTIVE")
-                    : vi("STANDING BY")}
-            </small>
-          </div>
-          <div className="metric altitude">
-            <span>{vi("ALTITUDE")}<Icon name="up" size={12} />
-            </span>
-            <div>
-              {t.altitude.toFixed(2)}
-              <small>m</small>
-            </div>
-            <p>{vi("above landing gear contact")}</p>
-          </div>
-          <div className="metric">
-            <span>{vi("GROUND SPEED")}</span>
-            <div>
-              {t.groundSpeed.toFixed(2)}
-              <small>m/s</small>
-            </div>
-            <p>
-              Lên/xuống {t.verticalSpeed >= 0 ? "+" : ""}
-              {t.verticalSpeed.toFixed(2)} m/s
-            </p>
-          </div>
-          <div className="metric attitude">
-            <span>{vi("ATTITUDE")}</span>
-            <div>
-              {t.roll.toFixed(1)}
-              <small>° R</small>
-              <i>/</i>
-              {t.pitch.toFixed(1)}
-              <small>° P</small>
-            </div>
-            <p>Hướng xoay {t.yaw.toFixed(1)}°</p>
-          </div>
-          <div className="motor-metric">
-            <span>{vi("MOTOR SPEED")}<small>RPM</small>
-            </span>
-            <div className="motor-bars">
-              {t.rpm.map((v, i) => (
-                <div key={i}>
-                  <span>
-                    <i
-                      style={{ height: `${Math.max(3, (v / 7257) * 100)}%` }}
-                    />
-                  </span>
-                  <b>{Math.round(v)}</b>
-                  <small>M{i + 1}</small>
-                </div>
-              ))}
-            </div>
-          </div>
-          <button
-            className="pause-sim"
-            onClick={() => action("pause")}
-            aria-label={t.paused ? vi("Resume simulation") : vi("Pause simulation")}
-          >
-            <Icon name={t.paused ? "play" : vi("pause")} size={18} />
-          </button>
-        </section>
-        {stats.loading && !constructionError && (
-          <div className="loading-chip">
-            <span className="spinner" />
-            Đang tải vật liệu sân…
-          </div>
-        )}
-        {(stats.error || constructionError) && (
-          <div className="error-message" role="alert">
-            {constructionError
-              ? `Không mở được mô phỏng 3D. Kiểm tra hỗ trợ WebGL2 rồi tải lại trang. Chi tiết: ${constructionError}`
-              : `Mô phỏng chưa hoạt động đầy đủ. Tải lại trang hoặc nhờ giảng viên kiểm tra. Chi tiết kỹ thuật: ${stats.error}`}
-          </div>
-        )}
-      </main>
-      {workspace !== "Reference missions" ? (
-        <footer className="statusbar learner-status">
-          <span>Mô phỏng luyện tập · dữ liệu lưu trên thiết bị</span>
-          <span>
-            {stats.loading
-              ? "Đang tải sân bay…"
-              : stats.error
-                ? "Cần kiểm tra hệ thống"
-                : stats.physicsHz > 0 && stats.physicsHz < 240
-                  ? "Mô phỏng đang chạy chậm — nhờ giảng viên kiểm tra thiết bị"
-                  : "Sẵn sàng"}
+          <span className="brand-mark">
+            <Icon name="drone" size={27} />
           </span>
-        </footer>
-      ) : (
-        <>
-          <footer className="statusbar">
-            <span>
-              <i /> {stats.fps} FPS <em>·</em> VẬT LÝ {stats.physicsHz} Hz{" "}
-              <em>·</em> {stats.drawCalls} LƯỢT VẼ
-              {stats.physicsHz > 0 && stats.physicsHz < 240 && (
-                <strong className="fidelity-warning">{vi("SIMULATION SLOWED")}</strong>
-              )}
-            </span>
-            <span className="keyboard-hint">
-              W A S D <span>{vi("move")}</span> R / F <span>{vi("altitude")}</span> Q / E{" "}
-              <span>{vi("yaw")}</span>
-              <em>·</em> SPACE <span>{vi("pause")}</span>
-            </span>
-            <span>{vi("LOCAL WORLD")}<em> / </em> {t.position[0].toFixed(1)},{" "}
-              {t.position[1].toFixed(1)}, {t.position[2].toFixed(1)} m
-            </span>
-          </footer>
-        </>
-      )}
+          <span>
+            UAV<span className="brand-light"> ARENA</span>
+            <small>FLIGHT SIMULATOR</small>
+          </span>
+        </button>
+        {workspace !== "Home" && (
+          <div className="context-navigation">
+            <button
+              className="home-back"
+              aria-label="Về trang chủ"
+              onClick={() => navigate("Home")}
+            >
+              <Icon name="back" size={17} />
+              <span>Trang chủ</span>
+            </button>
+            <span className="breadcrumb-divider">/</span>
+            <span className="current-page">{vi(workspace)}</span>
+            {!w?.session?.active && !w?.drone.missionActive && (
+              <details className="context-switch">
+                <summary aria-label="Chuyển không gian">⌄</summary>
+                <div>
+                  {destinations
+                    .filter((p) => p !== workspace)
+                    .map((p) => (
+                      <button
+                        key={p}
+                        onClick={(e) => {
+                          navigate(p);
+                          e.currentTarget
+                            .closest("details")
+                            ?.removeAttribute("open");
+                        }}
+                      >
+                        {vi(p)}
+                        <Icon name="arrow" size={16} />
+                      </button>
+                    ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
+        <div className="header-right">
+          <span className="local-status">
+            <i /> LƯU TRÊN THIẾT BỊ
+          </span>
+          <button
+            className="icon-button"
+            aria-label="Hướng dẫn sử dụng"
+            onClick={() => setDialog("help")}
+          >
+            <Icon name="help" size={21} />
+          </button>
+        </div>
+      </header>
+      <div className="experience-body" inert={dialog ? true : undefined}>
+        <div
+          className={`world-stage ${sceneVisible ? "visible" : ""}`}
+          aria-hidden={!sceneVisible}
+        >
+          <div ref={mount} className="viewport" />
+        </div>
+        {workspace === "Home" ? (
+          <Home navigate={navigate} />
+        ) : w ? (
+          flyPage ? (
+            <TrainingDesk
+              key={workspace}
+              w={w}
+              t={t}
+              page={workspace}
+              navigate={navigate}
+              persist={persist}
+            />
+          ) : workspace === "Session Review" ? (
+            <Review w={w} navigate={navigate} />
+          ) : workspace === "Reference missions" ? (
+            <Reference w={w} t={t} />
+          ) : (
+            <Settings
+              key={workspace}
+              w={w}
+              page={workspace}
+              navigate={navigate}
+            />
+          )
+        ) : (
+          <main className="connecting" id="main-content">
+            <span className="spinner" /> Đang kết nối mô phỏng…
+          </main>
+        )}
+        {sceneVisible && stats.loading && (
+          <div className="scene-loading" role="status">
+            <span className="spinner" /> Đang chuẩn bị không gian bay…
+          </div>
+        )}
+        {(error || stats.error) && (
+          <div className="system-error" role="alert">
+            <Icon name="help" />
+            <div>
+              <b>Mô phỏng cần được khởi động lại</b>
+              <p>{error || stats.error}</p>
+            </div>
+            <button onClick={() => window.location.reload()}>Tải lại</button>
+          </div>
+        )}
+        {saveError && (
+          <div className="save-error" role="alert">
+            {saveError}
+          </div>
+        )}
+      </div>
       {dialog && (
-        <div className="dialog-scrim" onClick={() => setDialog(null)}>
+        <div
+          className="dialog-scrim"
+          onClick={() => {
+            if (!leaving) setDialog(null);
+          }}
+        >
           <section
+            ref={dialogRef}
+            className="dialog"
             role="dialog"
             aria-modal="true"
-            aria-label={
-              dialog === "help" ? "Hướng dẫn sử dụng" : "Sơ đồ sân tham chiếu"
-            }
-            className={`dialog ${dialog === "reference" ? "reference-dialog" : ""}`}
+            aria-busy={leaving}
+            aria-labelledby="dialog-title"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               className="icon-button dialog-close"
-              autoFocus
-              aria-label="Đóng hướng dẫn"
+              aria-label="Đóng hộp thoại"
+              disabled={leaving}
               onClick={() => setDialog(null)}
             >
               <Icon name="close" />
             </button>
-            {dialog === "reference" ? (
+            <span className="eyebrow">
+              UAV ARENA / {dialog === "help" ? "HƯỚNG DẪN" : "BÀI BAY CỦA BẠN"}
+            </span>
+            <h2 id="dialog-title">
+              {dialog === "help"
+                ? "Bầu trời bắt đầu từ đây."
+                : "Kết thúc bài bay hiện tại?"}
+            </h2>
+            {dialog === "help" ? (
               <>
-                <span className="eyebrow">{vi("SOURCE GEOMETRY")}</span>
-                <h2>{vi("The original competition plan")}</h2>
-                <p>{vi("Only the 45 × 27 m central court is reconstructed. Neck curves and minor marker positions are estimates from this dimension-calibrated trace.")}</p>
-                <img
-                  src="/assets/reference/arena-layout.png"
-                  alt={vi("Original UAV competition diagram, with 45m by 27m central arena, figure-eight circles and landing zones")}
-                />
-                <p className="dialog-note">
-                  V1 · trắng 5 cm　 V2 · trắng 10 cm　 V3 · vàng đứt đoạn 10 cm
+                <p>
+                  Chọn Luyện tập, tìm một bài bay phù hợp rồi vào sân. Bạn tự
+                  cất cánh, thực hiện mục tiêu và hạ cánh. Thả phím để giữ vị
+                  trí.
                 </p>
+                <ControlGuide />
+                <p>
+                  <kbd>Space</kbd> tạm dừng hoặc tiếp tục. Kéo chuột để nhìn
+                  quanh. Nếu thiết bị ngắt kết nối hoặc cửa sổ mất tập trung,
+                  bài bay được dừng và giữ lại bản ghi.
+                </p>
+                <details>
+                  <summary>Về mô phỏng này</summary>
+                  <p>
+                    Chỉ dùng luyện tập, không thay thế sát hạch chính thức. Mô
+                    hình máy bay chưa được hiệu chuẩn bằng dữ liệu UAV thực. Gió
+                    tác động lên mô hình bay; mưa là hiệu ứng hình ảnh. Kết quả
+                    và bản ghi chỉ lưu trên thiết bị hiện tại.
+                  </p>
+                </details>
+                <button className="primary" onClick={() => setDialog(null)}>
+                  Đã hiểu
+                </button>
               </>
             ) : (
               <>
-                <span className="eyebrow">HƯỚNG DẪN LUYỆN BAY</span>
-                <h2>Cách bắt đầu và điều khiển</h2>
                 <p>
-                  {workspace === "Reference missions"
-                    ? vi("Select a reference mission while landed at H. The demonstration takes off, flies its course, returns and lands. Its completion is not candidate performance evidence.")
-                    : "Chọn bài bay → kiểm tra điều khiển → chuẩn bị → kiểm tra trước bay → bật động cơ → bắt đầu bài tập. Bạn tự cất cánh, bay và hạ cánh. Kết quả cần giảng viên đánh giá."}
+                  Bản ghi sẽ được lưu để xem lại. Bài chưa hoàn tất sẽ được đánh
+                  dấu đã kết thúc.
                 </p>
-                <div className="help-keys">
-                  {[
-                    [
-                      "W / S",
-                      workspace === "Reference missions"
-                        ? vi("Forward / backward (world −Z / +Z)")
-                        : "Tiến / lùi theo hướng mũi máy bay",
-                    ],
-                    [
-                      "A / D",
-                      workspace === "Reference missions"
-                        ? vi("Left / right (world −X / +X)")
-                        : "Trái / phải theo hướng máy bay",
-                    ],
-                    ["R / F", "Lên / xuống"],
-                    ["Q / E", "Xoay hướng trái / phải"],
-                    ["Space", "Tạm dừng / tiếp tục bài bay"],
-                    [
-                      "Kéo chuột",
-                      workspace === "Reference missions"
-                        ? "Xoay và thu phóng ở góc quan sát"
-                        : "Nhìn quanh tại chỗ. Dùng nút Nhìn thẳng để về hướng ban đầu",
-                    ],
-                  ].map(([a, b]) => (
-                    <div key={vi(a)}>
-                      <kbd>{vi(a)}</kbd>
-                      <span>{b}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="dialog-note">
-                  Máy bay minh họa 15 kg, tiếp xúc mặt đất được đơn giản hóa.
-                  Gió tác động lên mô hình bay; mưa chỉ là hình ảnh. Chưa hiệu
-                  chuẩn bằng dữ liệu UAV thực.
-                </p>
-                <details>
-                  <summary>Thông tin đồ họa nâng cao</summary>
-                  <p>
-                    {stats.gpu}
-                    <br />
-                    {Math.round(stats.triangles / 1000)}nghìn tam giác ·{" "}
-                    {stats.drawCalls} lượt vẽ
-                    <br />
-                    Vật lý 250 Hz · đo được {stats.fps} FPS
-                  </p>
-                </details>
+                <button
+                  className="primary"
+                  disabled={leaving}
+                  onClick={() => void leave()}
+                >
+                  {leaving ? "Đang lưu…" : "Lưu và rời bài bay"}
+                </button>
+                <button disabled={leaving} onClick={() => setDialog(null)}>
+                  Ở lại bài bay
+                </button>
+                {saveError && <p role="alert">{saveError}</p>}
               </>
             )}
           </section>
         </div>
       )}
     </div>
+  );
+}
+function Reference({ w, t }: { w: World; t: typeof initial }) {
+  const [, refresh] = useState(0),
+    [message, setMessage] = useState("");
+  const run = (fn: () => unknown) => {
+    try {
+      if (fn() === false) setMessage("Đặt lại máy bay về H rồi thử lại.");
+      else setMessage("");
+      refresh((n) => n + 1);
+    } catch {
+      setMessage("Chưa thực hiện được thao tác. Hãy thử lại.");
+    }
+  };
+  return (
+    <main className="reference-experience" id="main-content" tabIndex={-1}>
+      <section className="reference-heading">
+        <span className="eyebrow">QUAN SÁT & HỌC HỎI</span>
+        <h1>Bay mẫu tự động</h1>
+        <p>
+          Quan sát đường bay trước khi tự thử sức. Bài mẫu không tính vào kết
+          quả luyện tập.
+        </p>
+      </section>
+      <div className="reference-controls">
+        <label>
+          Bài bay mẫu
+          <select
+            aria-label="Chọn bài bay mẫu"
+            disabled={t.missionActive}
+            value={t.selectedMission}
+            onChange={(e) =>
+              run(() => {
+                w.setRoute(true);
+                return w.selectMission(e.target.value as MissionId);
+              })
+            }
+          >
+            {Object.values(missions).map((m) => (
+              <option key={m.id} value={m.id}>
+                {vi(m.name)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Góc quan sát
+          <select
+            aria-label="Góc quan sát bay mẫu"
+            value={w.cameraMode}
+            onChange={(e) =>
+              run(() => w.setCamera(e.target.value as World["cameraMode"]))
+            }
+          >
+            {[
+              "Overview",
+              "Orbit",
+              "Top down",
+              "Ground",
+              "Follow",
+              "FPV",
+              "PILOT VLOS",
+            ].map((v) => (
+              <option key={v} value={v}>
+                {vi(v)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {!t.missionActive ? (
+          <button
+            className="primary"
+            onClick={() =>
+              run(() => {
+                w.drone.paused = false;
+                w.setRoute(true);
+                return w.drone.mission();
+              })
+            }
+          >
+            <Icon name="play" size={17} /> Xem bay mẫu
+          </button>
+        ) : (
+          <>
+            <button
+              className="primary"
+              onClick={() => run(() => w.drone.toggleMissionPause())}
+            >
+              {t.missionPaused ? "Tiếp tục bay mẫu" : "Tạm dừng bay mẫu"}
+            </button>
+            <button onClick={() => run(() => w.drone.hold())}>
+              Dừng bài mẫu
+            </button>
+          </>
+        )}
+        <button
+          onClick={() =>
+            run(() => {
+              w.drone.reset();
+              return true;
+            })
+          }
+        >
+          Đặt lại về H
+        </button>
+        <details className="reference-manual">
+          <summary>Điều khiển tự do</summary>
+          <div>
+            <button
+              disabled={t.missionActive}
+              onClick={() =>
+                run(() => {
+                  w.drone.paused = false;
+                  return w.drone.armed ? w.drone.disarm() : w.drone.arm();
+                })
+              }
+            >
+              {t.armed ? "Tắt động cơ mẫu" : "Bật động cơ mẫu"}
+            </button>
+            <button
+              disabled={t.missionActive}
+              onClick={() =>
+                run(() => {
+                  w.drone.paused = false;
+                  return w.drone.takeoff();
+                })
+              }
+            >
+              Cất cánh tự động
+            </button>
+            <button onClick={() => run(() => w.drone.hold())}>
+              Giữ vị trí
+            </button>
+            <button
+              onClick={() =>
+                run(() => {
+                  w.drone.paused = false;
+                  return w.drone.land();
+                })
+              }
+            >
+              Hạ cánh tự động
+            </button>
+            <p>
+              Chỉ dùng trong sân bay mẫu. WASD di chuyển, R/F lên xuống, Q/E
+              xoay hướng.
+            </p>
+          </div>
+        </details>
+      </div>
+      <div className="reference-telemetry">
+        <span>{vi(t.missionPhase)}</span>
+        <span>Độ cao {t.altitude.toFixed(1)} m</span>
+        <span>Tốc độ {t.groundSpeed.toFixed(1)} m/s</span>
+      </div>
+      {message && (
+        <p className="flight-feedback" role="status">
+          {message}
+        </p>
+      )}
+    </main>
   );
 }

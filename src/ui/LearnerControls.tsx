@@ -1,11 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { useId, useState } from "react";
 import type { World } from "../scene/World";
 import { config } from "../arena/geometry";
 import { frontPilotStation, type PilotStation } from "../training/pilot";
 import {
   simpleWeather,
   weatherSummary,
-  weatherAtLevels, windLevelOf, levelDescription, validLevel,
+  weatherAtLevels,
+  windLevelOf,
+  levelDescription,
+  validLevel,
 } from "../training/weatherPresets";
 import { channels } from "../training/input";
 import { vi } from "./vi";
@@ -23,55 +26,137 @@ export function remember(key: string, value: string) {
     /* preference is optional */
   }
 }
-export function WindSelector({ w, assessment = false, disabled = false, onUpdate }: {
-  w: World; assessment?: boolean; disabled?: boolean; onUpdate: () => void;
+export function WindSelector({
+  w,
+  assessment = false,
+  disabled = false,
+  onUpdate,
+}: {
+  w: World;
+  assessment?: boolean;
+  disabled?: boolean;
+  onUpdate: () => void;
 }) {
+  const tickId = useId();
   const prefix = assessment ? "uav-assessment" : "uav-practice";
   const [chosen, setChosen] = useState(() => storedWeather(assessment));
   const p = assessment ? chosen : w.weather.target;
-  const wind = windLevelOf(p), rain = Math.round(p.rain * 10), customRain = Math.abs(p.rain * 10 - rain) > 1e-6;
+  const wind = windLevelOf(p),
+    rain = Math.round(p.rain * 10),
+    customRain = Math.abs(p.rain * 10 - rain) > 1e-6;
   function apply(a?: number, b?: number) {
-    if (disabled || w.session?.locked || (!assessment && !w.setWeatherLevels(a, b))) return;
+    if (
+      disabled ||
+      w.session?.locked ||
+      (!assessment && !w.setWeatherLevels(a, b))
+    )
+      return;
     const next = weatherAtLevels(p, a, b);
     setChosen(next);
     if (a !== undefined) remember(prefix + "-wind-level", String(a));
     if (b !== undefined) remember(prefix + "-rain-level", String(b));
     onUpdate();
   }
-  return <fieldset disabled={disabled || !!w.session?.locked} className="simple-weather">
-    <legend>{assessment ? "Thời tiết thi thử do giảng viên chọn" : "Thời tiết luyện tập"}</legend>
-    <label>
-      <b>Gió: {wind === null ? "Tùy chỉnh bởi giảng viên" : `${wind}/10 — ${levelDescription(wind)}`}</b>
-      <input aria-label={assessment ? "Mức gió thi thử" : "Mức gió"} aria-valuetext={wind === null ? `Tùy chỉnh, gió nền ${p.wind.toFixed(1)} mét mỗi giây` : `${wind} trên 10, ${levelDescription(wind)}, gió nền ${p.wind.toFixed(1)} mét mỗi giây`} type="range" min="0" max="10" step="1" value={wind ?? Math.round(p.wind / 0.9)} onChange={e => apply(+e.target.value)} list="weather-ticks" />
-      <span className="range-endpoints"><span>0 · Không gió</span><span>10 · Mạnh</span></span>
-    </label>
-    <label>
-      <b>Mưa: {customRain ? `Tùy chỉnh · ${Math.round(p.rain * 100)}%` : `${rain}/10 — ${levelDescription(rain, true)}`}</b>
-      <input aria-label={assessment ? "Mức mưa thi thử" : "Mức mưa"} aria-valuetext={customRain ? `Tùy chỉnh, ${Math.round(p.rain * 100)} phần trăm` : `${rain} trên 10, ${levelDescription(rain, true)}`} type="range" min="0" max="10" step="1" value={rain} onChange={e => apply(undefined, +e.target.value)} list="weather-ticks" />
-      <span className="range-endpoints"><span>0 · Không mưa</span><span>10 · Mưa mạnh</span></span>
-    </label>
-    <datalist id="weather-ticks">{Array.from({length: 11}, (_, i) => <option key={i} value={i} label={String(i)} />)}</datalist>
-    <p>{weatherSummary(p)}</p>
-    <button type="button" onClick={() => apply(0, 0)}>Đặt lại: không gió, không mưa</button>
-    <p className="training-muted">Mức mô phỏng để luyện tập, không phải giới hạn bay thực tế. Mưa chỉ tác động hình ảnh, chưa quy đổi sang mm/giờ.</p>
-  </fieldset>;
+  return (
+    <fieldset
+      disabled={disabled || !!w.session?.locked}
+      className="simple-weather"
+    >
+      <legend>
+        {assessment ? "Thời tiết thi thử" : "Thời tiết luyện tập"}
+      </legend>
+      <label>
+        <b>
+          Gió:{" "}
+          {wind === null
+            ? "Tùy chỉnh"
+            : `${wind}/10 — ${levelDescription(wind)}`}
+        </b>
+        <input
+          aria-label={assessment ? "Mức gió thi thử" : "Mức gió"}
+          aria-valuetext={
+            wind === null
+              ? `Tùy chỉnh, gió nền ${p.wind.toFixed(1)} mét mỗi giây`
+              : `${wind} trên 10, ${levelDescription(wind)}, gió nền ${p.wind.toFixed(1)} mét mỗi giây`
+          }
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={wind ?? Math.round(p.wind / 0.9)}
+          onChange={(e) => apply(+e.target.value)}
+          list={tickId}
+        />
+        <span className="range-endpoints">
+          <span>0 · Không gió</span>
+          <span>10 · Mạnh</span>
+        </span>
+      </label>
+      <label>
+        <b>
+          Mưa:{" "}
+          {customRain
+            ? `Tùy chỉnh · ${Math.round(p.rain * 100)}%`
+            : `${rain}/10 — ${levelDescription(rain, true)}`}
+        </b>
+        <input
+          aria-label={assessment ? "Mức mưa thi thử" : "Mức mưa"}
+          aria-valuetext={
+            customRain
+              ? `Tùy chỉnh, ${Math.round(p.rain * 100)} phần trăm`
+              : `${rain} trên 10, ${levelDescription(rain, true)}`
+          }
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={rain}
+          onChange={(e) => apply(undefined, +e.target.value)}
+          list={tickId}
+        />
+        <span className="range-endpoints">
+          <span>0 · Không mưa</span>
+          <span>10 · Mưa mạnh</span>
+        </span>
+      </label>
+      <datalist id={tickId}>
+        {Array.from({ length: 11 }, (_, i) => (
+          <option key={i} value={i} label={String(i)} />
+        ))}
+      </datalist>
+      <p>{weatherSummary(p)}</p>
+      <button type="button" onClick={() => apply(0, 0)}>
+        Đặt lại: không gió, không mưa
+      </button>
+      <p className="training-muted">
+        Mức mô phỏng để luyện tập, không phải giới hạn bay thực tế. Mưa chỉ tác
+        động hình ảnh, chưa quy đổi sang mm/giờ.
+      </p>
+    </fieldset>
+  );
 }
 export function storedWeather(assessment = false) {
   const prefix = assessment ? "uav-assessment" : "uav-practice";
-  const legacy = preference(prefix + "-wind", "calm"), sky = preference(prefix + "-sky", "clear");
-  const a = Number(preference(prefix + "-wind-level", String(({calm: 0, light: 2, medium: 4, strong: 10} as Record<string, number>)[legacy] ?? 0)));
-  const b = Number(preference(prefix + "-rain-level", sky === "rain" ? "3" : "0"));
-  return weatherAtLevels(simpleWeather("calm", "clear"), validLevel(a) ? a : 0, validLevel(b) ? b : 0);
-}
-export function TaskGroup({ title, summary, open, onToggle, children }: {
-  title: string; summary: string; open: boolean; onToggle: (open: boolean) => void; children: ReactNode;
-}) {
-  return <details className="task-group" open={open} onToggle={e => {
-    if (e.currentTarget.open !== open) onToggle(e.currentTarget.open);
-  }}>
-    <summary><b>{title}</b><span>{summary}</span></summary>
-    <div className="task-group-content">{children}</div>
-  </details>;
+  const legacy = preference(prefix + "-wind", "calm"),
+    sky = preference(prefix + "-sky", "clear");
+  const a = Number(
+    preference(
+      prefix + "-wind-level",
+      String(
+        (
+          { calm: 0, light: 2, medium: 4, strong: 10 } as Record<string, number>
+        )[legacy] ?? 0,
+      ),
+    ),
+  );
+  const b = Number(
+    preference(prefix + "-rain-level", sky === "rain" ? "3" : "0"),
+  );
+  return weatherAtLevels(
+    simpleWeather("calm", "clear"),
+    validLevel(a) ? a : 0,
+    validLevel(b) ? b : 0,
+  );
 }
 export function InputCheck({
   w,
@@ -99,7 +184,7 @@ export function InputCheck({
       {gamepad && !w.input.connected && (
         <p>
           Cắm cáp USB, nhấn một nút trên thiết bị. Nếu vẫn chưa nhận, chọn Dùng
-          bàn phím hoặc nhờ giảng viên kiểm tra.
+          bàn phím rồi kiểm tra kết nối USB.
         </p>
       )}
       {w.input.fault && <p className="input-fault">{vi(w.input.fault)}</p>}
@@ -148,8 +233,7 @@ export function InputCheck({
           ))}
         </div>
         <p className="training-muted">
-          Được trình duyệt nhận không có nghĩa là đã tương thích. Giảng viên cần
-          kiểm tra hướng, điểm giữa và toàn hành trình trước bài bay.
+          Trước khi bay, hãy kiểm tra hướng, điểm giữa và toàn hành trình.
         </p>
       </details>
     </section>
@@ -228,86 +312,5 @@ export function PilotDiagram({
         chưa phải quy định chính thức.
       </figcaption>
     </figure>
-  );
-}
-export function Home({ navigate }: { navigate: (page: string) => void }) {
-  return (
-    <main className="learner-home" id="main-content">
-      <div className="home-intro">
-        <p className="home-kicker">UAV ARENA · LUYỆN BAY THỰC HÀNH</p>
-        <h1>Bắt đầu bài bay của bạn</h1>
-        <p>Chọn một việc bạn muốn làm. Ứng dụng sẽ hướng dẫn từng bước.</p>
-      </div>
-      <div className="home-actions">
-        {[
-          [
-            "Training",
-            "01",
-            "Luyện tập",
-            "Chọn bài bay, tập điều khiển và làm quen với sân.",
-          ],
-          [
-            "Mock Examination",
-            "02",
-            "Thi thử",
-            "Tự thực hiện bài bay với góc nhìn và điều kiện cố định.",
-          ],
-          [
-            "Session Review",
-            "03",
-            "Xem lại bài bay",
-            "Xem đường bay, kết quả và nhận xét đã lưu trên thiết bị.",
-          ],
-          [
-            "System Configuration",
-            "04",
-            "Cài đặt",
-            "Kiểm tra tay điều khiển và chọn cách hiển thị.",
-          ],
-        ].map(([page, n, title, description]) => (
-          <button key={page} onClick={() => navigate(page)}>
-            <span>{n}</span>
-            <h2>{title}</h2>
-            <p>{description}</p>
-            <b>Mở {title.toLocaleLowerCase("vi")} →</b>
-          </button>
-        ))}
-      </div>
-      <section className="home-foot">
-        <div>
-          <h2>Lần đầu sử dụng?</h2>
-          <p>
-            Vào Luyện tập và chọn Hướng dẫn từng bước. Bạn có thể dùng bàn phím
-            để luyện thử trước khi cài tay điều khiển.
-          </p>
-          <button
-            onClick={() => {
-              remember("uav-show-guide", "yes");
-              navigate("Training");
-            }}
-          >
-            Hướng dẫn bắt đầu
-          </button>
-        </div>
-        <div>
-          <h2>Dành cho giảng viên</h2>
-          <p>
-            Thiết lập thời tiết thi thử, xem lại bài học viên hoặc mở bài bay
-            mẫu tự động.
-          </p>
-          <button onClick={() => navigate("Instructor")}>
-            Mở công cụ giảng viên
-          </button>
-        </div>
-      </section>
-      <p className="home-limitation">
-        Mô phỏng hỗ trợ luyện tập. Kết quả cần giảng viên đánh giá; không thay
-        thế sát hạch chính thức.
-      </p>
-      <p className="small-screen-note">
-        Màn hình nhỏ phù hợp cài đặt và xem lại. Luyện bay đầy đủ cần màn hình
-        lớn và thiết bị đã kiểm tra.
-      </p>
-    </main>
   );
 }

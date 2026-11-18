@@ -6,7 +6,11 @@ import {
 } from "../simulation/missions";
 import { samplePath } from "../simulation/missions";
 export type TaskKind =
-  "takeoff" | "hover" | "orientation" | "route" | "abnormal";
+  | "takeoff"
+  | "hover"
+  | "orientation"
+  | "route"
+  | "abnormal";
 export type Task = {
   id: string;
   label: string;
@@ -114,16 +118,6 @@ export const profiles = {
   },
 };
 export type ProfileId = keyof typeof profiles;
-export const preflight = [
-  "Airspace, field boundaries and people checked",
-  "Aircraft, propellers, battery and control mode checked",
-  "Controller axes and neutral response checked",
-  "Wind, emergency plan and provisional pilot station briefed",
-];
-export const postflight = [
-  "Aircraft disarmed and propulsion stopped",
-  "Aircraft condition and occurrence report reviewed",
-];
 export function taskPath(route: Task["route"]): Path {
   return route === "straight"
     ? path([

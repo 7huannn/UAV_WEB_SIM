@@ -388,11 +388,14 @@ export async function addAnnotation(a: Annotation) {
   try {
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction("annotations", "readwrite");
-      tx.objectStore("annotations").add({
+      const annotation = {
         ...a,
         author: a.author.slice(0, 80),
         createdAt: new Date().toISOString(),
-      });
+      };
+      // Imported note IDs belong to another database. Let this store allocate its key.
+      delete annotation.id;
+      tx.objectStore("annotations").add(annotation);
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });

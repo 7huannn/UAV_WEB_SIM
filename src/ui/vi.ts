@@ -22,12 +22,16 @@ export function learnerReport(a: Attempt, notes: Annotation[] = []) {
     "Chế độ bay: cần ra lệnh vận tốc theo hướng máy bay, lên xuống và xoay; hệ thống ổn định vị trí khi thả cần. Không phải ga trực tiếp hoặc điều khiển góc nghiêng.",
     `Vị trí người lái: X=${a.pilotStation.x}, Z=${a.pilotStation.z} m; mắt cao ${a.pilotStation.eyeHeight} m; góc nhìn dọc ${a.pilotStation.verticalFov}°. Vị trí tạm đề xuất.`,
     `Thời tiết lúc chuẩn bị: gió ${a.initialWeather.wind} m/s, gió giật ${a.initialWeather.gust} m/s; mưa ${a.initialWeather.rain}. Seed ${a.weatherSeed}.`,
-    `Kiểm tra trước bay: ${a.preflight.every(Boolean) ? "Đủ các xác nhận" : "Chưa đủ"} · sau bay: ${a.postflight.every(Boolean) ? "Đủ các xác nhận" : "Chưa đủ"}`,
+    ...(a.preflight.length || a.postflight.length
+      ? [
+          `Xác nhận trong bản ghi cũ: trước bay ${a.preflight.map(Boolean).join(",")} · sau bay ${a.postflight.map(Boolean).join(",")}`,
+        ]
+      : []),
     `Số mẫu ghi: ${a.frames.length}. Bước vật lý ${a.fixedDt} giây; ghi mỗi ${a.recordEverySteps} bước. Thời gian thực bị bỏ qua khi máy chậm: ${a.droppedSimulationSeconds.toFixed(3)} giây.`,
     "GIỚI HẠN CẦN HIỂU",
-    "Tiêu chí là giả định luyện tập, cần giảng viên đánh giá. Mô hình máy bay, quan sát trên màn hình, tay điều khiển và khả năng chuyển kỹ năng ra thực địa chưa được xác minh.",
+    "Tiêu chí là giả định luyện tập, cần xem xét kết quả. Mô hình máy bay, quan sát trên màn hình, tay điều khiển và khả năng chuyển kỹ năng ra thực địa chưa được xác minh.",
     "Bản ghi được giữ nguyên. Nhận xét được thêm riêng; checksum không phải chữ ký thiết bị hay hồ sơ sát hạch được chứng thực.",
-    "NHẬN XÉT CỦA GIẢNG VIÊN",
+    "GHI CHÚ BÀI BAY",
     ...notes.map((n) => `${n.at.toFixed(2)} giây · ${n.author}: ${n.text}`),
     "PHỤ LỤC KỸ THUẬT — giữ mã gốc để đối chiếu JSON/CSV",
     `Phần mềm: ${a.softwareVersion} · tiêu chí: ${a.rules.version} · ${a.rules.status} · ${a.rules.source}`,

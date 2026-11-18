@@ -7,8 +7,6 @@ import type { Weather } from "../weather/Weather";
 import {
   rules,
   profiles,
-  preflight,
-  postflight,
   taskPath,
   routeGates,
   type ProfileId,
@@ -186,8 +184,9 @@ export class TrainingSession {
       status: "NOT_STARTED",
       frames: [],
       events: [],
-      preflight: preflight.map(() => false),
-      postflight: postflight.map(() => false),
+      // Retained schema fields allow existing recordings to import without migration.
+      preflight: [],
+      postflight: [],
       result: {
         decision: "INSUFFICIENT_DATA",
         practiceScore: 100,
@@ -208,7 +207,7 @@ export class TrainingSession {
       },
       droppedSimulationSeconds: 0,
     };
-    this.transition("PREFLIGHT", d.time);
+    this.transition("READY", d.time);
   }
   get active() {
     return !terminal(this.state);
@@ -231,8 +230,7 @@ export class TrainingSession {
   }
   private transition(next: ExamState, time = this.lastSample) {
     const legal: Partial<Record<ExamState, ExamState[]>> = {
-      NOT_STARTED: ["PREFLIGHT"],
-      PREFLIGHT: ["READY"],
+      NOT_STARTED: ["READY"],
       READY: ["ACTIVE"],
       ACTIVE: ["TASK_COMPLETE", "PAUSED", "DISQUALIFIED"],
       PAUSED: ["ACTIVE", "TASK_COMPLETE", "LANDING", "POSTFLIGHT"],
@@ -251,21 +249,6 @@ export class TrainingSession {
     this.event("STATE", next, time);
     return true;
   }
-  check(stage: "preflight" | "postflight", i: number, value: boolean) {
-    if (
-      (stage === "preflight" && this.state !== "PREFLIGHT") ||
-      (stage === "postflight" && this.state !== "POSTFLIGHT")
-    )
-      return false;
-    if (!Number.isInteger(i) || i < 0 || i >= this.attempt[stage].length)
-      return false;
-    this.attempt[stage][i] = value;
-    this.event("CHECKLIST", `${stage} ${i + 1}: ${value}`);
-    return true;
-  }
-  ready() {
-    return this.attempt.preflight.every(Boolean) && this.transition("READY");
-  }
   start(d: DroneDynamics) {
     if (
       this.state !== "READY" ||
@@ -282,6 +265,7 @@ export class TrainingSession {
     )
       return false;
     if (!this.transition("ACTIVE", d.time)) return false;
+    d.paused = false;
     d.engageManual();
     return true;
   }
@@ -289,8 +273,7 @@ export class TrainingSession {
     return this.transition("LANDING");
   }
   finish() {
-    if (this.state !== "POSTFLIGHT" || !this.attempt.postflight.every(Boolean))
-      return false;
+    if (this.state !== "POSTFLIGHT") return false;
     const ok = this.transition("FINISHED");
     if (ok) this.finalize();
     return ok;

@@ -61,6 +61,7 @@ export type WorldStats = {
 };
 export class World {
   workspace = "Reference missions";
+  presentationActive = true;
   input = new ControllerInput();
   session: TrainingSession | null = null;
   pilotStation: PilotStation = { ...PILOT_STATION };
@@ -755,7 +756,7 @@ export class World {
   setWorkspace(page: string) {
     if (
       this.session?.active &&
-      ![this.session.attempt.mode, "Instructor"].includes(page)
+      page !== this.session.attempt.mode
     )
       return false;
     if (
@@ -768,6 +769,9 @@ export class World {
     if (page === "Reference missions" && this.replay) this.setReplay(null);
     if (this.session?.strict && page !== this.workspace) return false;
     if (this.session?.locked && page === "Reference missions") return false;
+    if (!["Home", "Training", "Mock Examination", "Session Review", "Controller Calibration", "Examination Profiles", "System Configuration", "Reference missions"].includes(page)) return false;
+    if (page !== "Session Review" && this.replay) this.setReplay(null);
+    this.keys.clear();
     this.workspace = page;
     this.groundGuide.group.visible = false;
     this.pilotMarker.visible = false;
@@ -787,8 +791,7 @@ export class World {
       this.workspace !== "Mock Examination" &&
       !this.session?.strict &&
       !this.replay &&
-      (!this.session?.locked ||
-        (this.workspace === "Instructor" && this.session.state === "PAUSED"))
+      !this.session?.locked
     );
   }
   setWeatherPreset(p: Preset) {
@@ -845,7 +848,7 @@ export class World {
   setPilotMarker(show: boolean) {
     if (
       this.session?.strict ||
-      !["Instructor", "System Configuration", "Reference missions"].includes(
+      !["System Configuration", "Reference missions"].includes(
         this.workspace,
       )
     )
@@ -892,7 +895,7 @@ export class World {
       return false;
     if (profile in missions) this.selectMission(profile as MissionId);
     this.keys.clear();
-    // Freeze the chosen preflight environment, including blend destination.
+    // Freeze the chosen simulation environment, including blend destination.
     this.weather.current = { ...this.weather.target };
     this.session = new TrainingSession(
       candidate,
@@ -914,7 +917,7 @@ export class World {
     );
     this.trainingReference.computeLineDistances();
     this.drone.manualOnly = true;
-    this.drone.paused = false;
+    this.drone.paused = true;
     this.recenterPilot();
     this.setLabels(false);
     this.setRoute(false);
@@ -976,8 +979,7 @@ export class World {
       this.replay?.attempt.frames ?? this.session?.attempt.frames ?? [];
     this.trace.visible =
       !this.session?.strict &&
-      (this.workspace === "Instructor" ||
-        this.workspace === "Session Review" ||
+      (this.workspace === "Session Review" ||
         (this.workspace === "Training" && this.routeVisible));
     this.trainingReference.visible =
       this.trace.visible &&
@@ -1108,6 +1110,14 @@ export class World {
         ? navigator.getGamepads()
         : [],
     );
+    // Keep device readiness live on setup screens without rendering an invisible 3D field.
+    if (!this.presentationActive && !this.session?.active && !this.drone.missionActive && !this.replay) {
+      if (stamp - this.sample > 150) {
+        this.callbacks(this.drone.telemetry(), { ...this.stats });
+        this.sample = stamp;
+      }
+      return;
+    }
     const key = (k: string) => (this.keys.has(k) ? 1 : 0);
     const command = new T.Vector3(
       key("KeyD") - key("KeyA"),

@@ -115,7 +115,23 @@ export function keyboardRC(keys: Set<string>): RC {
   };
 }
 export class ControllerInput {
-  source: "Keyboard" | "Gamepad" = "Keyboard";
+  private selectedSource: "Keyboard" | "Gamepad" = "Keyboard";
+  get source() {
+    return this.selectedSource;
+  }
+  set source(source: "Keyboard" | "Gamepad") {
+    if (source === this.selectedSource) return;
+    this.selectedSource = source;
+    this.connected = source === "Keyboard";
+    this.device =
+      source === "Keyboard"
+        ? "Keyboard fallback"
+        : "No browser gamepad exposed";
+    this.raw = [];
+    this.buttons = [];
+    this.value = neutral();
+    this.fault = source === "Gamepad" ? "Controller disconnected" : "";
+  }
   profile = mode2();
   index = 0;
   connected = false;

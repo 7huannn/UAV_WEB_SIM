@@ -55,8 +55,6 @@ function setup(
   return { w, d, input, s, tick };
 }
 function ready(o: ReturnType<typeof setup>) {
-  o.s.attempt.preflight.forEach((_, i) => o.s.check("preflight", i, true));
-  assert.ok(o.s.ready());
   o.d.arm();
   assert.ok(o.s.start(o.d));
 }
@@ -132,6 +130,18 @@ test("controller mapping covers asymmetric range, center, deadzone, inversion an
     roll: 1,
   });
 });
+test("changing input sources clears stale connection state and pending movement", () => {
+  const input = new ControllerInput();
+  input.poll(new Set(["KeyR"]), true);
+  assert.equal(input.connected, true);
+  input.source = "Gamepad";
+  assert.equal(input.connected, false);
+  assert.equal(input.fault, "Controller disconnected");
+  assert.deepEqual(input.value, { throttle: 0, yaw: 0, pitch: 0, roll: 0 });
+  input.source = "Keyboard";
+  assert.equal(input.connected, true);
+  assert.equal(input.fault, "");
+});
 test("gamepad disconnect never substitutes keyboard; focus loss neutralizes all channels", () => {
   const input = new ControllerInput();
   input.source = "Gamepad";
@@ -197,10 +207,12 @@ test("manual fixed-step commands are independent of render cadence; reset preser
   assert.equal(a.beforeStep, hook);
   assert.equal(a.manualOnly, true);
 });
-test("procedural transitions require preflight and arm; landing cannot produce a pass", () => {
+test("software readiness skips physical checks; arming and task completion still gate flight", () => {
   const o = setup();
   assert.equal(o.s.start(o.d), false);
-  assert.equal(o.s.ready(), false);
+  assert.equal(o.s.state, "READY");
+  assert.deepEqual(o.s.attempt.preflight, []);
+  assert.deepEqual(o.s.attempt.postflight, []);
   assert.equal(o.s.requestLanding(), false);
   assert.equal(o.s.finish(), false);
   ready(o);
@@ -210,7 +222,7 @@ test("procedural transitions require preflight and arm; landing cannot produce a
   assert.equal(o.s.state, "ABORTED");
   assert.ok(o.s.attempt.result.missedRouteGates > 100);
   assert.equal(o.s.attempt.result.decision, "INCOMPLETE_ATTEMPT");
-  assert.equal(o.s.ready(), false);
+  assert.equal(o.s.start(o.d), false);
 });
 for (const id of ["figure-eight", "outer-circuit"] as const)
   test(`${id}: full ordered route required; endpoint, wrong direction and missed lobe shortcuts fail`, () => {
@@ -239,8 +251,6 @@ for (const id of ["figure-eight", "outer-circuit"] as const)
     a.d.motors.fill(0);
     fixtureHover(a, 0.2);
     assert.equal(a.s.state, "POSTFLIGHT");
-    assert.equal(a.s.finish(), false);
-    a.s.attempt.postflight.forEach((_, i) => a.s.check("postflight", i, true));
     assert.ok(a.s.finish());
     assert.equal(a.s.attempt.result.decision, "HUMAN_REVIEW_REQUIRED");
     assert.equal(a.s.attempt.result.missedRouteGates, 0);
@@ -331,7 +341,7 @@ test("recording uses monotonic sim time, complete channels, immutable exports, r
 });
 
 for (const id of ["figure-eight", "outer-circuit"] as const)
-  test(`${id}: synthetic manual velocity inputs physically fly every gate, land and require postflight/human review`, () => {
+  test(`${id}: synthetic manual velocity inputs physically fly every gate, land and finalize without a physical checklist`, () => {
     const o = setup(id, "Mock Examination");
     ready(o);
     const route = taskPath(id),
@@ -383,7 +393,6 @@ for (const id of ["figure-eight", "outer-circuit"] as const)
     assert.equal(o.d.missionPhase, "IDLE");
     assert.equal(o.d.mode, "Disarmed");
     assert.ok(o.s.attempt.frames.some((f) => f.task === "route"));
-    o.s.attempt.postflight.forEach((_, i) => o.s.check("postflight", i, true));
     assert.ok(o.s.finish());
     assert.equal(o.s.attempt.result.decision, "HUMAN_REVIEW_REQUIRED");
   });
@@ -416,10 +425,8 @@ test("orientation exercise requires every requested heading and stable dwell", (
   assert.ok(o.s.attempt.result.completedTasks.includes("orientation"));
 });
 
-test("neutral input gates manual start and recording duration is bounded during preflight", () => {
+test("neutral input gates manual start and recording duration is bounded while ready", () => {
   const o = setup();
-  o.s.attempt.preflight.forEach((_, i) => o.s.check("preflight", i, true));
-  o.s.ready();
   o.d.arm();
   o.input.value.throttle = 1;
   assert.equal(o.s.start(o.d), false);
