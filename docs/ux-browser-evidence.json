@@ -1,0 +1,206 @@
+{
+  "date": "2026-11-18T07:10:58.887Z",
+  "url": "http://localhost:4175",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-DQOBEUTa.js",
+  "checks": [
+    "Vietnamese home has four task choices without engineering controls",
+    "Optional four-step setup, native keyboard activation and actionable controller fault; no false hardware compatibility",
+    "Four wind presets map to exact shared-engine values; sky independent; convenience preferences survive reload",
+    "Derived midpoint station outside V1, 1.65m eye, head buttons/recenter, fixed position/FOV/zoom",
+    "Advanced settings initially collapsed; station diagram/optional marker; valid station and display quality persist",
+    "Instructor assessment weather separate from learner preferences, captured exactly and locked with cameras/marker/navigation in mock",
+    "Pilot View works in both original force-integrated reference missions; quaternion stays fixed during aircraft movement; distance captures preserve eye/FOV/unit scale",
+    "Desktop/laptop primary navigation and head controls have >=44px targets and >=16px type",
+    "Tablet and 390px mobile configuration/review layout, explicit fidelity caveat and keyboard-contained help dialog"
+  ],
+  "screenshots": [
+    "vietnamese-home-desktop",
+    "controller-connection-error",
+    "controller-simple-check",
+    "wind-simple-selector",
+    "pilot-front-view",
+    "settings-advanced-collapsed",
+    "settings-advanced-expanded",
+    "pilot-station-diagram",
+    "pilot-technical-marker",
+    "instructor-dashboard",
+    "mock-examination-laptop",
+    "pilot-figure-eight",
+    "pilot-outer-circuit",
+    "pilot-distance-first",
+    "pilot-distance-second",
+    "training-laptop",
+    "settings-tablet",
+    "controller-mobile",
+    "home-mobile"
+  ],
+  "perspective": [
+    {
+      "mission": "figure-eight",
+      "capture": "first",
+      "position": [
+        9.443829821854298,
+        5.320313073370818,
+        -5.900860153505338
+      ],
+      "distance": 24.77166359925294,
+      "pixelHeight": 17.43513658403033,
+      "eye": [
+        0,
+        1.665,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "phase": "EXECUTING"
+    },
+    {
+      "mission": "figure-eight",
+      "capture": "second",
+      "position": [
+        -20.01327670187329,
+        0.32117448776230256,
+        0.0032031434755732282
+      ],
+      "distance": 26.256853347796703,
+      "pixelHeight": 16.76306115422706,
+      "eye": [
+        0,
+        1.665,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "phase": "COMPLETED"
+    },
+    {
+      "mission": "outer-circuit",
+      "capture": "first",
+      "position": [
+        15.40552520564492,
+        5.32009438931806,
+        -8.993404827145337
+      ],
+      "distance": 30.215679727082485,
+      "pixelHeight": 14.394349698709362,
+      "eye": [
+        0,
+        1.665,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "phase": "EXECUTING"
+    },
+    {
+      "mission": "outer-circuit",
+      "capture": "second",
+      "position": [
+        -4.160142380083248,
+        5.320015214068209,
+        8.97548306172799
+      ],
+      "distance": 9.038786241259338,
+      "pixelHeight": 41.976871097697796,
+      "eye": [
+        0,
+        1.665,
+        17
+      ],
+      "fov": 70,
+      "zoom": 1,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "phase": "EXECUTING"
+    }
+  ],
+  "controls": [
+    {
+      "text": "Trang chủ",
+      "height": 44,
+      "width": 99.453125,
+      "font": "16px"
+    },
+    {
+      "text": "Luyện tập",
+      "height": 44,
+      "width": 103.5625,
+      "font": "16px"
+    },
+    {
+      "text": "Thi thử",
+      "height": 44,
+      "width": 78.734375,
+      "font": "16px"
+    },
+    {
+      "text": "Giảng viên",
+      "height": 44,
+      "width": 104.5,
+      "font": "16px"
+    },
+    {
+      "text": "Xem lại bài bay",
+      "height": 44,
+      "width": 137.390625,
+      "font": "16px"
+    },
+    {
+      "text": "Cài đặt",
+      "height": 44,
+      "width": 78.703125,
+      "font": "16px"
+    },
+    {
+      "text": "← Trái",
+      "height": 44,
+      "width": 73.125,
+      "font": "16px"
+    },
+    {
+      "text": "↑ Lên",
+      "height": 44,
+      "width": 65.140625,
+      "font": "16px"
+    },
+    {
+      "text": "Nhìn thẳng",
+      "height": 44,
+      "width": 104.28125,
+      "font": "16px"
+    },
+    {
+      "text": "↓ Xuống",
+      "height": 44,
+      "width": 84.71875,
+      "font": "16px"
+    },
+    {
+      "text": "Phải →",
+      "height": 44,
+      "width": 78.46875,
+      "font": "16px"
+    }
+  ],
+  "errors": [],
+  "note": "Reference missions and capture-only scripted head turns are software QA; no human usability or RC hardware validation."
+}

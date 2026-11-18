@@ -1,11 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { PerspectiveCamera, Vector3 } from "three";
+import { config } from "../arena/geometry";
+import { simpleWeather, windLevels } from "../training/weatherPresets";
 import {
   PILOT_STATION,
   applyPilotCamera,
   pilotBearing,
   validStation,
+  frontPilotStation,
+  stationFromEdge,
+  validFrontStation,
 } from "../training/pilot";
 import {
   ControllerInput,
@@ -86,19 +91,20 @@ test("pilot camera remains fixed under head look; bearing and perspective size f
   const c = new PerspectiveCamera(55, 1.6, 0.06, 1200);
   applyPilotCamera(c, PILOT_STATION);
   const eye = c.position.clone();
-  const projectHeight = (x: number) => {
+  applyPilotCamera(c, PILOT_STATION, -Math.PI / 2, 0);
+  const projectHeight = (distance: number) => {
     c.updateMatrixWorld();
-    const a = new Vector3(x, 1.165, 0).project(c),
-      b = new Vector3(x, 2.165, 0).project(c);
+    const a = new Vector3(0, 1.115, PILOT_STATION.z - distance).project(c),
+      b = new Vector3(0, 2.115, PILOT_STATION.z - distance).project(c);
     return Math.abs(a.y - b.y);
   };
-  assert.ok(Math.abs(projectHeight(-15) / projectHeight(-5) - 2) < 1e-6);
+  assert.ok(Math.abs(projectHeight(10) / projectHeight(20) - 2) < 1e-6);
   applyPilotCamera(c, PILOT_STATION, 0.7, 0.2);
   assert.deepEqual(c.position.toArray(), eye.toArray());
   assert.equal(c.zoom, 1);
-  assert.equal(c.fov, 60);
-  assert.equal(pilotBearing(PILOT_STATION, [-20, 5, 0]), 0);
-  assert.ok(pilotBearing(PILOT_STATION, [0, 5, 10]) > 0);
+  assert.equal(c.fov, PILOT_STATION.verticalFov);
+  assert.equal(pilotBearing(PILOT_STATION, [0, 5, 0]), -Math.PI / 2);
+  assert.ok(pilotBearing(PILOT_STATION, [-20, 5, 0]) < -Math.PI / 2);
   assert.notEqual(PILOT_STATION.x, -20);
   assert.ok(validStation(PILOT_STATION));
   assert.ok(!validStation({ ...PILOT_STATION, eyeHeight: NaN }));
@@ -441,4 +447,77 @@ test("malformed replay weather and geometry are rejected before rendering", asyn
   delete (badGeometry.geometry as unknown as Record<string, unknown>).reference;
   const sealedGeometry = await seal(badGeometry);
   await assert.rejects(() => parseAttempt(JSON.stringify(sealedGeometry)));
+});
+
+test("front pilot station follows court midpoint and outward edge normal, including rotated edges", () => {
+  const s = frontPilotStation();
+  assert.equal(s.x, 0);
+  assert.equal(s.z, config.concrete.width / 2 + 3.5);
+  assert.ok(validFrontStation(s));
+  assert.ok(s.z > config.concrete.width / 2 + config.paint.v1Width / 2);
+  const t = stationFromEdge([10, -20], [10, 20], [0, 0], 3, -0.035);
+  assert.equal(t.x, 13);
+  assert.equal(t.z, 0);
+  assert.ok(Math.abs(Math.abs(t.initialYaw!) - Math.PI) < 1e-8);
+  const reversed = stationFromEdge([10, 20], [10, -20], [0, 0], 3, -0.035);
+  assert.deepEqual(reversed, t);
+  assert.ok(!validFrontStation({ ...s, x: 1 }));
+  assert.ok(!validFrontStation({ ...s, setback: NaN }));
+  // Old archived station remains readable; it is never selected as the new default.
+  assert.ok(
+    validStation({
+      ...s,
+      x: -25,
+      z: 0,
+      edge: undefined,
+      setback: undefined,
+      initialYaw: undefined,
+      initialPitch: undefined,
+    }),
+  );
+});
+
+test("simple wind presets reuse existing physical values independently of cloud and rain", () => {
+  for (const level of Object.keys(windLevels) as (keyof typeof windLevels)[]) {
+    const a = simpleWeather(level, "clear"),
+      b = simpleWeather(level, "rain");
+    for (const key of ["wind", "gust", "turbulence", "direction"] as const)
+      assert.equal(a[key], b[key]);
+    assert.equal(a.rain, 0);
+    assert.equal(b.rain, 0.3);
+  }
+  assert.deepEqual(
+    [
+      simpleWeather("calm", "clear").wind,
+      simpleWeather("calm", "clear").gust,
+      simpleWeather("calm", "clear").turbulence,
+    ],
+    [0, 0, 0],
+  );
+  assert.equal(simpleWeather("light", "clear").wind, 1.8);
+  assert.equal(simpleWeather("medium", "cloudy").wind, 3.8);
+  assert.equal(simpleWeather("strong", "clear").wind, 9);
+});
+
+test("legacy archived station stays importable and Vietnamese reporting never edits evidence", async () => {
+  const o = setup();
+  const archived = o.s.snapshot();
+  archived.softwareVersion = "uav-arena-0.2.0";
+  archived.pilotStation = {
+    x: -25,
+    z: 0,
+    groundY: -0.035,
+    eyeHeight: 1.65,
+    verticalFov: 60,
+    source: "Historical west station",
+    confidence: "Unverified",
+    verification: "PROVISIONAL",
+  };
+  const sealed = await seal(archived),
+    parsed = await parseAttempt(JSON.stringify(sealed));
+  const { learnerReport } = await import("../ui/vi");
+  assert.match(learnerReport(parsed.payload), /BÁO CÁO LUYỆN BAY/);
+  assert.match(learnerReport(parsed.payload), /không tự kết luận đạt/);
+  assert.equal((await seal(parsed.payload)).sha256, sealed.sha256);
+  assert.equal(parsed.payload.pilotStation.x, -25);
 });

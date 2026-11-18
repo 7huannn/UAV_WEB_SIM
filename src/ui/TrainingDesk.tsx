@@ -16,7 +16,21 @@ import {
   type Channel,
   type ControllerProfile,
 } from "../training/input";
-import { PILOT_STATION, type PilotStation } from "../training/pilot";
+import { vi, learnerReport } from "./vi";
+import {
+  InputCheck,
+  WindSelector,
+  PilotDiagram,
+  preference,
+  remember,
+} from "./LearnerControls";
+import { weatherSummary } from "../training/weatherPresets";
+import {
+  PILOT_STATION,
+  frontPilotStation,
+  validFrontStation,
+  type PilotStation,
+} from "../training/pilot";
 import type { Attempt } from "../training/Session";
 import {
   loadAttempts,
@@ -25,7 +39,6 @@ import {
   seal,
   download,
   attemptCSV,
-  readableReport,
   replayAt,
   addAnnotation,
   annotationsFor,
@@ -34,6 +47,7 @@ import {
   type SealedAttempt,
 } from "../training/records";
 export const workspaces = [
+  "Home",
   "Training",
   "Mock Examination",
   "Instructor",
@@ -46,6 +60,7 @@ export const workspaces = [
 const views = [
   "PILOT VLOS",
   "Overview",
+  "Orbit",
   "Top down",
   "Ground",
   "Follow",
@@ -70,7 +85,7 @@ function TraceMap({ attempt, at }: { attempt: Attempt; at: number }) {
       className="training-map"
       viewBox="-5 -5 280 172"
       role="img"
-      aria-label="Reference route and recorded candidate trace"
+      aria-label="Đường bay mẫu và vệt bay học viên đã ghi"
     >
       <rect
         x="0"
@@ -142,7 +157,7 @@ function TelemetryPlots({ attempt, at }: { attempt: Attempt; at: number }) {
   ];
   return (
     <section className="procedure-card telemetry-plots">
-      <h2>Recorded telemetry history</h2>
+      <h2>Biểu đồ bài bay đã ghi</h2>
       {panels.map((panel) => (
         <div key={panel.name}>
           <p>
@@ -179,11 +194,11 @@ function TelemetryPlots({ attempt, at }: { attempt: Attempt; at: number }) {
         </div>
       ))}
       <div>
-        <p>RC inputs −1…+1 · throttle / yaw / pitch / roll</p>
+        <p>Cần điều khiển −1…+1: lên xuống / xoay / tiến lùi / trái phải</p>
         <svg
           viewBox="0 0 320 72"
           role="img"
-          aria-label="Recorded controller input history"
+          aria-label="Lịch sử cần điều khiển đã ghi"
         >
           <path d="M0 32H320" stroke="#b5c3a7" />
           {channels.map((k, i) => (
@@ -210,14 +225,14 @@ function TelemetryPlots({ attempt, at }: { attempt: Attempt; at: number }) {
               fill={["#3c704b", "#cc8044", "#557ea1", "#9b659b"][i]}
               fontSize="7"
             >
-              {k}
+              {vi(k)}
             </text>
           ))}
         </svg>
       </div>
       <p className="training-muted">
-        Plots sample at most 1000 recorded points for display. JSON/CSV preserve
-        every recorded sample. Orange cursor follows replay time.
+        Biểu đồ hiển thị tối đa 1.000 mẫu. Tệp JSON/CSV giữ toàn bộ dữ liệu.
+        Vạch cam chỉ thời điểm đang xem.
       </p>
     </section>
   );
@@ -226,21 +241,29 @@ export function TrainingDesk({
   w,
   t,
   page,
+  navigate,
 }: {
   w: World | null;
   t: Telemetry;
   page: string;
+  navigate: (page: string) => void;
 }) {
+  const [guide, setGuide] = useState(() =>
+    preference("uav-show-guide", "yes") === "yes" ? 0 : -1,
+  );
   const [, refresh] = useState(0),
     [candidate, setCandidate] = useState(""),
-    [profile, setProfile] = useState<ProfileId>("figure-eight"),
+    [profile, setProfile] = useState<ProfileId>(() => {
+      const p = preference("uav-preferred-profile", "figure-eight");
+      return Object.hasOwn(profiles, p) ? (p as ProfileId) : "figure-eight";
+    }),
     [message, setMessage] = useState(
-      "Prepare a manual training attempt. All tolerances are training-only.",
+      "Chọn bài bay và kiểm tra điều khiển để bắt đầu. Các tiêu chí chỉ dùng luyện tập.",
     ),
     [stored, setStored] = useState<SealedAttempt[]>([]),
     [selected, setSelected] = useState<Attempt | null>(null),
     [notes, setNotes] = useState<Annotation[]>([]),
-    [author, setAuthor] = useState("Instructor"),
+    [author, setAuthor] = useState("Giảng viên"),
     [note, setNote] = useState(""),
     [noteKind, setNoteKind] = useState<Annotation["kind"]>("NOTE"),
     [draft, setDraft] = useState<ControllerProfile>(mode2()),
@@ -248,24 +271,30 @@ export function TrainingDesk({
       [],
     ),
     [station, setStation] = useState<PilotStation>({ ...PILOT_STATION });
+  const panelRef = useRef<HTMLElement>(null);
   const saveKey = useRef(""),
     lastCheckpoint = useRef(0),
     extremes = useRef<Record<number, { min: number; max: number }>>({});
   const s = w?.session,
     locked = !!s?.locked,
     strict = !!s?.strict;
+  useEffect(() => {
+    panelRef.current?.scrollTo({ top: 0 });
+  }, [s?.state, page, guide]);
   const update = () => refresh((n) => n + 1);
   const run = (fn: () => unknown, success?: string) => {
     try {
       const result = fn();
       if (result === false)
         setMessage(
-          "Action unavailable. Check the procedure, landed H condition, neutral sticks and controller connection.",
+          "Chưa thể thực hiện. Kiểm tra đúng bước, máy bay đã ở H, các cần ở trung tâm và thiết bị đã kết nối.",
         );
-      else if (success) setMessage(success);
+      else if (success) setMessage(vi(success));
       update();
     } catch (e) {
-      setMessage(String(e));
+      setMessage(
+        `Không thực hiện được. Kiểm tra lại thao tác hoặc xuất bản ghi để giữ dữ liệu. Chi tiết kỹ thuật: ${String(e)}`,
+      );
     }
   };
   async function reload() {
@@ -277,7 +306,7 @@ export function TrainingDesk({
       );
     } catch (e) {
       setMessage(
-        `Storage unavailable: ${String(e)}. Export JSON to retain evidence.`,
+        `Không đọc được bộ nhớ. Xuất JSON để giữ dữ liệu. Chi tiết: ${String(e)}`,
       );
     }
   }
@@ -301,7 +330,7 @@ export function TrainingDesk({
   }, [w, page]);
   useEffect(() => {
     if (!s) return;
-    const key = `${s.attempt.id}:${s.state}`;
+    const key = `${s.attempt.id}:${vi(s.state)}`;
     const final = isFinal(s.state);
     if (
       (final && saveKey.current !== key) ||
@@ -312,19 +341,21 @@ export function TrainingDesk({
       void saveAttempt(s.snapshot())
         .then(() => {
           if (final) {
-            setMessage("Attempt saved offline. Human review remains required.");
+            setMessage(
+              "Đã lưu bài bay trên thiết bị này. Cần giảng viên đánh giá kết quả.",
+            );
             void reload();
           }
         })
         .catch((e) => {
-          setMessage(`Save failed: ${String(e)}. Export JSON now.`);
+          setMessage(
+            `Chưa lưu được bài bay. Hãy xuất JSON để giữ bản ghi. Chi tiết: ${String(e)}`,
+          );
         });
     }
   }, [t.time, s?.state]);
   if (!w)
-    return (
-      <aside className="training-panel">Connecting training system…</aside>
-    );
+    return <aside className="training-panel">Đang kết nối mô phỏng…</aside>;
   const current = selected ?? s?.attempt ?? null;
   const replay = w.replay,
     frame = replay ? replayAt(replay.attempt.frames, replay.time) : null;
@@ -342,7 +373,7 @@ export function TrainingDesk({
         saveKey.current = "";
       }
       return ok;
-    }, "Preflight opened. Checklist acknowledgements are self-reported simulation checks.");
+    }, "Hãy kiểm tra từng mục trước bay. Đây là xác nhận của học viên trong mô phỏng.");
   const exportFile = async (format: "JSON" | "CSV" | "Report") => {
     if (!current) return;
     try {
@@ -360,17 +391,19 @@ export function TrainingDesk({
       else
         download(
           `${current.id}-report.txt`,
-          readableReport(current, notes),
+          learnerReport(current, notes),
           "text/plain",
         );
     } catch (e) {
-      setMessage(String(e));
+      setMessage(
+        `Không thực hiện được. Kiểm tra lại thao tác hoặc xuất bản ghi để giữ dữ liệu. Chi tiết kỹ thuật: ${String(e)}`,
+      );
     }
   };
   async function openAttempt(a: Attempt) {
     if (!w) return;
     if (locked) {
-      setMessage("Finish or abort the current attempt before replay.");
+      setMessage("Hoàn tất hoặc hủy bài đang bay trước khi mở phát lại.");
       return;
     }
     try {
@@ -383,18 +416,20 @@ export function TrainingDesk({
       } else {
         w.setReplay(null);
         setMessage(
-          "No trajectory samples in this attempt. Only procedural metadata can be reviewed.",
+          "Bài này chưa có mẫu đường bay. Chỉ có thể xem thông tin và các bước đã ghi.",
         );
       }
       update();
     } catch (e) {
-      setMessage(String(e));
+      setMessage(
+        `Không thực hiện được. Kiểm tra lại thao tác hoặc xuất bản ghi để giữ dữ liệu. Chi tiết kỹ thuật: ${String(e)}`,
+      );
     }
   }
   async function importFile(file: File | undefined) {
     if (!file) return;
     if (file.size > 100_000_000) {
-      setMessage("Import limit is 100 MB.");
+      setMessage("Tệp quá lớn. Chọn bản ghi JSON không quá 100 MB.");
       return;
     }
     try {
@@ -411,10 +446,12 @@ export function TrainingDesk({
       await reload();
       await openAttempt(e.payload);
       setMessage(
-        "Simulation recording imported and checksum verified. Provenance is self-reported, not a device signature.",
+        "Đã nhập bản ghi và kiểm tra checksum. Đây là dữ liệu mô phỏng tự khai báo, không có chữ ký thiết bị.",
       );
     } catch (e) {
-      setMessage(`Import rejected: ${String(e)}`);
+      setMessage(
+        `Không thể nhập tệp. Chọn đúng bản ghi mô phỏng JSON còn nguyên vẹn. Chi tiết: ${String(e)}`,
+      );
     }
   }
   function axisUpdate(k: Channel, key: string, value: number | boolean) {
@@ -433,58 +470,193 @@ export function TrainingDesk({
     <>
       <aside
         className={`training-panel ${flyPage ? "" : "wide-panel"}`}
-        aria-label={`${page} workspace`}
+        aria-label={`${vi(page)} · nội dung`}
+        id="main-content"
+        tabIndex={-1}
+        ref={panelRef}
       >
         <div className="training-eyebrow">
-          UAV PRACTICAL TRAINING <span>LOCAL / OFFLINE</span>
+          LUYỆN BAY UAV<span>LƯU TRÊN THIẾT BỊ</span>
         </div>
-        <h1>{page}</h1>
-        <p className="training-intro">
-          {page === "Mock Examination"
-            ? "SIMULATED / PRACTICE EXAMINATION. Manual flight, fixed Pilot VLOS, locked profile and no guidance aids."
-            : page === "Training"
-              ? "Practise procedures and complete courses from the pilot’s fixed observation station."
-              : "Instructor tools and inspectable practice evidence. No official certification."}
+        <h1>{vi(page)}</h1>
+        <p className="training-intro" hidden={flyPage && locked}>
+          {vi(
+            page === "Mock Examination"
+              ? "SIMULATED / PRACTICE EXAMINATION. Manual flight, fixed Pilot VLOS, locked profile and no guidance aids."
+              : page === "Training"
+                ? "Practise procedures and complete courses from the pilot’s fixed observation station."
+                : "Instructor tools and inspectable practice evidence. No official certification.",
+          )}
         </p>
         {flyPage && (
           <>
-            <div className="training-callout">
-              Position-stabilized velocity mode. Sticks command body-frame
-              movement, climb and yaw rate. Release holds the last target. No
-              attitude/rate flight mode.
-            </div>
-            <fieldset disabled={locked || !!replay}>
-              <legend>Attempt setup</legend>
-              <label>
-                Candidate identifier
-                <input
-                  aria-label="Candidate identifier"
-                  maxLength={80}
-                  value={candidate}
-                  onChange={(e) => setCandidate(e.target.value)}
-                />
-              </label>
-              <label>
-                Training profile
-                <select
-                  aria-label="Training profile"
-                  value={profile}
-                  onChange={(e) => setProfile(e.target.value as ProfileId)}
-                >
-                  {Object.entries(profiles).map(([id, p]) => (
-                    <option key={id} value={id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p className="training-muted">
-                {profiles[profile].version} · {rules.version} · TRAINING_ONLY
-              </p>
-              <button className="training-primary" onClick={begin}>
-                Prepare attempt
+            <details className="control-explanation" hidden={locked}>
+              <summary>Chế độ điều khiển này hoạt động thế nào?</summary>
+              <div className="training-callout">
+                Cần điều khiển ra lệnh di chuyển theo hướng máy bay. Thả cần để
+                hệ thống giữ mục tiêu. Đây là chế độ ổn định vị trí, không tương
+                đương điều khiển góc nghiêng hay ga trực tiếp trên UAV thật.
+              </div>
+            </details>
+            {!locked && (
+              <button
+                onClick={() => {
+                  setGuide(0);
+                  remember("uav-show-guide", "yes");
+                }}
+              >
+                Hướng dẫn từng bước
               </button>
-            </fieldset>
+            )}
+            {!locked && guide >= 0 && (
+              <section
+                className="procedure-card setup-guide"
+                aria-label="Hướng dẫn bắt đầu"
+              >
+                <p>Bước {guide + 1} / 4</p>
+                <h2>
+                  {
+                    [
+                      "Chọn chế độ",
+                      "Chọn bài bay",
+                      "Kiểm tra điều khiển",
+                      "Sẵn sàng bắt đầu",
+                    ][guide]
+                  }
+                </h2>
+                {guide === 0 && (
+                  <div className="training-actions">
+                    <button
+                      onClick={() => {
+                        navigate("Training");
+                        setGuide(1);
+                      }}
+                    >
+                      Luyện tập
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("Mock Examination");
+                        setGuide(1);
+                      }}
+                    >
+                      Thi thử
+                    </button>
+                  </div>
+                )}
+                {guide === 3 && (
+                  <p>
+                    Bạn sẽ tự cất cánh và hạ cánh. Bắt đầu tại H, giữ cần ở
+                    trung tâm và làm từng mục kiểm tra. Mọi kết quả đều cần
+                    giảng viên đánh giá.
+                  </p>
+                )}
+              </section>
+            )}
+            {!locked && (
+              <fieldset disabled={locked || !!replay}>
+                <legend>Chuẩn bị</legend>
+                {(guide < 0 || guide === 1) && (
+                  <>
+                    <label>
+                      Tên hoặc mã học viên
+                      <input
+                        aria-label="Tên hoặc mã học viên"
+                        maxLength={80}
+                        value={candidate}
+                        onChange={(e) => setCandidate(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Chọn bài bay
+                      <select
+                        aria-label="Chọn bài bay"
+                        value={profile}
+                        onChange={(e) => {
+                          setProfile(e.target.value as ProfileId);
+                          remember("uav-preferred-profile", e.target.value);
+                        }}
+                      >
+                        {Object.entries(profiles).map(([id, p]) => (
+                          <option key={id} value={id}>
+                            {vi(p.name)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </>
+                )}
+                {guide < 0 || guide === 2 ? (
+                  <InputCheck w={w} onUpdate={update} />
+                ) : null}
+                {(guide < 0 || guide === 1) && page === "Training" && (
+                  <WindSelector w={w} onUpdate={update} />
+                )}
+                {page === "Mock Examination" && (
+                  <p>
+                    Thời tiết do giảng viên chọn:{" "}
+                    {weatherSummary(w.weather.target)}. Điều kiện sẽ khóa khi
+                    chuẩn bị bài.
+                  </p>
+                )}
+                <p className="training-muted">
+                  Chỉ dùng luyện tập · cần giảng viên đánh giá
+                </p>
+                {guide === 3 && (
+                  <p>
+                    Bài đã chọn: {vi(profiles[profile].name)} ·{" "}
+                    {w.input.source === "Keyboard"
+                      ? "Bàn phím"
+                      : "Tay điều khiển"}
+                    .
+                  </p>
+                )}
+                {(guide < 0 || guide === 3) && (
+                  <button
+                    className="training-primary"
+                    disabled={
+                      w.input.source === "Gamepad" &&
+                      (!w.input.connected || !!w.input.fault)
+                    }
+                    onClick={() => {
+                      begin();
+                      setGuide(-1);
+                      remember("uav-show-guide", "no");
+                    }}
+                  >
+                    Chuẩn bị bài bay
+                  </button>
+                )}
+              </fieldset>
+            )}
+            {!locked && guide >= 0 && (
+              <div className="training-actions">
+                {guide > 0 && (
+                  <button onClick={() => setGuide(guide - 1)}>Quay lại</button>
+                )}
+                {guide < 3 && (
+                  <button
+                    className="training-primary"
+                    disabled={
+                      guide === 2 &&
+                      w.input.source === "Gamepad" &&
+                      (!w.input.connected || !!w.input.fault)
+                    }
+                    onClick={() => setGuide(guide + 1)}
+                  >
+                    Tiếp theo
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setGuide(-1);
+                    remember("uav-show-guide", "no");
+                  }}
+                >
+                  Bỏ qua hướng dẫn
+                </button>
+              </div>
+            )}
             {replay && (
               <button
                 onClick={() =>
@@ -495,13 +667,36 @@ export function TrainingDesk({
                   })
                 }
               >
-                Close replay before flying
+                Đóng phát lại để chuẩn bị bay
               </button>
+            )}
+            {s && (
+              <section
+                className="essential-status"
+                aria-label="Trạng thái bài bay"
+              >
+                <b>{vi(s.state)}</b>
+                <p>
+                  {w.input.source === "Keyboard"
+                    ? "Bàn phím"
+                    : w.input.connected
+                      ? "Tay điều khiển đã kết nối"
+                      : "Chưa kết nối tay điều khiển"}
+                </p>
+                {w.input.fault && <p>{vi(w.input.fault)}</p>}
+                {!strict && (
+                  <p>
+                    Độ cao {fixed(t.altitude, 1)} m · tốc độ{" "}
+                    {fixed(t.groundSpeed, 1)} m/s
+                  </p>
+                )}
+              </section>
             )}
             {s && (
               <section className="procedure-card">
                 <div className="training-eyebrow">
-                  PROCEDURE <b data-testid="exam-state">{s.state}</b>
+                  CÁC BƯỚC THỰC HIỆN
+                  <b data-testid="exam-state">{vi(s.state)}</b>
                 </div>
                 {s.state === "PREFLIGHT" && (
                   <>
@@ -514,7 +709,7 @@ export function TrainingDesk({
                             run(() => s.check("preflight", i, e.target.checked))
                           }
                         />
-                        {text}
+                        {vi(text)}
                       </label>
                     ))}
                     <button
@@ -522,11 +717,11 @@ export function TrainingDesk({
                       onClick={() =>
                         run(
                           () => s.ready(),
-                          "Ready. Arm motors, then begin the manual task.",
+                          "Đã kiểm tra xong. Bật động cơ rồi chọn Bắt đầu bài tập.",
                         )
                       }
                     >
-                      Confirm preflight
+                      Xác nhận kiểm tra trước bay
                     </button>
                   </>
                 )}
@@ -536,12 +731,12 @@ export function TrainingDesk({
                       onClick={() =>
                         run(
                           () => w.drone.arm(),
-                          "Motors armed; no automatic climb.",
+                          "Đã bật động cơ. Máy bay chờ lệnh cất cánh của bạn.",
                         )
                       }
                       disabled={t.armed}
                     >
-                      Arm for manual flight
+                      Bật động cơ
                     </button>
                     <button
                       className="training-primary"
@@ -549,19 +744,19 @@ export function TrainingDesk({
                       onClick={() =>
                         run(
                           () => s.start(w.drone),
-                          "Manual task active. R/F climb/descend; WASD body-frame movement; Q/E yaw.",
+                          "Bài bay đã bắt đầu. R/F lên xuống; W/S tiến lùi; A/D trái phải; Q/E xoay hướng.",
                         )
                       }
                     >
-                      Begin manual task
+                      Bắt đầu bài tập
                     </button>
                   </>
                 )}
                 {s.state === "ACTIVE" && (
                   <>
-                    <h2>{s.task?.label}</h2>
+                    <h2>{vi(s.task?.label)}</h2>
                     <p>
-                      Task {s.taskIndex + 1} / {s.attempt.profile.tasks.length}
+                      Phần {s.taskIndex + 1} / {s.attempt.profile.tasks.length}
                     </p>
                     {!strict && (
                       <>
@@ -574,17 +769,17 @@ export function TrainingDesk({
                           }
                         />
                         <p>
-                          Route {Math.round(s.pathProgress * 100)}% · dwell{" "}
-                          {fixed(s.dwell, 1)} s
+                          Đường bay {Math.round(s.pathProgress * 100)}% · giữ ổn
+                          định {fixed(s.dwell, 1)} s
                         </p>
                         <p>
-                          Altitude error {fixed(s.altitudeError)} m · lateral{" "}
+                          Lệch độ cao {fixed(s.altitudeError)} m · lệch ngang{" "}
                           {fixed(s.lateral)} m
                         </p>
                         {s.task?.kind === "orientation" && (
                           <p>
-                            Heading target{" "}
-                            {[0, 90, 180, -90][s.orientationIndex]}° · error{" "}
+                            Hướng cần giữ{" "}
+                            {[0, 90, 180, -90][s.orientationIndex]}° · lệch{" "}
                             {fixed(s.headingError, 0)}°
                           </p>
                         )}
@@ -595,11 +790,11 @@ export function TrainingDesk({
                         onClick={() =>
                           run(
                             () => s.acknowledgeAbnormal(),
-                            "Recovery plan acknowledged for instructor review. Return to H and land manually.",
+                            "Đã xác nhận phương án để giảng viên đánh giá. Tự đưa máy bay về H và hạ cánh.",
                           )
                         }
                       >
-                        Acknowledge abnormal briefing & recovery plan
+                        Xác nhận tình huống và phương án xử lý
                       </button>
                     )}
                   </>
@@ -607,26 +802,26 @@ export function TrainingDesk({
                 {s.state === "TASK_COMPLETE" && (
                   <>
                     <p>
-                      Flight tasks observed. Return to H and descend manually
-                      using F / throttle down.
+                      Đã ghi nhận các phần bài bay. Tự đưa máy bay về H và hạ
+                      xuống bằng F hoặc cần xuống.
                     </p>
                     <button
                       className="training-primary"
                       onClick={() =>
                         run(
                           () => s.requestLanding(),
-                          "Landing phase: manual descent, then disarm at ground contact.",
+                          "Tự hạ máy bay xuống H, rồi tắt động cơ sau khi chạm đất ổn định.",
                         )
                       }
                     >
-                      Begin manual landing
+                      Bắt đầu hạ cánh thủ công
                     </button>
                   </>
                 )}
                 {s.state === "LANDING" && (
                   <p>
-                    Descend over H. Disarm only after stable ground contact.
-                    Motors must stop before postflight.
+                    Hạ xuống trên H. Chỉ tắt động cơ khi đã chạm đất ổn định.
+                    Chờ cánh quạt dừng rồi kiểm tra sau bay.
                   </p>
                 )}
                 {s.state === "POSTFLIGHT" && (
@@ -642,7 +837,7 @@ export function TrainingDesk({
                             )
                           }
                         />
-                        {text}
+                        {vi(text)}
                       </label>
                     ))}
                     <button
@@ -651,11 +846,11 @@ export function TrainingDesk({
                       onClick={() =>
                         run(
                           () => s.finish(),
-                          "Practice completed; human review required. No official pass awarded.",
+                          "Đã lưu bài luyện tập. Cần giảng viên đánh giá; không phải kết quả sát hạch chính thức.",
                         )
                       }
                     >
-                      Finish practice & save
+                      Hoàn tất và lưu bài bay
                     </button>
                   </>
                 )}
@@ -666,12 +861,18 @@ export function TrainingDesk({
                       disabled={s.state === "READY"}
                     >
                       {s.state === "PAUSED"
-                        ? "Resume attempt"
-                        : "Pause attempt"}
+                        ? "Tiếp tục bài bay"
+                        : "Tạm dừng bài bay"}
                     </button>
                     <button
                       onClick={() =>
                         run(() => {
+                          if (
+                            !window.confirm(
+                              "Hủy bài bay hiện tại? Bản ghi sẽ được giữ để xem lại; bài này được đánh dấu chưa hoàn thành.",
+                            )
+                          )
+                            return true;
                           s.abort();
                           w.drone.hold();
                           w.drone.paused = false;
@@ -679,25 +880,25 @@ export function TrainingDesk({
                         })
                       }
                     >
-                      Abort attempt
+                      Hủy bài bay
                     </button>
                   </div>
                 )}
                 {s.state === "PREFLIGHT" && (
                   <button onClick={() => run(() => s.abort())}>
-                    Cancel preflight
+                    Hủy chuẩn bị
                   </button>
                 )}
                 {isFinal(s.state) && (
                   <div className="training-result">
-                    <h2>{s.attempt.result.decision.replaceAll("_", " ")}</h2>
+                    <h2>{vi(s.attempt.result.decision)}</h2>
                     <p>
-                      Practice score {fixed(s.attempt.result.practiceScore, 1)}{" "}
+                      Điểm luyện tập {fixed(s.attempt.result.practiceScore, 1)}{" "}
                       / 100
                     </p>
                     <p>
-                      Completed {s.attempt.result.completedTasks.length} tasks.
-                      Landing alone does not establish competence.
+                      Hoàn thành {s.attempt.result.completedTasks.length} phần.
+                      Hạ cánh hoặc điểm cao chưa đủ để kết luận đạt.
                     </p>
                   </div>
                 )}
@@ -706,14 +907,22 @@ export function TrainingDesk({
             <div className="training-actions">
               <button
                 onClick={() =>
-                  run(
-                    () => w.drone.disarm(),
-                    "Thrust removed. Use only on ground or as an intentional emergency action.",
-                  )
+                  run(() => {
+                    if (
+                      w.drone.altitude > 0.12 &&
+                      !window.confirm(
+                        "Dừng khẩn cấp sẽ tắt lực đẩy khi máy bay đang ở trên không. Tiếp tục?",
+                      )
+                    )
+                      return true;
+                    if (w.drone.altitude > 0.12)
+                      s?.abort("Emergency motor stop", true);
+                    w.drone.disarm();
+                  }, "Đã tắt lực đẩy. Kiểm tra trạng thái bài bay và lưu bản ghi.")
                 }
                 disabled={!t.armed}
               >
-                Disarm
+                {t.altitude > 0.12 ? "Dừng khẩn cấp" : "Tắt động cơ"}
               </button>
               <button
                 disabled={locked}
@@ -724,10 +933,10 @@ export function TrainingDesk({
                     w.session = null;
                     setSelected(null);
                     return true;
-                  }, "Aircraft reset at H for a new attempt.")
+                  }, "Đã đặt lại máy bay tại H. Bạn có thể chuẩn bị bài mới.")
                 }
               >
-                Reset at H
+                Thử lại từ H
               </button>
             </div>
             {!strict && (
@@ -742,25 +951,23 @@ export function TrainingDesk({
                       })
                     }
                   />
-                  Training guidance: reference route & candidate trace
+                  Hỗ trợ luyện tập: hiện đường mẫu và vệt bay
                 </label>
                 <p className="training-muted">
-                  Guidance is optional in training; prohibited in mock
-                  examination.
+                  Đường hỗ trợ chỉ có trong luyện tập; được ẩn khi thi thử.
                 </p>
               </>
             )}
             <div className="training-keyboard">
-              <b>Manual input</b>
+              <b>Cách điều khiển</b>
               <p>
-                W/S forward/back · A/D left/right
+                W/S tiến / lùi · A/D trái / phải
                 <br />
-                R/F climb/descend · Q/E yaw · Space pause
+                R/F lên / xuống · Q/E xoay hướng · Space tạm dừng
               </p>
               <p>
-                Click the scene to focus. Text entry neutralizes input and
-                interrupts active attempts. Drag the scene to turn your head;
-                wheel does not magnify Pilot VLOS.
+                Chọn vùng mô phỏng trước khi bay. Nhập chữ sẽ ngắt điều khiển.
+                Kéo chuột để nhìn quanh; con lăn không phóng to góc người lái.
               </p>
             </div>
           </>
@@ -768,221 +975,231 @@ export function TrainingDesk({
         {page === "Controller Calibration" && (
           <>
             <div className="training-callout">
-              Browser Gamepad API only. Connect USB/RC simulator adapter, then
-              press a controller button. Hardware compatibility and latency are
-              UNVERIFIED. No direct WebUSB aircraft control.
+              Cắm tay điều khiển hoặc bộ chuyển USB, rồi nhấn một nút để trình
+              duyệt nhận thiết bị. Chưa xác minh tương thích và độ trễ bằng phần
+              cứng thực. Ứng dụng không gửi lệnh tới máy bay thật.
             </div>
-            <fieldset disabled={locked}>
-              <legend>Input source</legend>
-              <label>
-                Source
-                <select
-                  aria-label="Input source"
-                  value={w.input.source}
-                  onChange={(e) =>
-                    run(() => {
-                      w.input.source = e.target.value as "Keyboard" | "Gamepad";
-                    })
-                  }
-                >
-                  <option>Keyboard</option>
-                  <option>Gamepad</option>
-                </select>
-              </label>
-              <label>
-                Browser gamepad slot
-                <input
-                  aria-label="Gamepad slot"
-                  type="number"
-                  min={0}
-                  max={7}
-                  value={w.input.index}
-                  onChange={(e) =>
-                    run(() => {
-                      w.input.index = Math.max(0, Math.min(7, +e.target.value));
-                    })
-                  }
-                />
-              </label>
-              <p>
-                {w.input.connected ? "Connected" : "Disconnected"} ·{" "}
-                {w.input.device}
-              </p>
-              <p>{w.input.fault}</p>
-            </fieldset>
-            <div className="rc-bars">
-              {channels.map((k) => (
-                <div key={k}>
-                  <span>{k}</span>
-                  <meter min={-1} max={1} value={w.input.value[k]} />
-                  <b>{fixed(w.input.value[k])}</b>
-                </div>
-              ))}
-            </div>
-            <p className="training-muted">
-              Mode 2: left stick climb/yaw; right stick pitch/roll. Centered
-              climb demand, not raw motor throttle. Inspect all channels;
-              browser axis order is device-dependent.
-            </p>
-            <fieldset disabled={locked}>
-              <legend>Mapping & calibration</legend>
-              {controllerProfiles.length > 0 && (
+            <InputCheck w={w} disabled={locked} onUpdate={update} />
+            <details className="technical-settings">
+              <summary>Cài đặt nâng cao · hiệu chỉnh tay điều khiển</summary>
+              <fieldset disabled={locked}>
+                <legend>Thiết bị điều khiển</legend>
                 <label>
-                  Saved mappings
+                  Nguồn điều khiển
                   <select
-                    aria-label="Saved controller profiles"
-                    value=""
-                    onChange={(e) => {
-                      const p = controllerProfiles[+e.target.value];
-                      if (p) setDraft(JSON.parse(JSON.stringify(p)));
-                    }}
+                    aria-label="Thiết bị điều khiển"
+                    value={w.input.source}
+                    onChange={(e) =>
+                      run(() => {
+                        w.input.source = e.target.value as
+                          "Keyboard" | "Gamepad";
+                      })
+                    }
                   >
-                    <option value="" disabled>
-                      Load a saved mapping…
-                    </option>
-                    {controllerProfiles.map((p, i) => (
-                      <option key={i} value={i}>
-                        {p.name}
-                      </option>
-                    ))}
+                    <option value="Keyboard">Bàn phím</option>
+                    <option value="Gamepad">Tay điều khiển</option>
                   </select>
                 </label>
-              )}
-              <label>
-                Profile name
-                <input
-                  aria-label="Controller profile name"
-                  value={draft.name}
-                  maxLength={80}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                />
-              </label>
-              {channels.map((k) => {
-                const a = draft.axes[k];
-                return (
-                  <details key={k} open>
-                    <summary>
-                      {k.toUpperCase()} · raw {fixed(w.input.raw[a.axis])}
-                    </summary>
-                    <div className="calibration-grid">
-                      {(
-                        [
-                          ["axis", 0, 31, 1],
-                          ["min", -1, 1, 0.01],
-                          ["center", -1, 1, 0.01],
-                          ["max", -1, 1, 0.01],
-                          ["deadzone", 0, 0.49, 0.01],
-                        ] as const
-                      ).map(([key, min, max, step]) => (
-                        <label key={key}>
-                          {key}
+                <label>
+                  Số thiết bị trong trình duyệt
+                  <input
+                    aria-label="Số thiết bị"
+                    type="number"
+                    min={0}
+                    max={7}
+                    value={w.input.index}
+                    onChange={(e) =>
+                      run(() => {
+                        w.input.index = Math.max(
+                          0,
+                          Math.min(7, +e.target.value),
+                        );
+                      })
+                    }
+                  />
+                </label>
+                <p>
+                  {w.input.connected ? "Đã kết nối" : "Chưa kết nối"} ·{" "}
+                  {vi(w.input.device)}
+                </p>
+                <p>{vi(w.input.fault)}</p>
+              </fieldset>
+              <div className="rc-bars">
+                {channels.map((k) => (
+                  <div key={k}>
+                    <span>{vi(k)}</span>
+                    <meter min={-1} max={1} value={w.input.value[k]} />
+                    <b>{fixed(w.input.value[k])}</b>
+                  </div>
+                ))}
+              </div>
+              <p className="training-muted">
+                Mode 2: cần trái lên xuống và xoay; cần phải tiến lùi và trái
+                phải. Kiểm tra từng hướng. Lệnh lên xuống là vận tốc, không phải
+                ga động cơ trực tiếp.
+              </p>
+              <fieldset disabled={locked}>
+                <legend>Gán trục và hiệu chỉnh</legend>
+                {controllerProfiles.length > 0 && (
+                  <label>
+                    Cấu hình đã lưu
+                    <select
+                      aria-label="Cấu hình tay điều khiển đã lưu"
+                      value=""
+                      onChange={(e) => {
+                        const p = controllerProfiles[+e.target.value];
+                        if (p) setDraft(JSON.parse(JSON.stringify(p)));
+                      }}
+                    >
+                      <option value="" disabled>
+                        Chọn cấu hình đã lưu…
+                      </option>
+                      {controllerProfiles.map((p, i) => (
+                        <option key={i} value={i}>
+                          {vi(p.name)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <label>
+                  Tên cấu hình
+                  <input
+                    aria-label="Tên cấu hình tay điều khiển"
+                    value={draft.name}
+                    maxLength={80}
+                    onChange={(e) =>
+                      setDraft({ ...draft, name: e.target.value })
+                    }
+                  />
+                </label>
+                {channels.map((k) => {
+                  const a = draft.axes[k];
+                  return (
+                    <details key={k} open>
+                      <summary>
+                        {vi(k)} · tín hiệu thô {fixed(w.input.raw[a.axis])}
+                      </summary>
+                      <div className="calibration-grid">
+                        {(
+                          [
+                            ["axis", 0, 31, 1],
+                            ["min", -1, 1, 0.01],
+                            ["center", -1, 1, 0.01],
+                            ["max", -1, 1, 0.01],
+                            ["deadzone", 0, 0.49, 0.01],
+                          ] as const
+                        ).map(([key, min, max, step]) => (
+                          <label key={key}>
+                            {key}
+                            <input
+                              aria-label={`${k} ${key}`}
+                              type="number"
+                              min={min}
+                              max={max}
+                              step={step}
+                              value={a[key]}
+                              onChange={(e) =>
+                                axisUpdate(k, key, +e.target.value)
+                              }
+                            />
+                          </label>
+                        ))}
+                        <label className="training-check">
                           <input
-                            aria-label={`${k} ${key}`}
-                            type="number"
-                            min={min}
-                            max={max}
-                            step={step}
-                            value={a[key]}
+                            aria-label={`${k} inverted`}
+                            type="checkbox"
+                            checked={a.inverted}
                             onChange={(e) =>
-                              axisUpdate(k, key, +e.target.value)
+                              axisUpdate(k, "inverted", e.target.checked)
                             }
                           />
+                          Đảo chiều
                         </label>
-                      ))}
-                      <label className="training-check">
-                        <input
-                          aria-label={`${k} inverted`}
-                          type="checkbox"
-                          checked={a.inverted}
-                          onChange={(e) =>
-                            axisUpdate(k, "inverted", e.target.checked)
+                      </div>
+                      <div className="training-actions">
+                        <button
+                          disabled={!w.input.raw.length}
+                          onClick={() =>
+                            axisUpdate(k, "center", w.input.raw[a.axis] ?? 0)
                           }
-                        />
-                        Invert
-                      </label>
-                    </div>
-                    <div className="training-actions">
-                      <button
-                        disabled={!w.input.raw.length}
-                        onClick={() =>
-                          axisUpdate(k, "center", w.input.raw[a.axis] ?? 0)
-                        }
-                      >
-                        Capture center
-                      </button>
-                      <button
-                        disabled={!w.input.raw.length}
-                        onClick={() =>
-                          setDraft((p) => ({
-                            ...p,
-                            axes: {
-                              ...p.axes,
-                              [k]: {
-                                ...p.axes[k],
-                                min: extremes.current[a.axis]?.min ?? -1,
-                                max: extremes.current[a.axis]?.max ?? 1,
+                        >
+                          Ghi vị trí trung tâm
+                        </button>
+                        <button
+                          disabled={!w.input.raw.length}
+                          onClick={() =>
+                            setDraft((p) => ({
+                              ...p,
+                              axes: {
+                                ...p.axes,
+                                [k]: {
+                                  ...p.axes[k],
+                                  min: extremes.current[a.axis]?.min ?? -1,
+                                  max: extremes.current[a.axis]?.max ?? 1,
+                                },
                               },
-                            },
-                          }))
-                        }
-                      >
-                        Use observed range
-                      </button>
-                    </div>
-                  </details>
-                );
-              })}
-              <div className="training-actions">
-                <button
-                  onClick={() => {
-                    extremes.current = {};
-                    setMessage(
-                      "Range observations cleared. Sweep all axes, then capture center and range.",
-                    );
-                  }}
-                >
-                  Restart range sweep
-                </button>
-                <button onClick={() => setDraft(mode2())}>
-                  Mode 2 defaults
-                </button>
-                <button
-                  className="training-primary"
-                  disabled={!validController(draft)}
-                  onClick={() =>
-                    run(() => {
-                      if (!validController(draft)) return false;
-                      w.input.profile = JSON.parse(
-                        JSON.stringify({ ...draft, hardwareVerified: false }),
+                            }))
+                          }
+                        >
+                          Dùng khoảng đã đo
+                        </button>
+                      </div>
+                    </details>
+                  );
+                })}
+                <div className="training-actions">
+                  <button
+                    onClick={() => {
+                      extremes.current = {};
+                      setMessage(
+                        "Đã xóa số đo cũ. Di chuyển hết hành trình từng cần, thả về trung tâm rồi ghi lại.",
                       );
-                      localStorage.setItem(
-                        "uav-controller",
-                        JSON.stringify(w.input.profile),
-                      );
-                      const library = [
-                        ...controllerProfiles.filter(
-                          (p) => p.name !== w.input.profile.name,
-                        ),
-                        w.input.profile,
-                      ].slice(-20);
-                      localStorage.setItem(
-                        "uav-controller-profiles",
-                        JSON.stringify(library),
-                      );
-                      setControllerProfiles(library);
-                      return true;
-                    }, "Mapping saved locally. Physical controller validation remains required.")
-                  }
-                >
-                  Save controller profile
-                </button>
-              </div>
-            </fieldset>
-            <p className="training-muted">
-              Raw axes: {JSON.stringify(w.input.raw)}
-              <br />
-              Buttons: {JSON.stringify(w.input.buttons)}
-            </p>
+                    }}
+                  >
+                    Đo lại hành trình cần
+                  </button>
+                  <button onClick={() => setDraft(mode2())}>
+                    Khôi phục cách gán Mode 2
+                  </button>
+                  <button
+                    className="training-primary"
+                    disabled={!validController(draft)}
+                    onClick={() =>
+                      run(() => {
+                        if (!validController(draft)) return false;
+                        w.input.profile = JSON.parse(
+                          JSON.stringify({ ...draft, hardwareVerified: false }),
+                        );
+                        localStorage.setItem(
+                          "uav-controller",
+                          JSON.stringify(w.input.profile),
+                        );
+                        const library = [
+                          ...controllerProfiles.filter(
+                            (p) => p.name !== w.input.profile.name,
+                          ),
+                          w.input.profile,
+                        ].slice(-20);
+                        localStorage.setItem(
+                          "uav-controller-profiles",
+                          JSON.stringify(library),
+                        );
+                        setControllerProfiles(library);
+                        return true;
+                      }, "Đã lưu cấu hình trên thiết bị này. Cần kiểm tra từng hướng cần bằng tay điều khiển thực.")
+                    }
+                  >
+                    Lưu cấu hình tay điều khiển
+                  </button>
+                </div>
+              </fieldset>
+              <p className="training-muted">
+                Giá trị trục thô: {JSON.stringify(w.input.raw)}
+                <br />
+                Nút bấm: {JSON.stringify(w.input.buttons)}
+              </p>
+            </details>
           </>
         )}
         {page === "Examination Profiles" && (
@@ -990,25 +1207,25 @@ export function TrainingDesk({
             {Object.values(profiles).map((p) => (
               <section className="procedure-card" key={p.id}>
                 <h2>
-                  {p.name} · v{p.version}
+                  {vi(p.name)} · v{p.version}
                 </h2>
                 <p className="training-tag">
-                  TRAINING_ONLY · OFFICIAL APPLICABILITY UNVERIFIED
+                  CHỈ LUYỆN TẬP · CHƯA XÁC MINH ÁP DỤNG SÁT HẠCH
                 </p>
                 <ol>
                   {p.tasks.map((task) => (
-                    <li key={task.id}>{task.label}</li>
+                    <li key={task.id}>{vi(task.label)}</li>
                   ))}
-                  <li>Manual return, descent, disarm and postflight</li>
+                  <li>Tự đưa về H, hạ cánh, tắt động cơ và kiểm tra sau bay</li>
                 </ol>
                 <p>
-                  Preflight and postflight required. Human review required.
-                  Reference missions do not count as candidate evidence.
+                  Cần kiểm tra trước và sau bay, cùng đánh giá của giảng viên.
+                  Bay mẫu tự động không tính là bài bay của học viên.
                 </p>
               </section>
             ))}
             <details open>
-              <summary>Versioned rule configuration</summary>
+              <summary>Tiêu chí kỹ thuật theo phiên bản</summary>
               <dl className="rule-list">
                 {Object.entries(rules).map(([k, v]) => (
                   <div key={k}>
@@ -1019,20 +1236,20 @@ export function TrainingDesk({
               </dl>
             </details>
             <p>
-              Source register: docs/UAV_EXAMINATION_STANDARDS_RESEARCH.md. No
-              official Vietnamese profile is enabled. Changes require a new
-              version and preserve existing attempt snapshots.
+              Nguồn tiêu chí: docs/UAV_EXAMINATION_STANDARDS_RESEARCH.md. Chưa
+              có bộ tiêu chí sát hạch Việt Nam chính thức được xác minh. Mọi
+              thay đổi cần phiên bản mới; giữ nguyên dữ liệu bài đã bay.
             </p>
           </>
         )}
         {page === "Instructor" && locked && !strict && (
           <section className="procedure-card">
-            <h2>Live instructor controls</h2>
+            <h2>Điều khiển của giảng viên</h2>
             <div className="training-actions">
               <button onClick={() => run(() => s?.pause(w.drone))}>
                 {s?.state === "PAUSED"
-                  ? "Resume live attempt"
-                  : "Pause live attempt"}
+                  ? "Tiếp tục bài đang bay"
+                  : "Tạm dừng bài đang bay"}
               </button>
               <button
                 onClick={() =>
@@ -1044,158 +1261,273 @@ export function TrainingDesk({
                   })
                 }
               >
-                End live attempt
+                Kết thúc bài đang bay
               </button>
             </div>
             <p>
-              Pause before changing environment. Human judgement is appended
-              after the recording is sealed.
+              Tạm dừng trước khi đổi thời tiết. Nhận xét được lưu riêng sau bản
+              ghi.
             </p>
           </section>
         )}
         {(page === "System Configuration" || page === "Instructor") && (
-          <fieldset
-            disabled={strict || !!replay || (locked && s?.state !== "PAUSED")}
-          >
-            <legend>Training environment</legend>
-            <label>
-              Weather scenario
-              <select
-                aria-label="Training weather preset"
-                value={w.weather.preset}
-                onChange={(e) =>
-                  run(() => {
-                    w.weather.setPreset(e.target.value as Preset);
-                    s?.event("WEATHER_CHANGE", e.target.value);
-                  })
+          <>
+            <div className="training-actions">
+              <button onClick={() => navigate("Controller Calibration")}>
+                Kiểm tra tay điều khiển
+              </button>
+              {page === "Instructor" && (
+                <>
+                  <button
+                    disabled={locked}
+                    onClick={() => navigate("Reference missions")}
+                  >
+                    Bay mẫu tự động
+                  </button>
+                  <button
+                    disabled={locked}
+                    onClick={() => navigate("Examination Profiles")}
+                  >
+                    Bài bay và tiêu chí
+                  </button>
+                </>
+              )}
+            </div>
+            {page === "System Configuration" && (
+              <>
+                <InputCheck w={w} disabled={locked} onUpdate={update} />
+                <label>
+                  Hiển thị
+                  <select
+                    aria-label="Hiển thị"
+                    value={w.quality}
+                    onChange={(e) => {
+                      w.setQuality(e.target.value as World["quality"]);
+                      remember("uav-display-quality", e.target.value);
+                      update();
+                    }}
+                    disabled={strict}
+                  >
+                    <option value="Low">Ưu tiên mượt</option>
+                    <option value="Medium">Cân bằng</option>
+                    <option value="High">Ưu tiên hình ảnh</option>
+                    <option value="Ultra">Chi tiết tối đa · máy mạnh</option>
+                  </select>
+                </label>
+                <p className="training-muted">
+                  Chất lượng hình ảnh không thay đổi mô hình bay. Nếu mô phỏng
+                  chậm, chọn Ưu tiên mượt. Không tự đổi chất lượng trong bài thi
+                  thử.
+                </p>
+              </>
+            )}
+            {page === "Instructor" && (
+              <>
+                <h2>Thiết lập trước bài thi thử</h2>
+                <WindSelector
+                  w={w}
+                  assessment
+                  disabled={locked}
+                  onUpdate={update}
+                />
+                <p>
+                  Chỉ áp dụng cho lần mở Thi thử tiếp theo. Không sửa dữ liệu
+                  bài bay đã ghi.
+                </p>
+              </>
+            )}
+            <details className="technical-settings">
+              <summary>Cài đặt nâng cao</summary>
+              <fieldset
+                disabled={
+                  strict ||
+                  !!replay ||
+                  (locked && (page !== "Instructor" || s?.state !== "PAUSED"))
                 }
               >
-                {Object.keys(presets).map((p) => (
-                  <option key={p}>{p}</option>
-                ))}
-              </select>
-            </label>
-            {(
-              [
-                ["wind", 0, 15, 0.1, "m/s"],
-                ["gust", 0, 7, 0.1, "m/s"],
-                ["turbulence", 0, 1, 0.05, "normalized"],
-              ] as const
-            ).map(([key, min, max, step, unit]) => (
-              <label key={key}>
-                {key} · {unit}
-                <input
-                  type="range"
-                  aria-label={`Training ${key}`}
-                  min={min}
-                  max={max}
-                  step={step}
-                  value={w.weather.target[key]}
-                  onChange={(e) =>
-                    run(() => {
-                      w.weather.target[key] = +e.target.value;
-                      s?.event("WEATHER_CHANGE", `${key}=${e.target.value}`);
-                    })
-                  }
-                />
-                {fixed(w.weather.target[key])}
-              </label>
-            ))}
-            <p className="training-muted">
-              Shared wind acts on dynamics. Mock attempt conditions lock at
-              preparation. Physical weather equivalence is unverified.
-            </p>
-          </fieldset>
-        )}
-        {page === "System Configuration" && (
-          <>
-            <div className="training-callout">
-              Pilot station is provisional. H is the aircraft landing location.
-              The diagram does not designate a pilot station. These controls do
-              not make the coordinates official.
-            </div>
-            <fieldset disabled={locked}>
-              <legend>PILOT_STATION · engineering assumption</legend>
-              {(
-                [
-                  ["x", -30, 30, 0.1],
-                  ["z", -21, 21, 0.1],
-                  ["groundY", -0.1, 0.1, 0.005],
-                  ["eyeHeight", 1, 2.2, 0.01],
-                  ["verticalFov", 35, 80, 1],
-                ] as const
-              ).map(([key, min, max, step]) => (
-                <label key={key}>
-                  {key}
-                  <input
-                    aria-label={`Pilot ${key}`}
-                    type="number"
-                    min={min}
-                    max={max}
-                    step={step}
-                    value={station[key]}
+                <legend>Thời tiết chi tiết · luyện tập</legend>
+                <label>
+                  Kịch bản gốc
+                  <select
+                    aria-label="Kịch bản thời tiết luyện tập"
+                    value={
+                      Object.keys(presets).find((p) =>
+                        Object.entries(presets[p as Preset]).every(
+                          ([k, v]) =>
+                            w.weather.target[
+                              k as keyof typeof w.weather.target
+                            ] === v,
+                        ),
+                      ) ?? ""
+                    }
                     onChange={(e) =>
-                      setStation({ ...station, [key]: +e.target.value })
+                      run(() => w.setWeatherPreset(e.target.value as Preset))
+                    }
+                  >
+                    <option value="" disabled>
+                      Đã tùy chỉnh · xem thông số bên dưới
+                    </option>
+                    {Object.keys(presets).map((p) => (
+                      <option key={p} value={p}>
+                        {vi(p)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {(
+                  [
+                    ["wind", 0, 15, 0.1, "Gió nền (m/s)"],
+                    ["direction", 0, 360, 1, "Hướng gió tới · +X = 0°"],
+                    ["gust", 0, 7, 0.1, "Biên độ gió giật (m/s)"],
+                    ["turbulence", 0, 1, 0.05, "Mức nhiễu gió"],
+                    ["rain", 0, 1, 0.05, "Cường độ mưa"],
+                    ["cloud", 0, 1, 0.05, "Mức mây"],
+                    ["visibility", 60, 800, 10, "Tầm nhìn (m)"],
+                    ["timeOfDay", 7, 18, 0.1, "Giờ trong ngày"],
+                  ] as const
+                ).map(([key, min, max, step, label]) => (
+                  <label key={key}>
+                    {label}
+                    <input
+                      aria-label={`Chi tiết ${key}`}
+                      type="range"
+                      min={min}
+                      max={max}
+                      step={step}
+                      value={w.weather.target[key]}
+                      onChange={(e) =>
+                        run(() => w.setAdvancedWeather(key, +e.target.value))
+                      }
+                    />
+                    {fixed(w.weather.target[key])}
+                  </label>
+                ))}
+                <p>
+                  Chuyển thời tiết được hòa trộn trong khoảng vài giây. Khi
+                  chuẩn bị bài, điều kiện đã chọn được cố định và ghi lại. Mưa
+                  chỉ có tác dụng hình ảnh; gió tác động lên mô hình bay.
+                </p>
+              </fieldset>
+              <fieldset disabled={locked || !!replay}>
+                <legend>Vị trí người lái · tạm đề xuất</legend>
+                <PilotDiagram station={station} />
+                {(
+                  [
+                    ["setback", 0.1, 7, 0.1, "Khoảng lùi ngoài V1 (m)"],
+                    ["eyeHeight", 1, 2.2, 0.01, "Chiều cao mắt (m)"],
+                    ["verticalFov", 35, 80, 1, "Góc nhìn dọc (độ)"],
+                  ] as const
+                ).map(([key, min, max, step, label]) => (
+                  <label key={key}>
+                    {label}
+                    <input
+                      type="number"
+                      aria-label={`Pilot ${key}`}
+                      min={min}
+                      max={max}
+                      step={step}
+                      value={station[key] ?? 3.5}
+                      onChange={(e) => {
+                        const value = +e.target.value;
+                        setStation(
+                          key === "setback" && value > 0
+                            ? {
+                                ...frontPilotStation(value),
+                                eyeHeight: station.eyeHeight,
+                                verticalFov: station.verticalFov,
+                              }
+                            : { ...station, [key]: value },
+                        );
+                      }}
+                    />
+                  </label>
+                ))}
+                <p>
+                  X {fixed(station.x, 1)} m · Z {fixed(station.z, 1)} m · ngoài
+                  cạnh V1 phía trước. Không di chuyển H hoặc vạch sân.
+                </p>
+                {!validFrontStation(station) && (
+                  <p role="alert">
+                    Chưa lưu được vị trí. Nhập khoảng lùi lớn hơn 0,025 m và nằm
+                    trong bãi cỏ; chiều cao mắt từ 1 đến 2,2 m; góc nhìn từ 35
+                    đến 80 độ.
+                  </p>
+                )}
+                <button
+                  disabled={!validFrontStation(station)}
+                  onClick={() =>
+                    run(
+                      () => w.configureStation(station),
+                      "Provisional station saved. Validate against authority/site evidence before field use.",
+                    )
+                  }
+                >
+                  Lưu vị trí người lái tạm đề xuất
+                </button>
+              </fieldset>
+              <details>
+                <summary>Hiệu chỉnh màn hình và góc nhìn</summary>
+                <p>
+                  Đo chiều cao vùng ảnh trên màn hình và khoảng cách từ mắt tới
+                  màn hình. Góc nhìn dọc tương ứng = 2 × atan(chiều cao ảnh / (2
+                  × khoảng cách nhìn)). Nhập kết quả ở Góc nhìn dọc trước bài
+                  bay. Góc ngang hiện tại{" "}
+                  {fixed(
+                    (2 *
+                      Math.atan(
+                        Math.tan((w.pilotStation.verticalFov * Math.PI) / 360) *
+                          w.camera.aspect,
+                      ) *
+                      180) /
+                      Math.PI,
+                    1,
+                  )}
+                  °.
+                </p>
+                <p>
+                  Máy bay giữ đúng kích thước mét. Độ phân giải, khoảng cách
+                  nhìn, thị lực và độ trễ làm thay đổi khả năng nhận hướng. Phối
+                  cảnh đúng chưa chứng minh tương đương quan sát ngoài thực địa.
+                  Không thay đổi góc nhìn để phóng đại máy bay trong thi thử.
+                </p>
+              </details>
+              <fieldset disabled={strict}>
+                <legend>Lớp phủ kỹ thuật</legend>
+                <label className="training-check">
+                  <input
+                    type="checkbox"
+                    checked={w.pilotMarker.visible}
+                    onChange={(e) =>
+                      run(() => w.setPilotMarker(e.target.checked))
                     }
                   />
+                  PILOT — Vị trí người điều khiển và hướng nhìn
                 </label>
-              ))}
-              <button
-                className="training-primary"
-                onClick={() =>
-                  run(
-                    () => w.configureStation(station),
-                    "Provisional station saved. Validate against authority/site evidence before field use.",
-                  )
-                }
-              >
-                Save provisional station
-              </button>
-            </fieldset>
-            <p>Source: {w.pilotStation.source}</p>
-            <p>Confidence: {w.pilotStation.confidence}</p>
-            <p>Verification: {w.pilotStation.verification}</p>
-            <p>
-              Vertical FOV {w.pilotStation.verticalFov}° · horizontal FOV{" "}
-              {fixed(
-                (2 *
-                  Math.atan(
-                    Math.tan((w.pilotStation.verticalFov * Math.PI) / 360) *
-                      w.camera.aspect,
-                  ) *
-                  180) /
-                  Math.PI,
-                1,
-              )}
-              ° at current aspect. Aircraft stays at real metre scale. Screen
-              size, viewing distance and acuity require validation.
-            </p>
-            <label>
-              Graphics quality
-              <select
-                aria-label="Training graphics quality"
-                value={w.quality}
-                onChange={(e) =>
-                  run(() => w.setQuality(e.target.value as World["quality"]))
-                }
-              >
-                {["Low", "Medium", "High", "Ultra"].map((q) => (
-                  <option key={q}>{q}</option>
-                ))}
-              </select>
-            </label>
-            <p className="training-muted">
-              {w.stats.gpu}. Observed {w.stats.fps} FPS, {w.stats.physicsHz}{" "}
-              actual steps / wall second. No hardware 60 FPS claim.
-            </p>
-            <details>
-              <summary>Read-only field telemetry boundary</summary>
+                <label className="training-check">
+                  <input
+                    type="checkbox"
+                    checked={w.labels.visible}
+                    onChange={(e) => run(() => w.setLabels(e.target.checked))}
+                  />
+                  Nhãn mốc sân
+                </label>
+                <label className="training-check">
+                  <input
+                    type="checkbox"
+                    checked={w.debug.visible}
+                    onChange={(e) => run(() => w.setDebug(e.target.checked))}
+                  />
+                  Khung va chạm
+                </label>
+              </fieldset>
+              <p className="training-muted">
+                Thông tin kỹ thuật: {w.stats.gpu} · {w.stats.fps} FPS ·{" "}
+                {w.stats.physicsHz} bước vật lý / giây thực. Chưa xác minh hiệu
+                năng phần cứng thực.
+              </p>
               <p>
-                Only sealed simulator JSON can currently be imported. Future
-                aircraft logs require units/frame transform, survey reference,
-                clock offset/uncertainty, aircraft configuration, source hash
-                and signature status. No command transmission, arming or
-                aircraft takeoff integration exists.
+                Chỉ nhập bản ghi mô phỏng JSON. Không có kết nối gửi lệnh, bật
+                động cơ hoặc cất cánh trên máy bay thật.
               </p>
             </details>
           </>
@@ -1204,12 +1536,12 @@ export function TrainingDesk({
           <>
             <div className="training-actions">
               <button onClick={() => void reload()}>
-                Refresh saved attempts
+                Tải lại danh sách bài bay
               </button>
               <label className="file-button">
-                Import simulation JSON
+                Nhập bản ghi mô phỏng JSON
                 <input
-                  aria-label="Import simulation JSON"
+                  aria-label="Nhập bản ghi mô phỏng JSON"
                   type="file"
                   accept=".json,application/json"
                   onChange={(e) => void importFile(e.target.files?.[0])}
@@ -1218,8 +1550,8 @@ export function TrainingDesk({
             </div>
             {stored.length === 0 && (
               <p>
-                No saved attempts yet. Training records are checkpointed offline
-                and sealed at completion or abort.
+                Chưa có bài bay đã lưu. Bản ghi được lưu trên thiết bị khi hoàn
+                tất hoặc hủy bài bay.
               </p>
             )}
             <div className="attempt-list">
@@ -1231,10 +1563,10 @@ export function TrainingDesk({
                   onClick={() => void openAttempt(a.payload)}
                 >
                   <b>
-                    {a.payload.candidate} · {a.payload.profile.name}
+                    {vi(a.payload.candidate)} · {vi(a.payload.profile.name)}
                   </b>
                   <span>
-                    {a.payload.status} ·{" "}
+                    {vi(a.payload.status)} ·{" "}
                     {new Date(a.payload.createdAt).toLocaleString()}
                   </span>
                   <small>{a.sha256.slice(0, 16)}…</small>
@@ -1243,89 +1575,100 @@ export function TrainingDesk({
             </div>
             {locked && (
               <p>
-                Live attempt: {s?.state}.{" "}
+                Bài đang bay: {vi(s?.state)}.{" "}
                 {strict
-                  ? "Instructor aids locked during mock examination."
-                  : "Live metrics and trace are available below; automation remains disabled."}
+                  ? "Công cụ giảng viên bị khóa khi thi thử."
+                  : "Có thể xem số liệu và vệt bay bên dưới. Không có tự động lái."}
               </p>
             )}
             {current && (
               <>
                 <section className="procedure-card">
                   <h2>
-                    {current.candidate} · {current.profile.name}
+                    {vi(current.candidate)} · {vi(current.profile.name)}
                   </h2>
                   <p>
-                    {current.status} · {current.result.decision}
+                    {vi(current.status)} · {vi(current.result.decision)}
                   </p>
-                  <p className="training-tag">
-                    SIMULATED / PRACTICE EXAMINATION
-                  </p>
+                  <p className="training-tag">THI THỬ TRONG MÔ PHỎNG</p>
                   <TraceMap
                     attempt={current}
                     at={replay?.time ?? current.frames.at(-1)?.time ?? 0}
                   />
                   <p className="training-muted">
-                    Green dashed: reference / orange: actual recorded 3D
-                    trajectory projected into plan
+                    Nét đứt xanh: đường mẫu. Nét cam: vệt bay thực đã ghi, chiếu
+                    xuống mặt bằng.
                   </p>
                   <dl className="result-metrics">
                     <div>
-                      <dt>Practice score</dt>
+                      <dt>Điểm luyện tập</dt>
                       <dd>{fixed(current.result.practiceScore, 1)} / 100</dd>
                     </div>
                     <div>
-                      <dt>Max lateral error</dt>
+                      <dt>Lệch ngang lớn nhất</dt>
                       <dd>{fixed(current.result.maxLateral)} m</dd>
                     </div>
                     <div>
-                      <dt>Max altitude error</dt>
+                      <dt>Lệch độ cao lớn nhất</dt>
                       <dd>{fixed(current.result.maxAltitudeError)} m</dd>
                     </div>
                     <div>
-                      <dt>Max speed</dt>
+                      <dt>Tốc độ lớn nhất</dt>
                       <dd>{fixed(current.result.maxSpeed)} m/s</dd>
                     </div>
                     <div>
-                      <dt>Landing error</dt>
+                      <dt>Độ lệch khi hạ cánh</dt>
                       <dd>
                         {current.result.landingError === null
-                          ? "Not observed"
+                          ? "Chưa ghi nhận"
                           : fixed(current.result.landingError) + " m"}
                       </dd>
                     </div>
                     <div>
-                      <dt>Completed tasks</dt>
+                      <dt>Phần bài bay đã hoàn thành</dt>
                       <dd>
-                        {current.result.completedTasks.join(", ") || "None"}
+                        {current.result.completedTasks
+                          .map((id) =>
+                            vi(
+                              current.profile.tasks.find((t) => t.id === id)
+                                ?.label ?? id,
+                            ),
+                          )
+                          .join("; ") || "Chưa có"}
                       </dd>
                     </div>
                     <div>
-                      <dt>Missed route gates</dt>
+                      <dt>Mốc đường bay chưa đi qua</dt>
                       <dd>{current.result.missedRouteGates}</dd>
                     </div>
                   </dl>
                   <p>
-                    Violations (seconds):{" "}
-                    {JSON.stringify(current.result.violations)}
+                    Thời gian vượt giới hạn (giây):{" "}
+                    {Object.entries(current.result.violations)
+                      .map(
+                        ([code, seconds]) =>
+                          `${vi(code)}: ${fixed(seconds, 1)} s`,
+                      )
+                      .join("; ") || "Chưa ghi nhận vượt giới hạn"}
                   </p>
                   <p>
-                    Provenance: {current.rules.status} · {current.rules.source}
+                    Nguồn tiêu chí: {vi(current.rules.status)} ·{" "}
+                    {vi(current.rules.source)}
                   </p>
                   {!isFinal(current.status) && (
                     <p className="training-callout">
-                      Interrupted checkpoint / in-progress evidence. This is not
-                      a completed attempt and cannot establish a pass.
+                      Bản lưu giữa chừng hoặc bài đang bay. Bài chưa hoàn tất,
+                      không thể kết luận đạt.
                     </p>
                   )}
                 </section>
                 {replay && (
                   <section className="procedure-card">
-                    <h2>Recorded-state replay</h2>
+                    <h2>Phát lại bài bay đã ghi</h2>
                     <label>
-                      Simulation time {fixed(replay.time, 2)} s
+                      Thời gian mô phỏng {fixed(replay.time, 2)} s
                       <input
-                        aria-label="Replay time"
+                        aria-label="Thời điểm phát lại"
                         type="range"
                         min={replay.attempt.frames[0]?.time ?? 0}
                         max={replay.attempt.frames.at(-1)?.time ?? 0}
@@ -1346,10 +1689,10 @@ export function TrainingDesk({
                           })
                         }
                       >
-                        {replay.playing ? "Pause replay" : "Play replay"}
+                        {replay.playing ? "Tạm dừng phát lại" : "Phát lại"}
                       </button>
                       <select
-                        aria-label="Replay speed"
+                        aria-label="Tốc độ phát lại"
                         value={replay.speed}
                         onChange={(e) =>
                           run(() => {
@@ -1374,44 +1717,45 @@ export function TrainingDesk({
                           })
                         }
                       >
-                        Recorded camera
+                        Góc nhìn đã ghi
                       </button>
                       <button onClick={() => run(() => w.setReplay(null))}>
-                        Close replay
+                        Đóng phát lại
                       </button>
                     </div>
                     {frame && (
-                      <>
+                      <details>
+                        <summary>Số liệu chi tiết của bản ghi</summary>
                         <p>
-                          Task {frame.task} · {frame.state} · recorded{" "}
-                          {frame.camera}
+                          Phần {vi(frame.task)} · {vi(frame.state)} · góc đã ghi{" "}
+                          {vi(frame.camera)}
                         </p>
                         <p>
                           XYZ {frame.position.map((n) => fixed(n)).join(" / ")}{" "}
                           m<br />
-                          Altitude {fixed(frame.altitude)} m · speed{" "}
+                          Độ cao {fixed(frame.altitude)} m · tốc độ{" "}
                           {fixed(Math.hypot(...frame.velocity))} m/s
                           <br />
-                          Lateral {fixed(frame.lateral)} m · heading error{" "}
+                          Lệch ngang {fixed(frame.lateral)} m · lệch hướng{" "}
                           {fixed(frame.headingError, 1)}°
                         </p>
                         <div className="rc-bars">
                           {channels.map((k) => (
                             <div key={k}>
-                              <span>{k}</span>
+                              <span>{vi(k)}</span>
                               <meter min={-1} max={1} value={frame.rc[k]} />
                               <b>{fixed(frame.rc[k])}</b>
                             </div>
                           ))}
                         </div>
                         <p>
-                          Motors{" "}
+                          Động cơ{" "}
                           {frame.motors.map((n) => fixed(n, 0)).join(" / ")}{" "}
                           rad/s
                           <br />
-                          Wind {frame.wind.map((n) => fixed(n)).join(" / ")} m/s
+                          Gió {frame.wind.map((n) => fixed(n)).join(" / ")} m/s
                         </p>
-                      </>
+                      </details>
                     )}
                   </section>
                 )}
@@ -1420,35 +1764,35 @@ export function TrainingDesk({
                   at={replay?.time ?? current.frames.at(-1)?.time ?? 0}
                 />
                 <section className="procedure-card">
-                  <h2>Append instructor review</h2>
+                  <h2>Nhận xét của giảng viên</h2>
                   <label>
-                    Reviewer
+                    Người đánh giá
                     <input
-                      aria-label="Reviewer"
+                      aria-label="Người đánh giá"
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
                       maxLength={80}
                     />
                   </label>
                   <label>
-                    Review kind
+                    Loại nhận xét
                     <select
-                      aria-label="Review kind"
+                      aria-label="Loại nhận xét"
                       value={noteKind}
                       onChange={(e) =>
                         setNoteKind(e.target.value as Annotation["kind"])
                       }
                     >
-                      <option value="NOTE">Time-stamped annotation</option>
+                      <option value="NOTE">Nhận xét tại thời điểm này</option>
                       <option value="PRACTICE_REVIEW">
-                        Human practice assessment
+                        Đánh giá luyện tập của giảng viên
                       </option>
                     </select>
                   </label>
                   <label>
-                    Observation / decision
+                    Nhận xét hoặc kết luận
                     <textarea
-                      aria-label="Instructor annotation"
+                      aria-label="Nội dung nhận xét"
                       maxLength={2000}
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
@@ -1471,24 +1815,26 @@ export function TrainingDesk({
                           setNotes(await annotationsFor(current.id));
                           setNote("");
                           setMessage(
-                            "Review appended separately. Original recording unchanged.",
+                            "Đã lưu nhận xét riêng. Bản ghi bài bay được giữ nguyên.",
                           );
                         } catch (e) {
-                          setMessage(String(e));
+                          setMessage(
+                            `Không thực hiện được. Kiểm tra lại thao tác hoặc xuất bản ghi để giữ dữ liệu. Chi tiết kỹ thuật: ${String(e)}`,
+                          );
                         }
                       })()
                     }
                   >
-                    Append review
+                    Lưu nhận xét
                   </button>
                   {notes.map((n) => (
                     <p key={n.id}>
-                      {fixed(n.at)}s · {n.author} · {n.kind}: {n.text}
+                      {fixed(n.at)}s · {n.author} · {vi(n.kind)}: {n.text}
                     </p>
                   ))}
                 </section>
-                <details className="procedure-card" open>
-                  <summary>Task / violation timeline</summary>
+                <details className="procedure-card">
+                  <summary>Diễn biến bài bay và lỗi</summary>
                   <ol className="event-timeline">
                     {current.events.map((e, i) => (
                       <li key={i}>
@@ -1502,22 +1848,22 @@ export function TrainingDesk({
                         >
                           {fixed(e.time, 2)}s
                         </button>
-                        <b>{e.code}</b> {e.detail}
+                        <b>{vi(e.code)}</b> {vi(e.detail)}
                       </li>
                     ))}
                   </ol>
                 </details>
                 <details>
-                  <summary>Limitations & evidence provenance</summary>
+                  <summary>Giới hạn và nguồn dữ liệu</summary>
                   <ul>
                     {current.result.limitations.map((l) => (
-                      <li key={l}>{l}</li>
+                      <li key={l}>{vi(l)}</li>
                     ))}
                   </ul>
                   <p>
-                    SHA-256 detects accidental modification; local files are not
-                    authenticated aircraft evidence or secure official exam
-                    records.
+                    SHA-256 giúp phát hiện dữ liệu thay đổi. Tệp cục bộ không
+                    phải dữ liệu máy bay có chữ ký xác thực hay hồ sơ sát hạch
+                    chính thức.
                   </p>
                 </details>
               </>
@@ -1528,7 +1874,7 @@ export function TrainingDesk({
           <div className="training-actions exports">
             {(["JSON", "CSV", "Report"] as const).map((f) => (
               <button key={f} onClick={() => void exportFile(f)}>
-                Export {f}
+                {vi(`Export ${f}`)}
               </button>
             ))}
           </div>
@@ -1539,15 +1885,17 @@ export function TrainingDesk({
       </aside>
       <div className="training-scene-tools">
         <span className="training-scene-label">
-          {strict
-            ? "SIMULATED / PRACTICE EXAMINATION · VLOS LOCKED"
-            : replay
-              ? "INSTRUCTOR · RECORDED STATE REPLAY"
-              : "PILOT TRAINING · SIMULATION"}
+          {vi(
+            strict
+              ? "SIMULATED / PRACTICE EXAMINATION · VLOS LOCKED"
+              : replay
+                ? "INSTRUCTOR · RECORDED STATE REPLAY"
+                : "PILOT TRAINING · SIMULATION",
+          )}
         </span>
         <div className="training-camera-buttons">
           {views
-            .filter((v) => !strict || v === "PILOT VLOS")
+            .filter((v) => (!strict && !flyPage) || v === "PILOT VLOS")
             .map((v) => (
               <button
                 key={v}
@@ -1558,24 +1906,84 @@ export function TrainingDesk({
                 }
                 onClick={() => run(() => w.setCamera(v))}
               >
-                {v}
+                {vi(v)}
               </button>
             ))}
         </div>
+        {flyPage && !strict && (
+          <details className="camera-aids">
+            <summary>Góc quan sát hỗ trợ</summary>
+            <div>
+              {views
+                .filter((v) => v !== "PILOT VLOS")
+                .map((v) => (
+                  <button key={v} onClick={() => run(() => w.setCamera(v))}>
+                    {vi(v)}
+                  </button>
+                ))}
+            </div>
+            <p>Chỉ để học và minh họa. Thi thử chỉ cho phép góc người lái.</p>
+          </details>
+        )}
         {w.cameraMode === "PILOT VLOS" && (
-          <p>
-            Fixed eye {fixed(w.pilotStation.x, 1)},{" "}
-            {fixed(w.pilotStation.groundY + w.pilotStation.eyeHeight)},{" "}
-            {fixed(w.pilotStation.z, 1)} m · {w.pilotStation.verticalFov}°
-            vertical FOV · PROVISIONAL station
-            <br />
-            Drag to turn your head. No orbit, tracking or zoom.
-          </p>
+          <div
+            className="head-controls"
+            role="group"
+            aria-label="Nhìn quanh tại chỗ"
+          >
+            <button
+              aria-label="Nhìn trái"
+              onClick={() => {
+                w.lookPilot(-0.15, 0);
+                update();
+              }}
+            >
+              ← Trái
+            </button>
+            <button
+              aria-label="Nhìn lên"
+              onClick={() => {
+                w.lookPilot(0, 0.12);
+                update();
+              }}
+            >
+              ↑ Lên
+            </button>
+            <button
+              onClick={() => {
+                w.recenterPilot();
+                update();
+              }}
+            >
+              Nhìn thẳng
+            </button>
+            <button
+              aria-label="Nhìn xuống"
+              onClick={() => {
+                w.lookPilot(0, -0.12);
+                update();
+              }}
+            >
+              ↓ Xuống
+            </button>
+            <button
+              aria-label="Nhìn phải"
+              onClick={() => {
+                w.lookPilot(0.15, 0);
+                update();
+              }}
+            >
+              Phải →
+            </button>
+            <span>Kéo chuột để nhìn quanh · đứng tại chỗ</span>
+          </div>
         )}
       </div>
       <div className="training-scene-status">
         <b>
-          {frame ? `REPLAY · ${frame.state}` : (s?.state ?? "READY TO PREPARE")}
+          {frame
+            ? `REPLAY · ${vi(frame.state)}`
+            : (s?.state ?? "READY TO PREPARE")}
         </b>
         <span>
           {strict

@@ -14,6 +14,8 @@ import {
 } from "../weather/Weather";
 import { config } from "../arena/geometry";
 import { missions, type MissionId } from "../simulation/missions";
+import { Home, storedWeather, preference } from "./LearnerControls";
+import { vi } from "./vi";
 import { TrainingDesk, workspaces } from "./TrainingDesk";
 const iconPaths: Record<string, string> = {
   drone:
@@ -205,8 +207,9 @@ function Toggle({
 }
 export default function App() {
   const mount = useRef<HTMLDivElement>(null),
-    world = useRef<World | null>(null);
-  const [workspace, setWorkspace] = useState("Training");
+    world = useRef<World | null>(null),
+    practiceEnvironment = useRef<WeatherParams | null>(null);
+  const [workspace, setWorkspace] = useState("Home");
   const [t, setT] = useState(initial),
     [stats, setStats] = useState(initialStats),
     [camera, setCamera] = useState<CameraMode>("Overview"),
@@ -235,7 +238,14 @@ export default function App() {
         setStats(s);
       });
       world.current = w;
-      w.setWorkspace("Training");
+      w.setWorkspace("Home");
+      w.setCamera("PILOT VLOS");
+      w.weather.target = storedWeather();
+      if (preference("uav-input-source", "Keyboard") === "Gamepad")
+        w.input.source = "Gamepad";
+      const savedQuality = preference("uav-display-quality", "");
+      if (["Low", "Medium", "High", "Ultra"].includes(savedQuality))
+        w.setQuality(savedQuality as Quality);
       setQuality(w.quality);
       if (w.quality === "Low")
         setNotice("Software rendering detected. Low graphics selected.");
@@ -252,12 +262,61 @@ export default function App() {
   }, []);
   useEffect(() => {
     if (!dialog) return;
+    const previous = document.activeElement as HTMLElement;
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") setDialog(null);
+      if (e.key === "Tab") {
+        const nodes = Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '[role="dialog"] button,[role="dialog"] summary,[role="dialog"] input,[role="dialog"] a',
+          ),
+        );
+        const first = nodes[0],
+          last = nodes.at(-1);
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
     };
     window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("keydown", key);
+      previous?.focus();
+    };
   }, [dialog]);
+  function navigate(page: string) {
+    const w = world.current;
+    if (
+      w?.session?.active &&
+      !["Training", "Mock Examination", "Instructor"].includes(page)
+    )
+      return;
+    const wasSeparate = ["Mock Examination", "Reference missions"].includes(
+      w?.workspace ?? "",
+    );
+    const nextSeparate = ["Mock Examination", "Reference missions"].includes(
+      page,
+    );
+    if (w?.setWorkspace(page)) {
+      if (!w.session?.active) {
+        if (nextSeparate && !wasSeparate)
+          practiceEnvironment.current = { ...w.weather.target };
+        if (!nextSeparate && wasSeparate && practiceEnvironment.current)
+          w.weather.target = { ...practiceEnvironment.current };
+        if (page === "Mock Examination") w.weather.target = storedWeather(true);
+        if (page === "Reference missions") {
+          w.weather.target = { ...weather };
+          w.weather.preset = preset;
+        }
+      }
+      setWorkspace(page);
+      setCamera(w.cameraMode);
+    }
+  }
   function action(name: string) {
     const d = world.current?.drone;
     if (!d) return;
@@ -346,29 +405,34 @@ export default function App() {
   }
   return (
     <div
-      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""}`}
+      className={`app-shell ${workspace !== "Reference missions" ? "training-mode" : "reference-mode"} ${world.current?.session?.strict ? "strict-exam" : ""} ${workspace === "Home" ? "home-mode" : ""}`}
     >
       <header className="app-header">
-        <a className="brand" href="/" aria-label="UAV Arena home">
+        <button
+          className="brand"
+          onClick={() => navigate("Home")}
+          disabled={!!world.current?.session?.active}
+          aria-label="Về trang chủ UAV ARENA"
+        >
           <span className="brand-mark">
             <Icon name="drone" size={26} />
           </span>
           <span>
             UAV<span className="brand-light"> ARENA</span>
-            <small>PRACTICAL PILOT TRAINING</small>
+            <small>LUYỆN BAY THỰC HÀNH</small>
           </span>
-        </a>
+        </button>
         <div className="header-divider" />
         <span className="project-name">
-          Multirotor pilot training <span> / </span> Arena 01
+          Mô phỏng đào tạo UAV <span> / </span> Sân 01
         </span>
         <div className="header-right">
           <span className="local-badge">
-            <i /> LOCAL SIMULATION
+            <i /> MÔ PHỎNG TRÊN THIẾT BỊ
           </span>
           <button
             className="icon-button help-button"
-            aria-label="Open controls help"
+            aria-label="Hướng dẫn sử dụng"
             onClick={() => setDialog("help")}
           >
             <Icon name="help" />
@@ -376,39 +440,85 @@ export default function App() {
           <button
             className="avatar"
             onClick={() => setDialog("help")}
-            aria-label="About the flight laboratory"
+            aria-label="Thông tin mô phỏng"
           >
             FL
           </button>
         </div>
       </header>
-      <nav className="workspace-navigation" aria-label="Training workspaces">
-        {workspaces.map((page) => (
-          <button
-            key={page}
-            className={workspace === page ? "active" : ""}
-            disabled={
-              (!!world.current?.session?.strict && page !== workspace) ||
-              (!!world.current?.session?.locked &&
-                page === "Reference missions") ||
-              (activeMission && page !== "Reference missions") ||
-              (!!world.current?.session?.active &&
-                ["Training", "Mock Examination"].includes(page) &&
-                page !== world.current.session.attempt.mode)
-            }
-            onClick={() => {
-              if (world.current?.setWorkspace(page)) {
-                setWorkspace(page);
-                setCamera(world.current.cameraMode);
+      <a className="skip-link" href="#main-content">
+        Bỏ qua đến nội dung chính
+      </a>
+      <nav className="workspace-navigation" aria-label="Điều hướng chính">
+        {workspaces
+          .filter((p) =>
+            [
+              "Home",
+              "Training",
+              "Mock Examination",
+              "Session Review",
+              "System Configuration",
+              "Instructor",
+            ].includes(p),
+          )
+          .map((page) => (
+            <button
+              key={page}
+              className={workspace === page ? "active" : ""}
+              aria-current={workspace === page ? "page" : undefined}
+              disabled={
+                (!!world.current?.session?.strict && page !== workspace) ||
+                (activeMission && page !== "Reference missions") ||
+                (!!world.current?.session?.active &&
+                  page !== workspace &&
+                  page !== "Instructor" &&
+                  page !== world.current.session.attempt.mode)
               }
-            }}
-          >
-            {page}
-          </button>
-        ))}
+              onClick={() => navigate(page)}
+            >
+              {vi(page)}
+            </button>
+          ))}
+        <details className="workspace-more">
+          <summary>Công cụ khác</summary>
+          <div>
+            {workspaces
+              .filter((p) =>
+                [
+                  "Controller Calibration",
+                  "Examination Profiles",
+                  "Reference missions",
+                ].includes(p),
+              )
+              .map((page) => (
+                <button
+                  key={page}
+                  disabled={
+                    !!world.current?.session?.active ||
+                    (activeMission && page !== "Reference missions")
+                  }
+                  onClick={(e) => {
+                    navigate(page);
+                    e.currentTarget.closest("details")?.removeAttribute("open");
+                  }}
+                >
+                  {vi(page)}
+                </button>
+              ))}
+          </div>
+        </details>
       </nav>
-      {workspace !== "Reference missions" && (
-        <TrainingDesk w={world.current} t={t} page={workspace} />
+      {workspace === "Home" ? (
+        <Home navigate={navigate} />
+      ) : (
+        workspace !== "Reference missions" && (
+          <TrainingDesk
+            w={world.current}
+            t={t}
+            page={workspace}
+            navigate={navigate}
+          />
+        )
       )}
       <aside className="sidebar">
         <div className="section-eyebrow">
@@ -679,7 +789,7 @@ export default function App() {
                 key={c}
                 onClick={() => setView(c)}
               >
-                {c === "Overview" && <Icon name="cube" size={14} />} {c}
+                {c === "Overview" && <Icon name="cube" size={14} />} {vi(c)}
               </button>
             ))}
           </div>
@@ -998,42 +1108,59 @@ export default function App() {
         {stats.loading && !constructionError && (
           <div className="loading-chip">
             <span className="spinner" />
-            Loading surface materials…
+            Đang tải vật liệu sân…
           </div>
         )}
         {(stats.error || constructionError) && (
           <div className="error-message" role="alert">
             {constructionError
-              ? `Unable to initialize WebGL: ${constructionError}`
-              : stats.error}
+              ? `Không mở được mô phỏng 3D. Kiểm tra hỗ trợ WebGL2 rồi tải lại trang. Chi tiết: ${constructionError}`
+              : `Mô phỏng chưa hoạt động đầy đủ. Tải lại trang hoặc nhờ giảng viên kiểm tra. Chi tiết kỹ thuật: ${stats.error}`}
           </div>
         )}
       </main>
-      <footer className="statusbar">
-        <span>
-          <i /> {stats.fps} FPS <em>·</em> PHYSICS {stats.physicsHz} Hz{" "}
-          <em>·</em> {stats.drawCalls} DRAW CALLS
-          {stats.physicsHz > 0 && stats.physicsHz < 240 && (
-            <strong className="fidelity-warning">SIMULATION SLOWED</strong>
-          )}
-        </span>
-        <span className="keyboard-hint">
-          W A S D <span>move</span> R / F <span>altitude</span> Q / E{" "}
-          <span>yaw</span>
-          <em>·</em> SPACE <span>pause</span>
-        </span>
-        <span>
-          LOCAL WORLD <em> / </em> {t.position[0].toFixed(1)},{" "}
-          {t.position[1].toFixed(1)}, {t.position[2].toFixed(1)} m
-        </span>
-      </footer>
+      {workspace !== "Reference missions" ? (
+        <footer className="statusbar learner-status">
+          <span>Mô phỏng luyện tập · dữ liệu lưu trên thiết bị</span>
+          <span>
+            {stats.loading
+              ? "Đang tải sân bay…"
+              : stats.error
+                ? "Cần kiểm tra hệ thống"
+                : stats.physicsHz > 0 && stats.physicsHz < 240
+                  ? "Mô phỏng đang chạy chậm — nhờ giảng viên kiểm tra thiết bị"
+                  : "Sẵn sàng"}
+          </span>
+        </footer>
+      ) : (
+        <>
+          <footer className="statusbar">
+            <span>
+              <i /> {stats.fps} FPS <em>·</em> PHYSICS {stats.physicsHz} Hz{" "}
+              <em>·</em> {stats.drawCalls} DRAW CALLS
+              {stats.physicsHz > 0 && stats.physicsHz < 240 && (
+                <strong className="fidelity-warning">SIMULATION SLOWED</strong>
+              )}
+            </span>
+            <span className="keyboard-hint">
+              W A S D <span>move</span> R / F <span>altitude</span> Q / E{" "}
+              <span>yaw</span>
+              <em>·</em> SPACE <span>pause</span>
+            </span>
+            <span>
+              LOCAL WORLD <em> / </em> {t.position[0].toFixed(1)},{" "}
+              {t.position[1].toFixed(1)}, {t.position[2].toFixed(1)} m
+            </span>
+          </footer>
+        </>
+      )}
       {dialog && (
         <div className="dialog-scrim" onClick={() => setDialog(null)}>
           <section
             role="dialog"
             aria-modal="true"
             aria-label={
-              dialog === "help" ? "Simulator controls" : "Arena reference plan"
+              dialog === "help" ? "Hướng dẫn sử dụng" : "Sơ đồ sân tham chiếu"
             }
             className={`dialog ${dialog === "reference" ? "reference-dialog" : ""}`}
             onClick={(e) => e.stopPropagation()}
@@ -1041,7 +1168,7 @@ export default function App() {
             <button
               className="icon-button dialog-close"
               autoFocus
-              aria-label="Close dialog"
+              aria-label="Đóng hướng dẫn"
               onClick={() => setDialog(null)}
             >
               <Icon name="close" />
@@ -1065,12 +1192,12 @@ export default function App() {
               </>
             ) : (
               <>
-                <span className="eyebrow">FLIGHT LABORATORY</span>
-                <h2>Your controls, at a glance.</h2>
+                <span className="eyebrow">HƯỚNG DẪN LUYỆN BAY</span>
+                <h2>Cách bắt đầu và điều khiển</h2>
                 <p>
                   {workspace === "Reference missions"
                     ? "Select a reference mission while landed at H. The demonstration takes off, flies its course, returns and lands. Its completion is not candidate performance evidence."
-                    : "Prepare an attempt, complete preflight, arm and begin the manual task. R/F commands climb/descent; no automatic takeoff or landing is available. Complete the entire ordered course, land, disarm and complete postflight. All profiles are training-only and require human review."}
+                    : "Chọn bài bay → kiểm tra điều khiển → chuẩn bị → kiểm tra trước bay → bật động cơ → bắt đầu bài tập. Bạn tự cất cánh, bay và hạ cánh. Kết quả cần giảng viên đánh giá."}
                 </p>
                 <div className="help-keys">
                   {[
@@ -1078,20 +1205,22 @@ export default function App() {
                       "W / S",
                       workspace === "Reference missions"
                         ? "Forward / backward (world −Z / +Z)"
-                        : "Forward / backward in aircraft heading frame",
+                        : "Tiến / lùi theo hướng mũi máy bay",
                     ],
                     [
                       "A / D",
                       workspace === "Reference missions"
                         ? "Left / right (world −X / +X)"
-                        : "Left / right in aircraft heading frame",
+                        : "Trái / phải theo hướng máy bay",
                     ],
-                    ["R / F", "Climb / descend"],
-                    ["Q / E", "Yaw left / right"],
-                    ["Space", "Pause or resume the simulation"],
+                    ["R / F", "Lên / xuống"],
+                    ["Q / E", "Xoay hướng trái / phải"],
+                    ["Space", "Tạm dừng / tiếp tục bài bay"],
                     [
-                      "Mouse drag / wheel",
-                      "Orbit / zoom in Overview, Orbit or Ground",
+                      "Kéo chuột",
+                      workspace === "Reference missions"
+                        ? "Xoay và thu phóng ở góc quan sát"
+                        : "Nhìn quanh tại chỗ. Dùng nút Nhìn thẳng để về hướng ban đầu",
                     ],
                   ].map(([a, b]) => (
                     <div key={a}>
@@ -1101,13 +1230,12 @@ export default function App() {
                   ))}
                 </div>
                 <p className="dialog-note">
-                  15 kg illustrative airframe · ideal state telemetry ·
-                  simplified foot-contact collisions. Wind applies aerodynamic
-                  forces. Rain changes the environment visually. Not calibrated
-                  to real flight logs.
+                  Máy bay minh họa 15 kg, tiếp xúc mặt đất được đơn giản hóa.
+                  Gió tác động lên mô hình bay; mưa chỉ là hình ảnh. Chưa hiệu
+                  chuẩn bằng dữ liệu UAV thực.
                 </p>
                 <details>
-                  <summary>Renderer details</summary>
+                  <summary>Thông tin đồ họa nâng cao</summary>
                   <p>
                     {stats.gpu}
                     <br />

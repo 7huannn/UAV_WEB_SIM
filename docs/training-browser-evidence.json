@@ -1,13 +1,14 @@
 {
-  "date": "2026-11-18T05:47:58.811Z",
+  "date": "2026-11-18T07:12:42.207Z",
   "url": "http://localhost:4175",
   "browser": "147.0.7727.101",
   "initial": {
+    "bundle": "/assets/index-DQOBEUTa.js",
     "camera": "PILOT VLOS",
     "station": [
-      -25,
+      0,
       1.615,
-      0
+      17
     ],
     "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
     "quality": "Low"
@@ -57,8 +58,8 @@
         "hover",
         "route"
       ],
-      "samples": 3683,
-      "simSeconds": 73.64399999999831,
+      "samples": 3693,
+      "simSeconds": 73.8439999999988,
       "result": {
         "decision": "HUMAN_REVIEW_REQUIRED",
         "practiceScore": 100,
@@ -72,7 +73,7 @@
         "maxLateral": 0.37985269289546286,
         "maxAltitudeError": 0.02516685995341561,
         "maxSpeed": 1.6273248427361857,
-        "landingError": 0.7377345168854633,
+        "landingError": 0.7378745705473158,
         "limitations": [
           "Practice only; no official examination equivalence",
           "Rules and pilot station provisional; human review required",
@@ -92,8 +93,8 @@
         "hover",
         "route"
       ],
-      "samples": 4612,
-      "simSeconds": 92.22400000002106,
+      "samples": 4622,
+      "simSeconds": 92.42400000002118,
       "result": {
         "decision": "HUMAN_REVIEW_REQUIRED",
         "practiceScore": 100,
@@ -119,7 +120,7 @@
       }
     }
   ],
-  "bundle": "/assets/index-Bk5P8NB2.js",
+  "bundle": "/assets/index-DQOBEUTa.js",
   "errors": [],
   "limitations": [
     "SwiftShader software rendering, not hardware GPU acceptance",

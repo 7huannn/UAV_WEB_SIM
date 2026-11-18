@@ -2604,3 +2604,681 @@ svg {
 .training-mode .training-scene-status {
   display: none;
 }
+
+/* Vietnamese training equipment: readable controls, progressive disclosure and
+   a dedicated toolbar row so the candidate's aircraft view remains unobstructed. */
+:root {
+  --ux-ink: #203c31;
+  --ux-muted: #4b6055;
+  --ux-border: #b9c9be;
+  --ux-accent: #255b43;
+}
+html {
+  color-scheme: light;
+}
+body {
+  font-family: Arial, "Helvetica Neue", sans-serif;
+}
+.app-header .brand {
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.app-header .brand small {
+  letter-spacing: 1px;
+}
+button:focus-visible,
+summary:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+canvas:focus-visible {
+  outline: 3px solid #0873b4;
+  outline-offset: 3px;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.skip-link {
+  position: absolute;
+  left: 10px;
+  top: -100px;
+  background: #fff;
+  padding: 12px;
+  z-index: 100;
+  color: #143c2a;
+}
+.skip-link:focus {
+  top: 8px;
+}
+.workspace-navigation {
+  overflow: visible;
+  gap: 4px;
+  padding: 4px 18px;
+  align-items: center;
+}
+.workspace-navigation button,
+.workspace-navigation summary {
+  min-height: 44px;
+  font-size: 16px;
+  padding: 10px 14px;
+  line-height: 1.35;
+}
+.workspace-navigation summary {
+  cursor: pointer;
+  font-size: 15px;
+}
+.workspace-more {
+  position: relative;
+  margin-left: auto;
+}
+.workspace-more > div {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 280px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--ux-border);
+  box-shadow: 0 8px 20px #203c3120;
+  display: grid;
+  z-index: 30;
+}
+.workspace-more button {
+  text-align: left;
+  white-space: normal;
+}
+.training-mode {
+  grid-template-columns: 390px minmax(0, 1fr);
+  grid-template-rows: 76px 60px auto minmax(0, 1fr) 36px;
+}
+.training-mode .workspace-navigation {
+  grid-column: 1/-1;
+  grid-row: 2;
+}
+.training-mode .training-panel {
+  grid-column: 1;
+  grid-row: 3/5;
+  padding: 22px;
+  gap: 18px;
+}
+.training-mode .stage {
+  grid-column: 2;
+  grid-row: 4;
+  min-height: 0;
+}
+.training-mode .statusbar {
+  grid-row: 5;
+}
+.training-mode .training-scene-tools {
+  position: relative;
+  inset: auto;
+  grid-column: 2;
+  grid-row: 3;
+  background: #f6f8f4;
+  padding: 12px 18px;
+  gap: 9px;
+  z-index: 7;
+  border-bottom: 1px solid var(--ux-border);
+}
+.training-mode .training-scene-label {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--ux-muted);
+  letter-spacing: 0.5px;
+}
+.training-camera-buttons {
+  flex-wrap: wrap;
+}
+.training-mode .training-camera-buttons button,
+.head-controls button,
+.camera-aids button {
+  min-height: 44px;
+  font-size: 16px;
+  padding: 9px 12px;
+  border: 1px solid var(--ux-border);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ux-ink);
+}
+.training-camera-buttons .active {
+  background: var(--ux-accent) !important;
+  color: #fff !important;
+}
+.head-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.head-controls span {
+  font-size: 14px;
+  color: var(--ux-muted);
+  padding: 4px;
+}
+.camera-aids {
+  order: 4;
+  font-size: 15px;
+}
+.camera-aids summary {
+  cursor: pointer;
+  min-height: 32px;
+}
+.camera-aids > div {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.training-mode .training-scene-tools p {
+  font-size: 15px;
+}
+.training-panel {
+  color: var(--ux-ink);
+  background: #f8faf6;
+}
+.training-panel h1 {
+  font-size: 27px;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+.training-panel h2 {
+  font-size: 19px;
+  line-height: 1.45;
+}
+.training-panel p,
+.training-panel label,
+.training-panel summary,
+.training-panel button,
+.training-panel input,
+.training-panel select,
+.training-panel textarea,
+.training-panel .training-check {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.training-panel p {
+  margin: 0;
+}
+.training-panel .training-intro {
+  color: var(--ux-muted);
+}
+.training-panel .training-muted {
+  color: var(--ux-muted);
+  font-size: 14px !important;
+}
+.training-panel .training-callout {
+  color: var(--ux-ink);
+  font-size: 15px;
+}
+.training-panel .training-eyebrow {
+  color: var(--ux-muted);
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  flex-wrap: wrap;
+}
+.training-panel .training-eyebrow span {
+  font-size: 12px;
+}
+.training-panel legend {
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 5px 0;
+  font-weight: bold;
+}
+.training-panel button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-color: var(--ux-border);
+}
+.training-panel .training-primary {
+  background: var(--ux-accent);
+  border-color: var(--ux-accent);
+  color: #fff;
+}
+.training-panel select,
+.training-panel input:not([type="checkbox"]):not([type="range"]) {
+  min-height: 44px;
+  padding: 10px;
+}
+.training-panel input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin: 2px 0;
+}
+.training-panel .training-check {
+  min-height: 44px;
+  align-items: flex-start;
+}
+.training-panel .procedure-card {
+  padding: 15px;
+  gap: 12px;
+}
+.training-panel .training-actions {
+  gap: 8px;
+}
+.training-actions > * {
+  min-width: 115px;
+}
+.training-panel .rc-bars > div {
+  grid-template-columns: 95px minmax(0, 1fr) 46px;
+  font-size: 15px;
+}
+.training-panel .rc-bars meter {
+  height: 22px;
+}
+.training-panel .technical-settings {
+  padding: 14px;
+  border: 1px solid var(--ux-border);
+  border-radius: 6px;
+}
+.technical-settings > fieldset {
+  margin: 18px 0;
+}
+.training-panel details > summary {
+  min-height: 44px;
+  padding: 8px 0;
+}
+.training-panel .essential-status {
+  border-left: 4px solid var(--ux-accent);
+  padding: 10px 14px;
+  background: #e8f0e9;
+  display: grid;
+  gap: 8px;
+}
+.training-panel .training-keyboard {
+  font-size: 16px;
+}
+.training-panel .training-keyboard p {
+  font-size: 15px;
+}
+.training-panel .attempt-list {
+  max-height: 340px;
+}
+.training-panel .attempt-list span,
+.training-panel .attempt-list small {
+  font-size: 14px;
+  color: var(--ux-muted);
+}
+.training-panel .result-metrics,
+.training-panel .rule-list,
+.training-panel .procedure-card ol,
+.training-panel .event-timeline li {
+  font-size: 15px;
+}
+.training-panel .telemetry-plots p {
+  font-size: 15px;
+}
+.training-panel .file-button,
+.training-panel .file-button input {
+  font-size: 15px !important;
+}
+.training-panel .training-tag {
+  font-size: 14px !important;
+}
+.training-panel .input-fault {
+  border-left: 3px solid #9a4a20;
+  padding: 10px;
+  background: #fff2df;
+}
+.pilot-diagram {
+  margin: 0;
+}
+.pilot-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pilot-diagram text {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  fill: #213d32;
+}
+.pilot-diagram figcaption {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ux-muted);
+  margin-top: 8px;
+}
+.learner-status {
+  font-size: 13px !important;
+  gap: 12px;
+  color: #344f41;
+}
+.learner-status span {
+  white-space: normal;
+}
+.home-mode {
+  grid-template-columns: 1fr;
+  grid-template-rows: 76px 60px minmax(0, 1fr) 36px;
+}
+.home-mode .stage {
+  visibility: hidden;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.home-mode .learner-home {
+  grid-column: 1/-1;
+  grid-row: 3;
+  overflow: auto;
+  background: #f5f8f3;
+  padding: 44px max(24px, calc((100vw - 1120px) / 2));
+  color: var(--ux-ink);
+}
+.home-mode .statusbar {
+  grid-row: 4;
+}
+.home-intro {
+  max-width: 760px;
+}
+.home-kicker {
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  color: var(--ux-muted);
+}
+.home-intro h1 {
+  font-size: 36px;
+  line-height: 1.3;
+  margin: 14px 0;
+  letter-spacing: -0.5px;
+}
+.learner-home p {
+  font-size: 18px;
+  line-height: 1.6;
+}
+.home-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 30px 0;
+}
+.home-actions > button {
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--ux-border);
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 190px;
+  color: var(--ux-ink);
+  cursor: pointer;
+}
+.home-actions > button:hover {
+  border-color: var(--ux-accent);
+  background: #edf4ed;
+}
+.home-actions > button > span {
+  color: var(--ux-muted);
+  font-size: 15px;
+}
+.home-actions h2 {
+  font-size: 25px;
+  margin: 8px 0;
+}
+.home-actions p {
+  font-size: 17px;
+  margin: 10px 0 18px;
+}
+.home-actions b {
+  font-size: 16px;
+  color: var(--ux-accent);
+}
+.home-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  border-top: 1px solid var(--ux-border);
+  padding-top: 24px;
+}
+.home-foot h2 {
+  font-size: 21px;
+}
+.home-foot p {
+  font-size: 16px;
+  margin: 12px 0;
+}
+.home-foot button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--ux-border);
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ux-ink);
+  font-size: 16px;
+}
+.learner-home .home-limitation {
+  font-size: 15px;
+  margin-top: 30px;
+  color: var(--ux-muted);
+}
+.small-screen-note {
+  display: none;
+}
+.dialog {
+  max-height: 90dvh;
+  overflow: auto;
+  font-size: 16px;
+}
+.dialog p,
+.dialog .help-keys span {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.dialog-close {
+  min-width: 44px;
+  min-height: 44px;
+}
+@media (min-width: 1450px) {
+  .training-mode:has(.wide-panel) {
+    grid-template-columns: 500px minmax(0, 1fr);
+  }
+  .training-mode:has(.wide-panel) .training-scene-tools {
+    left: auto;
+  }
+}
+@media (max-width: 1100px) {
+  .training-mode {
+    grid-template-columns: 350px minmax(0, 1fr);
+  }
+  .workspace-navigation {
+    gap: 1px;
+    padding: 4px;
+  }
+  .workspace-navigation button,
+  .workspace-navigation summary {
+    font-size: 15px;
+    padding: 10px 9px;
+  }
+  .app-header .project-name {
+    display: none;
+  }
+  .training-mode .training-scene-tools {
+    left: auto;
+    right: auto;
+    top: auto;
+  }
+  .head-controls span {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  .workspace-navigation {
+    flex-wrap: wrap;
+    align-content: start;
+    overflow: visible;
+  }
+  .training-mode {
+    grid-template-rows: 66px 112px auto minmax(0, 1fr) 44px;
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+  .home-mode {
+    grid-template-columns: 1fr;
+    grid-template-rows: 66px 112px minmax(0, 1fr) 44px;
+  }
+  .workspace-more {
+    margin-left: 0;
+  }
+  .head-controls button {
+    padding: 8px;
+    font-size: 14px;
+  }
+  .home-mode .learner-home {
+    padding: 28px 22px;
+  }
+  .home-intro h1 {
+    font-size: 29px;
+  }
+  .home-actions > button {
+    padding: 18px;
+  }
+}
+@media (max-width: 620px) {
+  .training-mode {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-columns: 1fr;
+    grid-template-rows: 66px auto auto 36vh auto auto;
+  }
+  .training-mode .workspace-navigation {
+    grid-row: 2;
+    min-height: 112px;
+  }
+  .training-mode .training-scene-tools {
+    grid-column: 1;
+    grid-row: 3;
+    inset: auto;
+    padding: 12px;
+  }
+  .training-mode .stage {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .training-mode .training-panel {
+    grid-column: 1;
+    grid-row: 5;
+    overflow: visible;
+    padding: 20px;
+  }
+  .training-mode .statusbar {
+    grid-row: 6;
+    padding: 10px 14px;
+    min-height: 56px;
+    flex-wrap: wrap;
+  }
+  .workspace-more > div {
+    right: auto;
+    left: 0;
+  }
+  .home-mode {
+    grid-template-columns: 1fr;
+    grid-template-rows: 66px auto auto auto;
+  }
+  .home-mode .learner-home {
+    grid-row: 3;
+    padding: 28px 20px;
+    overflow: visible;
+  }
+  .home-mode .statusbar {
+    grid-row: 4;
+  }
+  .home-actions,
+  .home-foot {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .home-actions h2 {
+    font-size: 24px;
+  }
+  .small-screen-note {
+    display: block;
+    font-size: 15px !important;
+    padding: 12px;
+    background: #e6eddf;
+    border-radius: 4px;
+    margin: 16px 0;
+  }
+  .training-mode .training-scene-label {
+    font-size: 13px;
+  }
+  .head-controls {
+    gap: 4px;
+  }
+  .training-mode .app-header {
+    padding: 0 12px;
+  }
+  .app-header .local-badge,
+  .app-header .avatar {
+    display: none;
+  }
+  .training-mode .training-camera-buttons button {
+    font-size: 16px;
+    padding: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.app-header .brand {
+  font-size: 20px;
+}
+.app-header .brand small {
+  font-size: 11px;
+}
+.app-header .local-badge {
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+/* Camera choices share a row on desktop; head look has its own accessible row. */
+.training-mode .training-scene-tools {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.training-scene-tools .head-controls {
+  flex-basis: 100%;
+}
+.training-scene-tools .camera-aids {
+  margin-left: auto;
+}
+.training-scene-tools .camera-aids[open] {
+  flex-basis: 100%;
+  margin-left: 0;
+}
+@media (max-width: 620px) {
+  .training-scene-tools .camera-aids {
+    margin-left: 0;
+  }
+}
+.training-mode .training-scene-tools {
+  pointer-events: auto;
+}
+.training-panel .training-notice {
+  font-size: 16px !important;
+  color: var(--ux-ink);
+}
+.training-panel .training-keyboard b {
+  font-size: 16px;
+}
+.training-panel .training-keyboard p {
+  color: var(--ux-muted);
+}
+[hidden] {
+  display: none !important;
+}

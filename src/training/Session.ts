@@ -155,7 +155,7 @@ export class TrainingSession {
     this.lastDropped = d.droppedTime;
     this.attempt = {
       schema: 1,
-      softwareVersion: "uav-arena-0.2.0",
+      softwareVersion: "uav-arena-0.3.0",
       geometry: clone(config),
       referencePaths: Object.fromEntries(
         profiles[profileId].tasks

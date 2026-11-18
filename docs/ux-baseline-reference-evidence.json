@@ -1,0 +1,412 @@
+{
+  "url": "http://localhost:4175",
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1600,
+    1000
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "profile": {
+    "quality": "Low",
+    "frames": 30,
+    "meanFps": 4.687719736862665,
+    "medianFrameMs": 200,
+    "p95FrameMs": 433.40000000000146,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 16,
+    "bundle": "/assets/index-Bk5P8NB2.js",
+    "clumpsReady": true
+  },
+  "performance": {
+    "fps": 4,
+    "drawCalls": 115,
+    "triangles": 22696,
+    "physicsHz": 94,
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "loading": false,
+    "error": null
+  },
+  "initial": {
+    "t": {
+      "mode": "Disarmed",
+      "armed": false,
+      "altitude": 0,
+      "position": [
+        -20,
+        0.32,
+        0
+      ],
+      "speed": 0.0011425192171610277,
+      "groundSpeed": 0,
+      "verticalSpeed": 0.0011425192171610277,
+      "roll": 0,
+      "pitch": 0,
+      "yaw": 0,
+      "rates": [
+        0,
+        0,
+        0
+      ],
+      "rpm": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "thrust": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "wind": [
+        0.7157022581505089,
+        0.03561584974650056,
+        1.5914963190541676
+      ],
+      "progress": 0,
+      "time": 3.5160000000000027,
+      "droppedTime": 7.282917999999997,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    "stats": {
+      "fps": 4,
+      "drawCalls": 115,
+      "triangles": 22696,
+      "physicsHz": 94,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "loading": false,
+      "error": null
+    }
+  },
+  "takeoff": {
+    "mode": "Position hold",
+    "armed": true,
+    "altitude": 5.003429475312649,
+    "position": [
+      -19.999923361042107,
+      5.32342947531265,
+      -0.0012814755853770901
+    ],
+    "speed": 0.0025096423287496094,
+    "groundSpeed": 0.0023203056307208873,
+    "verticalSpeed": -0.0009562878218908305,
+    "roll": 0.04894131035586483,
+    "pitch": -0.15839069782361617,
+    "yaw": -0.00013532969423775824,
+    "rates": [
+      0.0010789881698957402,
+      0.0000028907044657870237,
+      -0.0010266776233563812
+    ],
+    "rpm": [
+      4201.4227405429565,
+      4201.476305519191,
+      4201.017817244136,
+      4200.9707094668165
+    ],
+    "thrust": [
+      36.77931195230819,
+      36.780249775350924,
+      36.77222288578139,
+      36.77139820564418
+    ],
+    "wind": [
+      0.6311974831703833,
+      0.02082383221090952,
+      1.6701818530955386
+    ],
+    "progress": 0,
+    "time": 26.848000000002305,
+    "droppedTime": 10.099517999999998,
+    "paused": false,
+    "missionPaused": false,
+    "selectedMission": "figure-eight",
+    "missionPhase": "IDLE",
+    "missionActive": false,
+    "activeWaypoint": "H",
+    "visitedWaypoints": []
+  },
+  "rainy": {
+    "wet": 0.9081885617729639,
+    "rain": true,
+    "wind": 5.268995050103731,
+    "roll": -0.6064282233511276
+  },
+  "mission": [
+    {
+      "id": "figure-eight",
+      "approach": {
+        "mode": "Mission",
+        "armed": true,
+        "altitude": 5.004184453476466,
+        "position": [
+          -16.475785629871112,
+          5.324184453476466,
+          -0.05068900917359077
+        ],
+        "speed": 2.320183859295699,
+        "groundSpeed": 2.3201802709813566,
+        "verticalSpeed": -0.0040805741220059045,
+        "roll": -1.117188644228186,
+        "pitch": -0.3925231487831816,
+        "yaw": 0.008956965988797019,
+        "rates": [
+          0.0004736336922154662,
+          -0.0005633535008580622,
+          0.0820683939563415
+        ],
+        "rpm": [
+          4199.181901738598,
+          4202.9029921794145,
+          4202.570277316888,
+          4200.277195403194
+        ],
+        "thrust": [
+          36.740089747837,
+          36.80523280375499,
+          36.79940580118387,
+          36.75925845099614
+        ],
+        "wind": [
+          0.8190804504237194,
+          -0.03947969574178235,
+          1.555626168080027
+        ],
+        "progress": 0.9625596348058921,
+        "time": 59.69599999998867,
+        "droppedTime": 2.633099999999998,
+        "paused": false,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "RETURN_TO_H",
+        "missionActive": true,
+        "activeWaypoint": "H",
+        "visitedWaypoints": [
+          "Entry",
+          "Figure Eight"
+        ]
+      },
+      "telemetry": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0.0019066014203213966,
+        "position": [
+          -20.0131086144564,
+          0.3219066014203214,
+          0.01552641517619381
+        ],
+        "speed": 0.001142419896642907,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.001142419896642907,
+        "roll": 0.20799095743796495,
+        "pitch": -0.0935334727232654,
+        "yaw": -0.00038596644837968685,
+        "rates": [
+          -0.00033825643296206913,
+          -0.0000012364703709564565,
+          0.0007243235816897416
+        ],
+        "rpm": [
+          39.08440364424458,
+          39.04833826112281,
+          39.029902647711424,
+          39.06098804206665
+        ],
+        "thrust": [
+          0.003182862053447075,
+          0.0031769907510064825,
+          0.003173991599194137,
+          0.003179049468400225
+        ],
+        "wind": [
+          0.4893118362691272,
+          -0.0028286486913733154,
+          1.113593405797115
+        ],
+        "progress": 1,
+        "time": 65.57999999998822,
+        "droppedTime": 3.8497000000000043,
+        "paused": false,
+        "missionPaused": false,
+        "selectedMission": "figure-eight",
+        "missionPhase": "COMPLETED",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": [
+          "Entry",
+          "Figure Eight",
+          "H"
+        ]
+      },
+      "phases": [
+        "IDLE",
+        "ARMING",
+        "TAKEOFF",
+        "TRANSIT_TO_ROUTE",
+        "EXECUTING",
+        "PAUSED",
+        "EXECUTING",
+        "RETURN_TO_H",
+        "LANDING",
+        "COMPLETED"
+      ]
+    },
+    {
+      "id": "outer-circuit",
+      "approach": {
+        "mode": "Mission",
+        "armed": true,
+        "altitude": 5.000251131954293,
+        "position": [
+          -16.902027253308713,
+          5.3202511319542936,
+          2.0906735957452898
+        ],
+        "speed": 2.1612814462375662,
+        "groundSpeed": 2.1612812972336526,
+        "verticalSpeed": -0.0008025451804091124,
+        "roll": 0.16481575594623316,
+        "pitch": 0.43548503339006744,
+        "yaw": 0.0009958376631993302,
+        "rates": [
+          0.17938979303962455,
+          -0.00003211222414597626,
+          -0.002241983163794066
+        ],
+        "rpm": [
+          4190.554443294654,
+          4190.218518140007,
+          4211.984416111272,
+          4211.379648104078
+        ],
+        "thrust": [
+          36.58927562033371,
+          36.583409682740594,
+          36.96445847774881,
+          36.953844327841075
+        ],
+        "wind": [
+          0.6674260582579284,
+          0.043903831912044736,
+          1.5038957451850443
+        ],
+        "progress": 0.9539587756215345,
+        "time": 77.54000000000283,
+        "droppedTime": 2.3165,
+        "paused": false,
+        "missionPaused": false,
+        "selectedMission": "outer-circuit",
+        "missionPhase": "RETURN_TO_H",
+        "missionActive": true,
+        "activeWaypoint": "Gate",
+        "visitedWaypoints": [
+          "Gate",
+          "M1",
+          "M2",
+          "M3",
+          "M4",
+          "M5"
+        ]
+      },
+      "telemetry": {
+        "mode": "Disarmed",
+        "armed": false,
+        "altitude": 0.0023606878077326865,
+        "position": [
+          -20.018079266808083,
+          0.3223606878077327,
+          0.020656323546597015
+        ],
+        "speed": 0.0011424153016512235,
+        "groundSpeed": 0,
+        "verticalSpeed": 0.0011424153016512235,
+        "roll": 0.215163218785731,
+        "pitch": -0.17646101443168644,
+        "yaw": -0.0006801884780044292,
+        "rates": [
+          -0.0004805449040105918,
+          -0.000002329077844476246,
+          0.0007075977105178891
+        ],
+        "rpm": [
+          39.090026997218374,
+          39.04647431256858,
+          39.02469919178848,
+          39.05952814445352
+        ],
+        "thrust": [
+          0.0031837780016364704,
+          0.003176687454823068,
+          0.0031731453442291036,
+          0.003178811840002499
+        ],
+        "wind": [
+          0.7408559971704122,
+          -0.04030271782618471,
+          1.6031696269350035
+        ],
+        "progress": 1,
+        "time": 86.70800000001404,
+        "droppedTime": 2.633099999999999,
+        "paused": false,
+        "missionPaused": false,
+        "selectedMission": "outer-circuit",
+        "missionPhase": "COMPLETED",
+        "missionActive": false,
+        "activeWaypoint": "H",
+        "visitedWaypoints": [
+          "Gate",
+          "M1",
+          "M2",
+          "M3",
+          "M4",
+          "M5",
+          "Gate",
+          "H"
+        ]
+      },
+      "phases": [
+        "IDLE",
+        "ARMING",
+        "TAKEOFF",
+        "TRANSIT_TO_ROUTE",
+        "TRANSIT_TO_ROUTE",
+        "EXECUTING",
+        "PAUSED",
+        "EXECUTING",
+        "EXECUTING",
+        "EXECUTING",
+        "EXECUTING",
+        "RETURN_TO_H",
+        "RETURN_TO_H",
+        "LANDING",
+        "COMPLETED"
+      ]
+    }
+  ],
+  "checks": [
+    "Initial WebGL2 scene, textures and original GLB loaded",
+    "Takeoff button drives motor-based climb and stable 5m hover",
+    "Keyboard movement and yaw go through the physical controller after a button click",
+    "Follow and FPV cameras track the physical aircraft",
+    "Weather selector blends cloud/rain, wets concrete and physically disturbs aircraft",
+    "figure-eight: selected preview/overlay, takeoff, route, pause/resume, H approach and physical landing before completion",
+    "outer-circuit: selected preview/overlay, takeoff, route, pause/resume, H approach and physical landing before completion",
+    "Markers, collider overlay and graphics quality controls work",
+    "Global pause stops simulated time",
+    "Land button descends and disarms on physical ground contact",
+    "Reset returns to H at rest",
+    "Reference and keyboard-help dialogs open and close",
+    "390px mobile layout has accessible flight/mission controls and no horizontal overflow"
+  ],
+  "errors": [],
+  "requests": [],
+  "note": "Physics forward-stepped through the actual fixed-step integrator for long flight scenarios. Screenshots are actual live browser renders. Software SwiftShader performance is not a hardware GPU benchmark."
+}

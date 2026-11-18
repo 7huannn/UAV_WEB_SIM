@@ -1,3 +1,8 @@
+import { readFileSync } from "node:fs";
+const dictionary = JSON.parse(
+  readFileSync(new URL("../src/ui/vi.json", import.meta.url), "utf8"),
+);
+const vi = (s) => dictionary[s] ?? s;
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -20,6 +25,7 @@ const errors = [],
   checks = [],
   screenshots = [],
   completeFlights = [];
+page.on("dialog", (d) => d.accept());
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => {
   if (m.type() === "error") errors.push(m.text());
@@ -29,9 +35,18 @@ page.on("requestfailed", (r) =>
 );
 await mkdir("docs/training-screenshots", { recursive: true });
 const nav = async (name) => {
+  const more = page.locator(".workspace-more");
+  if (
+    [
+      "Controller Calibration",
+      "Examination Profiles",
+      "Reference missions",
+    ].includes(name)
+  )
+    await more.locator("summary").click();
   await page
-    .getByRole("navigation", { name: "Training workspaces" })
-    .getByRole("button", { name, exact: true })
+    .getByRole("navigation", { name: "Điều hướng chính" })
+    .getByRole("button", { name: vi(name), exact: true })
     .click();
 };
 const frames = () =>
@@ -64,12 +79,10 @@ async function fast(seconds, rc = { throttle: 0, yaw: 0, pitch: 0, roll: 0 }) {
   await frames();
 }
 async function prepare(name, profile = "figure-eight") {
-  await page.getByLabel("Candidate identifier", { exact: true }).fill(name);
+  await page.getByLabel("Tên hoặc mã học viên", { exact: true }).fill(name);
+  await page.getByLabel("Chọn bài bay", { exact: true }).selectOption(profile);
   await page
-    .getByLabel("Training profile", { exact: true })
-    .selectOption(profile);
-  await page
-    .getByRole("button", { name: "Prepare attempt", exact: true })
+    .getByRole("button", { name: "Chuẩn bị bài bay", exact: true })
     .click();
   for (const label of [
     "Airspace, field boundaries and people checked",
@@ -77,15 +90,13 @@ async function prepare(name, profile = "figure-eight") {
     "Controller axes and neutral response checked",
     "Wind, emergency plan and provisional pilot station briefed",
   ])
-    await page.getByLabel(label, { exact: true }).check();
+    await page.getByLabel(vi(label), { exact: true }).check();
   await page
-    .getByRole("button", { name: "Confirm preflight", exact: true })
+    .getByRole("button", { name: "Xác nhận kiểm tra trước bay", exact: true })
     .click();
+  await page.getByRole("button", { name: "Bật động cơ", exact: true }).click();
   await page
-    .getByRole("button", { name: "Arm for manual flight", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Begin manual task", exact: true })
+    .getByRole("button", { name: "Bắt đầu bài tập", exact: true })
     .click();
 }
 async function savedCount() {
@@ -110,8 +121,17 @@ try {
   await page.waitForFunction(
     () => window.__UAV__ && !window.__UAV__.stats.loading,
   );
+  await nav("Training");
+  const skip = page.getByRole("button", {
+    name: "Bỏ qua hướng dẫn",
+    exact: true,
+  });
+  if (await skip.isVisible()) await skip.click();
   await frames();
   const initial = await page.evaluate(() => ({
+    bundle: document
+      .querySelector('script[type="module"]')
+      ?.getAttribute("src"),
     camera: window.__UAV__.cameraMode,
     station: window.__UAV__.camera.position.toArray(),
     gpu: window.__UAV__.stats.gpu,
@@ -137,10 +157,13 @@ try {
   assert.equal(await page.evaluate(() => window.__UAV__.camera.zoom), 1);
   checks.push("VLOS head look and wheel preserve eye and zoom");
   await nav("Controller Calibration");
+  await page
+    .getByText("Cài đặt nâng cao · hiệu chỉnh tay điều khiển", { exact: true })
+    .click();
   await page.getByLabel("roll axis", { exact: true }).fill("3");
   await page.getByLabel("roll inverted", { exact: true }).check();
   await page
-    .getByRole("button", { name: "Save controller profile", exact: true })
+    .getByRole("button", { name: "Lưu cấu hình tay điều khiển", exact: true })
     .click();
   assert.equal(
     await page.evaluate(() => window.__UAV__.input.profile.axes.roll.axis),
@@ -151,10 +174,10 @@ try {
     "Calibration profile edited, normalized diagnostics visible and persisted",
   );
   await page
-    .getByRole("button", { name: "Mode 2 defaults", exact: true })
+    .getByRole("button", { name: "Khôi phục cách gán Mode 2", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Save controller profile", exact: true })
+    .getByRole("button", { name: "Lưu cấu hình tay điều khiển", exact: true })
     .click();
   await nav("Training");
   await prepare("Browser figure-eight manual attempt");
@@ -167,7 +190,7 @@ try {
   await fast(10);
   assert.ok(await page.evaluate(() => window.__UAV__.drone.altitude > 4));
   await page
-    .getByLabel("Training guidance: reference route & candidate trace", {
+    .getByLabel("Hỗ trợ luyện tập: hiện đường mẫu và vệt bay", {
       exact: true,
     })
     .check();
@@ -199,28 +222,26 @@ try {
     "Actual browser keyboard body-frame input changes force-integrated aircraft",
   );
   await page
-    .getByRole("button", { name: "Pause attempt", exact: true })
+    .getByRole("button", { name: "Tạm dừng bài bay", exact: true })
     .click();
   assert.equal(
     await page.evaluate(() => window.__UAV__.session.state),
     "PAUSED",
   );
   await page
-    .getByRole("button", { name: "Resume attempt", exact: true })
+    .getByRole("button", { name: "Tiếp tục bài bay", exact: true })
     .click();
-  await page
-    .getByRole("button", { name: "Abort attempt", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Hủy bài bay", exact: true }).click();
   await page.waitForFunction(() => window.__UAV__.session.state === "ABORTED");
   await page.waitForTimeout(400);
   assert.ok((await savedCount()) >= 1);
   checks.push("Pause/resume/abort and offline persistence");
-  await page.getByRole("button", { name: "Reset at H", exact: true }).click();
+  await page.getByRole("button", { name: "Thử lại từ H", exact: true }).click();
   await prepare("Browser outer-circuit manual attempt", "outer-circuit");
   await fast(2.5, { throttle: 1, yaw: 0, pitch: 0, roll: 0 });
   await fast(10);
   await page
-    .getByLabel("Training guidance: reference route & candidate trace", {
+    .getByLabel("Hỗ trợ luyện tập: hiện đường mẫu và vệt bay", {
       exact: true,
     })
     .check();
@@ -233,11 +254,9 @@ try {
   );
   await page.mouse.up();
   await capture("manual-outer-circuit-attempt");
-  await page
-    .getByRole("button", { name: "Abort attempt", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Hủy bài bay", exact: true }).click();
   await page.waitForTimeout(400);
-  await page.getByRole("button", { name: "Reset at H", exact: true }).click();
+  await page.getByRole("button", { name: "Thử lại từ H", exact: true }).click();
   await nav("Mock Examination");
   await prepare("Browser restricted practice exam");
   await fast(1, { throttle: 0.5, yaw: 0, pitch: 0, roll: 0 });
@@ -274,8 +293,8 @@ try {
   assert.deepEqual(restricted.eye, restricted.before);
   assert.equal(
     await page
-      .getByRole("navigation", { name: "Training workspaces" })
-      .getByRole("button", { name: "Instructor", exact: true })
+      .getByRole("navigation", { name: "Điều hướng chính" })
+      .getByRole("button", { name: "Giảng viên", exact: true })
       .isDisabled(),
     true,
   );
@@ -283,24 +302,25 @@ try {
   checks.push(
     "Mock camera, aids, station, reference automation and navigation locked at API and UI",
   );
-  await page
-    .getByRole("button", { name: "Abort attempt", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Hủy bài bay", exact: true }).click();
   await page.waitForTimeout(500);
   await nav("Session Review");
   await page
     .getByRole("button", { name: /Browser figure-eight manual attempt/ })
     .click();
-  await page.getByRole("button", { name: "Play replay", exact: true }).click();
+  await page.getByRole("button", { name: "Phát lại", exact: true }).click();
   await page.waitForTimeout(500);
-  await page.getByRole("button", { name: "Pause replay", exact: true }).click();
-  await page.getByLabel("Replay time", { exact: false }).fill("4");
+  await page
+    .getByRole("button", { name: "Tạm dừng phát lại", exact: true })
+    .click();
+  await page.getByLabel("Thời điểm phát lại", { exact: false }).fill("4");
+  await page.getByText("Số liệu chi tiết của bản ghi", { exact: true }).click();
   await capture("replay-telemetry");
   checks.push(
     "Stored recording replay with RC, attitude/position and task timeline",
   );
   await page
-    .getByRole("heading", { name: "Recorded telemetry history", exact: true })
+    .getByRole("heading", { name: "Biểu đồ bài bay đã ghi", exact: true })
     .scrollIntoViewIfNeeded();
   await page.locator(".telemetry-plots").scrollIntoViewIfNeeded();
   await capture("replay-telemetry-history");
@@ -319,13 +339,11 @@ try {
       }),
   );
   await page
-    .getByLabel("Instructor annotation", { exact: true })
+    .getByLabel("Nội dung nhận xét", { exact: true })
     .fill(
       "Synthetic browser QA review: partial attempt, not a completed flight or certification.",
     );
-  await page
-    .getByRole("button", { name: "Append review", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Lưu nhận xét", exact: true }).click();
   await page.waitForTimeout(300);
   const hashAfter = await page.evaluate(
     () =>
@@ -346,7 +364,7 @@ try {
   for (const format of ["JSON", "CSV", "Report"]) {
     const promise = page.waitForEvent("download");
     await page
-      .getByRole("button", { name: `Export ${format}`, exact: true })
+      .getByRole("button", { name: vi(`Export ${format}`), exact: true })
       .click();
     const d = await promise;
     await d.saveAs(
@@ -356,7 +374,7 @@ try {
   }
   checks.push("JSON, CSV and readable report downloads");
   await page
-    .getByRole("button", { name: "Recorded camera", exact: true })
+    .getByRole("button", { name: "Góc nhìn đã ghi", exact: true })
     .click();
   await frames();
   const restored = await page.evaluate(() => {
@@ -371,9 +389,9 @@ try {
   });
   assert.deepEqual(restored.eye, restored.recorded);
   checks.push("Recorded camera pose replay preserves fixed eye");
-  await page.getByRole("button", { name: "Overview", exact: true }).click();
+  await page.getByRole("button", { name: "Toàn cảnh", exact: true }).click();
   await page
-    .getByLabel("Import simulation JSON", { exact: true })
+    .getByLabel("Nhập bản ghi mô phỏng JSON", { exact: true })
     .setInputFiles({
       name: "invalid.json",
       mimeType: "application/json",
@@ -381,7 +399,7 @@ try {
         '{"format":"UAV_ARENA_ATTEMPT_V1","sha256":"tampered","payload":{}}',
       ),
     });
-  await page.getByText(/Import rejected:/).waitFor();
+  await page.getByText(/Không thể nhập tệp/).waitFor();
   checks.push(
     "Malformed recording import is rejected without replacing original evidence",
   );
@@ -393,16 +411,24 @@ try {
   await nav("Examination Profiles");
   assert.ok(
     (await page
-      .getByText("TRAINING_ONLY · OFFICIAL APPLICABILITY UNVERIFIED", {
+      .getByText("CHỈ LUYỆN TẬP · CHƯA XÁC MINH ÁP DỤNG SÁT HẠCH", {
         exact: true,
       })
       .count()) === 4,
   );
   await capture("examination-profiles");
+  await nav("Session Review");
+  await page
+    .getByRole("button", { name: "Đóng phát lại", exact: true })
+    .click();
   await nav("System Configuration");
+  await page.getByText("Cài đặt nâng cao", { exact: true }).click();
   await page.getByLabel("Pilot eyeHeight", { exact: true }).fill("1.7");
   await page
-    .getByRole("button", { name: "Save provisional station", exact: true })
+    .getByRole("button", {
+      name: "Lưu vị trí người lái tạm đề xuất",
+      exact: true,
+    })
     .click();
   assert.equal(
     await page.evaluate(() => window.__UAV__.pilotStation.eyeHeight),
@@ -410,7 +436,7 @@ try {
   );
   checks.push("Provisional station configuration and rule provenance");
   await nav("Training");
-  await page.getByRole("button", { name: "Reset at H", exact: true }).click();
+  await page.getByRole("button", { name: "Thử lại từ H", exact: true }).click();
   await prepare("Focus-loss QA", "foundations");
   await canvas.click();
   await page.keyboard.down("KeyR");
@@ -425,7 +451,9 @@ try {
   );
   for (const id of ["figure-eight", "outer-circuit"]) {
     await nav("Training");
-    await page.getByRole("button", { name: "Reset at H", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Thử lại từ H", exact: true })
+      .click();
     await page.evaluate(() => {
       const w = window.__UAV__;
       w.weather.current = {
@@ -522,29 +550,31 @@ try {
     assert.ok(flown.completed.includes("route"));
     await frames();
     await page
-      .getByRole("button", { name: "Begin manual landing", exact: true })
+      .getByRole("button", { name: "Bắt đầu hạ cánh thủ công", exact: true })
       .click();
     await fast(5.5, { throttle: -0.5, yaw: 0, pitch: 0, roll: 0 });
     await fast(8);
     assert.ok(await page.evaluate(() => window.__UAV__.drone.altitude < 0.08));
-    await page.getByRole("button", { name: "Disarm", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Tắt động cơ", exact: true })
+      .click();
     await fast(2);
     await page.waitForFunction(
       () => window.__UAV__.session.state === "POSTFLIGHT",
     );
     await page
-      .getByLabel("Aircraft disarmed and propulsion stopped", { exact: true })
+      .getByLabel("Đã tắt động cơ và cánh quạt đã dừng", { exact: true })
       .check();
     await page
-      .getByLabel("Aircraft condition and occurrence report reviewed", {
+      .getByLabel("Đã kiểm tra máy bay và ghi nhận sự cố sau bài bay", {
         exact: true,
       })
       .check();
     await page
-      .getByRole("button", { name: "Finish practice & save", exact: true })
+      .getByRole("button", { name: "Hoàn tất và lưu bài bay", exact: true })
       .click();
     await page
-      .getByText("Attempt saved offline. Human review remains required.", {
+      .getByText(vi("Attempt saved offline. Human review remains required."), {
         exact: true,
       })
       .waitFor();
@@ -563,11 +593,13 @@ try {
         name: new RegExp(`Browser QA synthetic RC full ${id}`),
       })
       .click();
-    await page.getByRole("button", { name: "Top down", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Nhìn từ trên", exact: true })
+      .click();
     await page.locator(".training-panel").evaluate((el) => (el.scrollTop = 0));
     await capture(`complete-${id}-debrief`);
     await page
-      .getByRole("button", { name: "Close replay", exact: true })
+      .getByRole("button", { name: "Đóng phát lại", exact: true })
       .click();
     checks.push(
       `${id}: synthetic RC full force-integrated route, manual descent/disarm, postflight, sealed review-required outcome and replay`,

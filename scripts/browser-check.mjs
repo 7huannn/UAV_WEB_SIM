@@ -76,7 +76,10 @@ try {
     null,
     { timeout: 60000 },
   );
-  await page.getByRole("button",{name:"Reference missions",exact:true}).click();
+  await page.locator(".workspace-more summary").click();
+  await page
+    .getByRole("button", { name: "Bay mẫu tự động", exact: true })
+    .click();
   await frames();
   const profile = await page.evaluate(
     () =>
@@ -119,11 +122,11 @@ try {
   checks.push("Initial WebGL2 scene, textures and original GLB loaded");
   await screenshot("aerial-clear");
   await page
-    .getByRole("button", { name: "Top down", exact: true })
+    .getByRole("button", { name: "Nhìn từ trên", exact: true })
     .click({ noWaitAfter: true });
   await screenshot("top-down-reference");
   await page
-    .getByRole("button", { name: "Ground", exact: true })
+    .getByRole("button", { name: "Quan sát mặt đất", exact: true })
     .click({ noWaitAfter: true });
   await screenshot("ground-concrete-detail");
   await page.evaluate(() => {
@@ -165,7 +168,7 @@ try {
     "Keyboard movement and yaw go through the physical controller after a button click",
   );
   await page
-    .getByRole("button", { name: "Follow", exact: true })
+    .getByRole("button", { name: "Theo máy bay", exact: true })
     .click({ noWaitAfter: true });
   await page.evaluate(() => {
     const w = window.__UAV__;
@@ -173,13 +176,13 @@ try {
   });
   await screenshot("drone-flight");
   await page
-    .getByRole("button", { name: "FPV", exact: true })
+    .getByRole("button", { name: "Camera trên máy bay (FPV)", exact: true })
     .click({ noWaitAfter: true });
   await frames();
   assert.equal(await page.evaluate(() => window.__UAV__.cameraMode), "FPV");
   checks.push("Follow and FPV cameras track the physical aircraft");
   await page
-    .getByRole("button", { name: "Overview", exact: true })
+    .getByRole("button", { name: "Toàn cảnh", exact: true })
     .click({ noWaitAfter: true });
   await page
     .getByLabel("Weather preset", { exact: true })
@@ -305,11 +308,11 @@ try {
     assert.ok(approach.progress < 1);
     if (id === "figure-eight") {
       await page
-        .getByRole("button", { name: "Follow", exact: true })
+        .getByRole("button", { name: "Theo máy bay", exact: true })
         .click({ noWaitAfter: true });
       await screenshot("return-to-h-approach");
       await page
-        .getByRole("button", { name: "Overview", exact: true })
+        .getByRole("button", { name: "Toàn cảnh", exact: true })
         .click({ noWaitAfter: true });
     }
     await until("COMPLETED");
@@ -390,10 +393,10 @@ try {
     .click({ noWaitAfter: true });
   assert.ok(await page.getByRole("dialog").isVisible());
   await page
-    .getByRole("button", { name: "Close dialog", exact: true })
+    .getByRole("button", { name: "Đóng hướng dẫn", exact: true })
     .click({ noWaitAfter: true });
   await page
-    .getByRole("button", { name: "Open controls help", exact: true })
+    .getByRole("button", { name: "Hướng dẫn sử dụng", exact: true })
     .click({ noWaitAfter: true });
   assert.ok(await page.getByRole("dialog").isVisible());
   await page.keyboard.press("Escape");

@@ -1,3 +1,5 @@
+> Historical v0.2 implementation report. The current Vietnamese UX/front-station iteration is documented in [UX_IMPLEMENTATION_REPORT.md](UX_IMPLEMENTATION_REPORT.md); its pilot-station description supersedes the west-station description below.
+
 # Practical training implementation and verification report
 
 Verified 2026-11-18. App v0.2.0. This is an implemented offline practice system with explicit validation boundaries, not an approved examination device, aircraft digital twin or official licence test.

@@ -200,8 +200,9 @@ try {
   await page.waitForFunction(
     () => window.__UAV__ && !window.__UAV__.stats.loading,
   );
+  await page.locator(".workspace-more summary").click();
   await page
-    .getByRole("button", { name: "Reference missions", exact: true })
+    .getByRole("button", { name: "Bay mẫu tự động", exact: true })
     .click();
   assert.equal(
     await page.evaluate(() => window.__UAV__.clumps.state.ready),

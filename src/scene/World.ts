@@ -1,7 +1,12 @@
 import * as T from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { Weather } from "../weather/Weather";
+import {
+  simpleWeather,
+  type WindLevel,
+  type Condition,
+} from "../training/weatherPresets";
+import { Weather, presets, type Preset } from "../weather/Weather";
 import { DroneDynamics, type Telemetry } from "../simulation/DroneDynamics";
 import { aircraft, motorSpin } from "../simulation/parameters";
 import { config } from "../arena/geometry";
@@ -30,7 +35,7 @@ import {
 import {
   PILOT_STATION,
   applyPilotCamera,
-  validStation,
+  validFrontStation,
   type PilotStation,
 } from "../training/pilot";
 import { replayAt } from "../training/records";
@@ -58,8 +63,8 @@ export class World {
   input = new ControllerInput();
   session: TrainingSession | null = null;
   pilotStation: PilotStation = { ...PILOT_STATION };
-  headYaw = 0;
-  headPitch = 0.2;
+  headYaw = PILOT_STATION.initialYaw!;
+  headPitch = PILOT_STATION.initialPitch!;
   inputFocused = true;
   replay: {
     attempt: Attempt;
@@ -83,6 +88,7 @@ export class World {
   );
   private traceCount = -1;
   private traceArray = new Float32Array(100000 * 3);
+  private pilotLabel: T.Sprite | null = null;
   private pointer: { x: number; y: number } | null = null;
   scene = new T.Scene();
   renderer: T.WebGLRenderer;
@@ -137,7 +143,8 @@ export class World {
     this.callbacks = onUpdate;
     try {
       const s = JSON.parse(localStorage.getItem("uav-pilot-station") ?? "null");
-      if (s && validStation(s)) this.pilotStation = s;
+      if (s && validFrontStation(s)) this.pilotStation = s;
+      // Legacy local west station is superseded; archived attempt snapshots stay untouched.
     } catch {
       /* default provisional station */
     }
@@ -147,6 +154,7 @@ export class World {
     } catch {
       /* default unverified mapping */
     }
+    this.recenterPilot();
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -166,7 +174,7 @@ export class World {
     this.renderer.domElement.addEventListener("pointercancel", this.headEnd);
     this.renderer.domElement.setAttribute(
       "aria-label",
-      "Interactive 3D UAV competition arena",
+      "Sân mô phỏng UAV 3D. Kéo chuột để nhìn quanh tại chỗ; dùng các nút nhìn quanh nếu cần.",
     );
     this.renderer.domElement.addEventListener(
       "webglcontextlost",
@@ -510,6 +518,45 @@ export class World {
     this.debug.add(collider);
     this.debug.visible = false;
     this.scene.add(this.debug);
+    const ring = new T.Mesh(
+      new T.RingGeometry(0.35, 0.48, 32),
+      new T.MeshBasicMaterial({ color: 0x176b82, side: T.DoubleSide }),
+    );
+    ring.rotation.x = -Math.PI / 2;
+    this.pilotMarker.add(
+      ring,
+      new T.ArrowHelper(
+        new T.Vector3(1, 0, 0),
+        new T.Vector3(0, 0.02, 0),
+        2,
+        0x176b82,
+        0.45,
+        0.25,
+      ),
+    );
+    const labelCanvas = document.createElement("canvas");
+    labelCanvas.width = 640;
+    labelCanvas.height = 96;
+    const ctx = labelCanvas.getContext("2d")!;
+    ctx.fillStyle = "#f8fffa";
+    ctx.fillRect(0, 0, 640, 96);
+    ctx.fillStyle = "#12475b";
+    ctx.font = "bold 34px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("PILOT — Vị trí người điều khiển", 320, 59);
+    const label = new T.Sprite(
+      new T.SpriteMaterial({
+        map: new T.CanvasTexture(labelCanvas),
+        depthTest: false,
+      }),
+    );
+    label.scale.set(5.5, 0.52, 1);
+    label.position.set(-2.5, 0.8, 0);
+    this.pilotLabel = label;
+    this.pilotMarker.add(label);
+    this.scene.add(this.pilotMarker);
+    this.pilotMarker.visible = false;
+    this.updatePilotMarker();
     this.setCamera("Overview");
     if (/swiftshader|llvmpipe|software/i.test(this.stats.gpu))
       this.setQuality("Low");
@@ -693,6 +740,11 @@ export class World {
   setWorkspace(page: string) {
     if (
       this.session?.active &&
+      ![this.session.attempt.mode, "Instructor"].includes(page)
+    )
+      return false;
+    if (
+      this.session?.active &&
       ["Training", "Mock Examination"].includes(page) &&
       page !== this.session.attempt.mode
     )
@@ -702,6 +754,7 @@ export class World {
     if (this.session?.strict && page !== this.workspace) return false;
     if (this.session?.locked && page === "Reference missions") return false;
     this.workspace = page;
+    this.pilotMarker.visible = false;
     if (!this.session?.strict) this.markerDots.visible = true;
     if (page === "Reference missions") {
       this.drone.manualOnly = false;
@@ -713,13 +766,83 @@ export class World {
     }
     return true;
   }
+  private canConfigureWeather() {
+    return (
+      this.workspace !== "Mock Examination" &&
+      !this.session?.strict &&
+      !this.replay &&
+      (!this.session?.locked ||
+        (this.workspace === "Instructor" && this.session.state === "PAUSED"))
+    );
+  }
+  setWeatherPreset(p: Preset) {
+    if (!this.canConfigureWeather() || !Object.hasOwn(presets, p)) return false;
+    this.weather.setPreset(p);
+    this.session?.event("WEATHER_CHANGE", p);
+    return true;
+  }
+  setSimpleWeather(wind: WindLevel, condition: Condition) {
+    if (!this.canConfigureWeather()) return false;
+    this.weather.target = simpleWeather(wind, condition);
+    this.session?.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
+    return true;
+  }
+  setAdvancedWeather(key: keyof Weather["target"], value: number) {
+    const bounds: Record<keyof Weather["target"], number[]> = {
+      wind: [0, 15],
+      direction: [0, 360],
+      gust: [0, 7],
+      turbulence: [0, 1],
+      cloud: [0, 1],
+      rain: [0, 1],
+      visibility: [60, 800],
+      timeOfDay: [7, 18],
+    };
+    if (
+      !this.canConfigureWeather() ||
+      !Object.hasOwn(bounds, key) ||
+      !Number.isFinite(value) ||
+      value < bounds[key][0] ||
+      value > bounds[key][1]
+    )
+      return false;
+    this.weather.target[key] = value;
+    this.session?.event("WEATHER_CHANGE", `${key}=${value}`);
+    return true;
+  }
+  recenterPilot() {
+    this.headYaw = this.pilotStation.initialYaw ?? PILOT_STATION.initialYaw!;
+    this.headPitch =
+      this.pilotStation.initialPitch ?? PILOT_STATION.initialPitch!;
+  }
+  lookPilot(yaw: number, pitch: number) {
+    this.headYaw = Math.max(-Math.PI, Math.min(Math.PI, this.headYaw + yaw));
+    this.headPitch = Math.max(-1.2, Math.min(1.2, this.headPitch + pitch));
+  }
+  pilotMarker = new T.Group();
+  setPilotMarker(show: boolean) {
+    if (
+      this.session?.strict ||
+      !["Instructor", "System Configuration", "Reference missions"].includes(
+        this.workspace,
+      )
+    )
+      return false;
+    this.pilotMarker.visible = show;
+    return true;
+  }
+  private updatePilotMarker() {
+    const s = this.pilotStation;
+    this.pilotMarker.position.set(s.x, s.groundY + 0.03, s.z);
+    this.pilotMarker.rotation.y = -(s.initialYaw ?? -Math.PI / 2);
+  }
   configureStation(station: PilotStation) {
-    if (this.session?.locked || !validStation(station)) return false;
+    if (this.session?.locked || !validFrontStation(station)) return false;
     this.pilotStation = {
       ...station,
       verification: "PROVISIONAL",
       source:
-        "User-configured engineering assumption; authority/site validation required",
+        "Vị trí tạm đề xuất do người dùng cài đặt; cần khảo sát và xác nhận",
     };
     try {
       localStorage.setItem(
@@ -729,6 +852,8 @@ export class World {
     } catch {
       this.stats.error = "Pilot station could not be persisted";
     }
+    this.recenterPilot();
+    this.updatePilotMarker();
     if (this.cameraMode === "PILOT VLOS") this.setCamera("PILOT VLOS");
     return true;
   }
@@ -745,6 +870,8 @@ export class World {
       return false;
     if (profile in missions) this.selectMission(profile as MissionId);
     this.keys.clear();
+    // Freeze the chosen preflight environment, including blend destination.
+    this.weather.current = { ...this.weather.target };
     this.session = new TrainingSession(
       candidate,
       mode,
@@ -766,12 +893,12 @@ export class World {
     this.trainingReference.computeLineDistances();
     this.drone.manualOnly = true;
     this.drone.paused = false;
-    this.headYaw = 0;
-    this.headPitch = 0.2;
+    this.recenterPilot();
     this.setLabels(false);
     this.setRoute(false);
     this.setDebug(false);
     this.markerDots.visible = mode !== "Mock Examination";
+    this.pilotMarker.visible = false;
     this.setCamera("PILOT VLOS");
     this.traceCount = -1;
     return true;
@@ -877,6 +1004,11 @@ export class World {
   };
   private keyDown = (e: KeyboardEvent) => {
     if (
+      e.code === "Space" &&
+      (e.target as HTMLElement).closest("button,summary,a")
+    )
+      return;
+    if (
       (e.target as HTMLElement).matches(
         "input,select,textarea,[contenteditable=true]",
       )
@@ -928,7 +1060,7 @@ export class World {
   private onContextLost = (event: Event) => {
     event.preventDefault();
     this.stats.error =
-      "Graphics context lost. Reload to restore the simulator.";
+      "Mất kết nối đồ họa. Bài bay đã dừng; tải lại trang để khôi phục mô phỏng và kiểm tra bản lưu giữa chừng.";
     this.drone.paused = true;
     this.session?.abort("Graphics context lost", true);
     this.callbacks(this.drone.telemetry(), { ...this.stats });
@@ -1106,6 +1238,17 @@ export class World {
       (dot as T.Mesh<T.BufferGeometry, T.MeshBasicMaterial>).material.color.set(
         active ? "#d2e96e" : "#4b7667",
       );
+    }
+    if (this.pilotMarker.visible && this.pilotLabel) {
+      // Technical annotation keeps readable screen size; aircraft scale is untouched.
+      const point = this.pilotLabel
+        .getWorldPosition(new T.Vector3())
+        .applyMatrix4(this.camera.matrixWorldInverse);
+      const units =
+        (2 * -point.z * Math.tan(T.MathUtils.degToRad(this.camera.fov / 2))) /
+        Math.max(1, this.host.clientHeight);
+      this.pilotLabel.visible = point.z < 0;
+      this.pilotLabel.scale.set(320 * units, 48 * units, 1);
     }
     this.renderer.render(this.scene, this.camera);
     this.samples++;
