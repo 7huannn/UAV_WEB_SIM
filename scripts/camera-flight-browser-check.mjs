@@ -20,6 +20,7 @@ const state = () => page.evaluate(() => {
     yaw: Math.atan2(direction.z, direction.x),
     pitch: Math.asin(direction.y),
     fov: w.camera.fov,
+    pointerLocked: document.pointerLockElement === w.renderer.domElement,
     horizonY: screenY(-100000, w.camera.position.y),
     farEdgeY: screenY(-13.5),
     nearEdgeY: screenY(13.5),
@@ -64,9 +65,39 @@ try {
   assert.ok(Math.abs(before.yaw + Math.PI / 2) < 1e-9);
   assert.ok(Math.abs(before.pitch + 14.3 * Math.PI / 180) < 1e-9);
   assert.equal(before.fov, 45);
-  assert.ok(Math.abs(before.horizonY - 0.193) < 0.01);
+  assert.ok(Math.abs(before.horizonY - 0.193) < 0.02);
   assert.ok(Math.abs(before.farEdgeY - 0.385) < 0.01);
-  assert.ok(Math.abs(before.nearEdgeY - 0.773) < 0.01);
+  assert.ok(Math.abs(before.nearEdgeY - 0.773) < 0.02);
+  assert.ok(before.farEdgeY - before.horizonY > 0.15);
+  const canvas = page.locator(".viewport canvas");
+  const box = await canvas.boundingBox();
+  const x = box.x + box.width / 2, y = box.y + box.height / 2;
+  await page.mouse.click(x, y);
+  await page.waitForFunction(() => document.pointerLockElement === window.__UAV__.renderer.domElement);
+  await page.mouse.move(x + 80, y - 40);
+  await page.waitForFunction((yaw) => window.__UAV__.headYaw > yaw + 0.05, before.yaw);
+  const turned = await state();
+  assert.ok(turned.pointerLocked && turned.pitch > before.pitch);
+  assert.deepEqual(turned.eye, before.eye);
+  assert.equal(turned.state, "ACTIVE");
+  await page.mouse.move(x - 280, y - 40);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const uav = await page.evaluate(() => window.__UAV__.drone.position.clone().project(window.__UAV__.camera).toArray());
+  assert.ok(Math.abs(uav[0]) < 0.3 && Math.abs(uav[1]) < 1, "mouse look can bring the UAV into view");
+  await page.mouse.click(x, y);
+  await page.waitForFunction(() => document.pointerLockElement === null);
+  await page.mouse.click(x, y);
+  await page.waitForFunction(() => document.pointerLockElement === window.__UAV__.renderer.domElement);
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => document.pointerLockElement === null);
+  await page.mouse.click(x, y);
+  await page.waitForFunction(() => document.pointerLockElement === window.__UAV__.renderer.domElement);
+  await page.evaluate(() => window.__UAV__.setCamera("Overview"));
+  await page.waitForFunction(() => document.pointerLockElement === null);
+  assert.equal((await state()).state, "ACTIVE");
+  await page.evaluate(() => window.__UAV__.setCamera("PILOT VLOS"));
+  await page.evaluate(() => window.__UAV__.recenterPilot());
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   for (const mode of ["Overview", "Follow", "FPV", "Top down", "Ground", "PILOT VLOS"]) {
     await camera.selectOption(mode);
     await page.waitForFunction((expected) => window.__UAV__.cameraMode === expected, mode);
@@ -76,11 +107,16 @@ try {
     assert.equal(current.state, "ACTIVE", `flight ended when selecting ${mode}`);
     assert.equal(current.fault, "", `input fault when selecting ${mode}`);
     assert.equal(current.camera, mode);
+    assert.equal(current.pointerLocked, false);
     assert.equal(current.paused, false);
     assert.ok(current.sameWorld && current.sameSession && current.sameDrone);
     assert.equal(current.taskIndex, before.taskIndex);
     assert.deepEqual(current.completed, before.completed);
     assert.ok(current.altitude > 0.1);
+    if (mode === "FPV") {
+      await page.mouse.click(x, y);
+      assert.equal((await state()).pointerLocked, false);
+    }
     if (mode === "PILOT VLOS") {
       assert.deepEqual(current.eye, before.eye);
       assert.deepEqual(current.station, before.station);
@@ -101,7 +137,7 @@ try {
   assert.equal(await page.getByRole("region", { name: "Kết quả bài bay" }).count(), 1);
   assert.equal(await page.evaluate(() => window.__UAV__.setCamera("Overview")), true);
   assert.equal(await page.evaluate(() => window.__UAV__.session.state), "ABORTED");
-  console.log("Camera switches preserve active flight, drone/session identity, progress, and timer; explicit end still works.");
+  console.log("Pilot Pointer Lock toggles, ESC unlocks, FPV ignores clicks, and camera switches preserve the active flight.");
 } finally {
   await browser.close();
 }

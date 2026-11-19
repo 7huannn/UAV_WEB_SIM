@@ -390,8 +390,9 @@ export default function App() {
                 </p>
                 <ControlGuide />
                 <p>
-                  <kbd>Space</kbd> tạm dừng hoặc tiếp tục. Kéo chuột để nhìn
-                  quanh. Nếu thiết bị ngắt kết nối hoặc cửa sổ mất tập trung,
+                  <kbd>Space</kbd> tạm dừng hoặc tiếp tục. Ở góc người lái,
+                  nhấp sân để khóa chuột và nhìn quanh; nhấp lần nữa hoặc nhấn
+                  <kbd>Esc</kbd> để thả chuột. Nếu thiết bị ngắt kết nối hoặc cửa sổ mất tập trung,
                   bài bay được dừng và giữ lại bản ghi.
                 </p>
                 <details>

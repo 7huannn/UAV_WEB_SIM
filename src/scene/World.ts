@@ -87,7 +87,6 @@ export class World {
   private traceCount = -1;
   private traceArray = new Float32Array(100000 * 3);
   private pilotLabel: T.Sprite | null = null;
-  private pointer: { x: number; y: number } | null = null;
   scene = new T.Scene();
   renderer: T.WebGLRenderer;
   camera = new T.PerspectiveCamera(43, 1, 0.06, 1200);
@@ -149,12 +148,12 @@ export class World {
     this.scene.add(this.groundGuide.group);
     try {
       const s = JSON.parse(localStorage.getItem("uav-pilot-station") ?? "null");
-      if (s && validFrontStation(s)) this.pilotStation = s.viewRevision === 5 ? s : {
+      if (s && validFrontStation(s)) this.pilotStation = s.viewRevision === 7 ? s : {
         ...s,
         verticalFov: PILOT_STATION.verticalFov,
         initialYaw: frontPilotStation(s.setback).initialYaw,
         initialPitch: PILOT_STATION.initialPitch,
-        viewRevision: 5,
+        viewRevision: 7,
       };
       // Legacy local west station is superseded; archived attempt snapshots stay untouched.
     } catch {
@@ -182,11 +181,9 @@ export class World {
     this.renderer.domElement.tabIndex = 0;
     this.renderer.domElement.addEventListener("pointerdown", this.headStart);
     this.renderer.domElement.addEventListener("pointermove", this.headMove);
-    this.renderer.domElement.addEventListener("pointerup", this.headEnd);
-    this.renderer.domElement.addEventListener("pointercancel", this.headEnd);
     this.renderer.domElement.setAttribute(
       "aria-label",
-      "Sân mô phỏng UAV 3D. Kéo chuột để nhìn quanh tại chỗ; dùng các nút nhìn quanh nếu cần.",
+      "Sân mô phỏng UAV 3D. Ở góc người lái, nhấp để khóa chuột và nhìn quanh, nhấp lần nữa hoặc nhấn Escape để thả chuột.",
     );
     this.renderer.domElement.addEventListener(
       "webglcontextlost",
@@ -633,6 +630,8 @@ export class World {
       return false;
     }
     if (this.replay) this.replay.recordedCamera = false;
+    if (mode !== "PILOT VLOS" && document.pointerLockElement === this.renderer.domElement)
+      document.exitPointerLock();
     this.cameraMode = mode;
     this.controls.enabled =
       mode === "Overview" || mode === "Orbit" || mode === "Ground";
@@ -857,7 +856,7 @@ export class World {
       this.pilotStation.initialPitch ?? PILOT_STATION.initialPitch!;
   }
   lookPilot(yaw: number, pitch: number) {
-    this.headYaw = Math.max(-Math.PI, Math.min(Math.PI, this.headYaw + yaw));
+    this.headYaw = Math.atan2(Math.sin(this.headYaw + yaw), Math.cos(this.headYaw + yaw));
     this.headPitch = Math.max(-1.2, Math.min(1.2, this.headPitch + pitch));
   }
   pilotMarker = new T.Group();
@@ -1026,26 +1025,23 @@ export class World {
   }
   private headStart = (e: PointerEvent) => {
     this.renderer.domElement.focus();
-    if (this.cameraMode !== "PILOT VLOS") return;
-    this.pointer = { x: e.clientX, y: e.clientY };
-    this.renderer.domElement.setPointerCapture(e.pointerId);
+    if (this.cameraMode !== "PILOT VLOS" || e.button !== 0) return;
+    if (document.pointerLockElement === this.renderer.domElement)
+      document.exitPointerLock();
+    else {
+      const lock = this.renderer.domElement.requestPointerLock();
+      if (lock) void lock.catch(() => {});
+    }
   };
   private headMove = (e: PointerEvent) => {
-    if (!this.pointer || this.cameraMode !== "PILOT VLOS") return;
-    this.headYaw = Math.max(
-      -Math.PI,
-      Math.min(Math.PI, this.headYaw + (e.clientX - this.pointer.x) * 0.003),
-    );
-    this.headPitch = Math.max(
-      -1.2,
-      Math.min(1.2, this.headPitch - (e.clientY - this.pointer.y) * 0.003),
-    );
-    this.pointer = { x: e.clientX, y: e.clientY };
-  };
-  private headEnd = () => {
-    this.pointer = null;
+    if (this.cameraMode === "PILOT VLOS" && document.pointerLockElement === this.renderer.domElement)
+      this.lookPilot(e.movementX * 0.003, -e.movementY * 0.003);
   };
   private keyDown = (e: KeyboardEvent) => {
+    if (e.code === "Escape" && document.pointerLockElement === this.renderer.domElement) {
+      document.exitPointerLock();
+      return;
+    }
     if (
       e.code === "Space" &&
       (e.target as HTMLElement).closest("button,summary,a")
@@ -1314,13 +1310,12 @@ export class World {
   };
   dispose() {
     this.disposed = true;
+    if (document.pointerLockElement === this.renderer.domElement) document.exitPointerLock();
     cancelAnimationFrame(this.frame);
     this.observer.disconnect();
     this.controls.dispose();
     this.renderer.domElement.removeEventListener("pointerdown", this.headStart);
     this.renderer.domElement.removeEventListener("pointermove", this.headMove);
-    this.renderer.domElement.removeEventListener("pointerup", this.headEnd);
-    this.renderer.domElement.removeEventListener("pointercancel", this.headEnd);
     window.removeEventListener("keydown", this.keyDown);
     window.removeEventListener("keyup", this.keyUp);
     window.removeEventListener("blur", this.clearKeys);

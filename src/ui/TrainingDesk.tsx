@@ -798,8 +798,8 @@ export function TrainingDesk({
           <h2>Cách điều khiển</h2>
           <ControlGuide gamepad={w.input.source === "Gamepad"} />
           <p>
-            Kéo chuột để nhìn quanh. Chọn vùng mô phỏng để nhận phím. Thả phím
-            để giữ vị trí.
+            Ở góc người lái, nhấp vào sân để khóa chuột và nhìn quanh. Nhấp lần
+            nữa hoặc nhấn Esc để thả chuột. Thả phím để giữ vị trí.
           </p>
         </section>
       )}

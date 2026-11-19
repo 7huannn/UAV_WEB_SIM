@@ -16,8 +16,8 @@ export type PilotStation = {
   initialPitch?: number;
   viewRevision?: number;
 };
-// Reference framing is a virtual camera behind and above the physical pilot station.
 const PILOT_VIEW = { back: 8.5, rise: 4.5, verticalFov: 45, pitch: -14.3 * Math.PI / 180 };
+
 // Edge/centre vectors use the same world coordinates as the court; this also
 // handles a rotated edge when a surveyed transform is supplied by the caller.
 export function stationFromEdge(
@@ -49,7 +49,7 @@ export function stationFromEdge(
     eyeHeight: 1.65,
     verticalFov: PILOT_VIEW.verticalFov,
     edge: "front-long-edge",
-    viewRevision: 5,
+    viewRevision: 7,
     setback,
     initialYaw: Math.atan2(center[1] - z, center[0] - x),
     initialPitch: PILOT_VIEW.pitch,
