@@ -244,7 +244,6 @@ kbd {
   letter-spacing: 1.7px;
 }
 .status-dot,
-.local-status i,
 .software-readiness i,
 .home-coordinate i,
 .home-footer i,
@@ -328,19 +327,9 @@ kbd {
   color: var(--muted);
   margin-top: 3px;
 }
-.header-right {
+.header-help {
   margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-.local-status {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 10px;
-  letter-spacing: 1.1px;
-  color: #596a5d;
+  flex-shrink: 0;
 }
 .context-navigation {
   display: flex;
@@ -603,7 +592,7 @@ kbd {
   border-radius: 15px;
   background: #e9ede2;
   position: relative;
-  min-height: 196px;
+  min-height: 184px;
 }
 .destination:nth-child(2) {
   background: #e9ece8;
@@ -649,66 +638,78 @@ kbd {
 }
 .learn-strip {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 40px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+  gap: clamp(24px, 3vw, 48px);
   align-items: center;
-  padding: 32px 0;
-  margin-top: 10px;
+  padding: 27px clamp(24px, 3vw, 40px);
+  margin-top: 22px;
+  background: #edf0e7;
+  border: 1px solid #e1e6d9;
+  border-radius: 16px;
 }
 .learn-intro .eyebrow {
-  font-size: 8px;
+  color: #5f7455;
+  font-size: 9px;
 }
 .learn-intro h2 {
-  font-size: 20px;
-  margin: 9px 0 7px;
+  font-size: 22px;
+  margin: 9px 0 8px;
 }
 .learn-intro p {
   color: var(--muted);
-  font-size: 13px;
-  max-width: 340px;
+  font-size: 14px;
+  max-width: 380px;
 }
 .learn-links {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .learn-links button {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 18px;
   align-items: center;
-  gap: 13px;
+  gap: 12px;
+  min-height: 92px;
   border: 0;
   background: transparent;
   text-align: left;
-  padding: 16px 20px;
-  border-radius: 0;
+  padding: 15px 17px;
+  border-radius: 10px;
 }
 .learn-links button + button {
-  border-left: 1px solid var(--line);
+  border-left: 1px solid #d1d9c9;
 }
-.learn-links button:hover {
-  background: #e8eddf;
+.learn-links button:hover:not(:disabled) {
+  background: #f8faf4;
+  border-color: #d1d9c9;
 }
 .learn-links button > svg {
   flex-shrink: 0;
   color: #657e52;
 }
 .learn-links button > svg:last-child {
-  margin-left: auto;
   width: 16px;
+  transition: transform 0.18s var(--ease);
+}
+.learn-links button:hover > svg:last-child {
+  transform: translateX(3px);
 }
 .learn-links b {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   display: block;
 }
 .learn-links small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.5;
   margin-top: 5px;
 }
 .home-footer {
   border-top: 1px solid var(--line);
   padding: 21px 0;
+  margin-top: 30px;
   display: flex;
   justify-content: space-between;
   gap: 20px;
@@ -2452,16 +2453,13 @@ button[aria-pressed="true"] {
     gap: 23px;
   }
   .destination {
-    min-height: 220px;
+    min-height: 200px;
     padding: 30px;
   }
 }
 @media (max-width: 1100px) {
   .app-header {
     gap: 25px;
-  }
-  .local-status {
-    display: none;
   }
   .hero-copy h1 {
     font-size: 48px;
@@ -2599,9 +2597,6 @@ button[aria-pressed="true"] {
   .brand small {
     font-size: 7px;
     letter-spacing: 2px;
-  }
-  .header-right {
-    gap: 4px;
   }
   .context-navigation {
     gap: 10px;
@@ -2942,10 +2937,10 @@ button[aria-pressed="true"] {
     left: auto;
     right: 0;
   }
-  .header-right {
+  .header-help {
     margin-left: 0;
   }
-  .home-mode .header-right {
+  .home-mode .header-help {
     margin-left: auto;
   }
   .experience-body {
@@ -3079,6 +3074,7 @@ button[aria-pressed="true"] {
   }
   .home-footer {
     padding: 22px 0;
+    margin-top: 22px;
     gap: 10px;
   }
   .home-footer > span {
@@ -3648,9 +3644,6 @@ button[aria-pressed="true"] {
   .learn-intro p {
     max-width: none;
   }
-  .learn-links button:first-child {
-    padding-left: 0;
-  }
   .view-tools {
     flex-wrap: wrap;
   }
@@ -3698,8 +3691,9 @@ button[aria-pressed="true"] {
     font-size: 10px;
   }
   .learn-strip {
-    padding: 26px 0;
-    gap: 15px;
+    padding: 24px 21px;
+    margin-top: 18px;
+    gap: 13px;
   }
   .learn-intro h2 {
     font-size: 19px;
@@ -3708,7 +3702,9 @@ button[aria-pressed="true"] {
     grid-template-columns: 1fr;
   }
   .learn-links button {
-    padding: 16px 0;
+    min-height: 76px;
+    padding: 14px 0;
+    border-radius: 0;
   }
   .learn-links button + button {
     border-left: 0;

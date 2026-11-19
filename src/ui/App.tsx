@@ -284,18 +284,13 @@ export default function App() {
             )}
           </div>
         )}
-        <div className="header-right">
-          <span className="local-status">
-            <i /> LƯU TRÊN THIẾT BỊ
-          </span>
-          <button
-            className="icon-button"
-            aria-label="Hướng dẫn sử dụng"
-            onClick={() => setDialog("help")}
-          >
-            <Icon name="help" size={21} />
-          </button>
-        </div>
+        <button
+          className="icon-button header-help"
+          aria-label="Hướng dẫn sử dụng"
+          onClick={() => setDialog("help")}
+        >
+          <Icon name="help" size={21} />
+        </button>
       </header>
       <div className="experience-body" inert={dialog ? true : undefined}>
         <div
