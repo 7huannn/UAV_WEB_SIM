@@ -71,7 +71,7 @@ test("P1-C: actual reference/training command adapters are render-cadence indepe
       }
       d.beforeStep=step=>{
         const n=d.simulation.tick;
-        world.keys=new Set(n<300?['KeyR','KeyD']:[]);
+        world.keys=new Set(n<300?['KeyJ','KeyD']:[]);
         input.value={throttle:n<300?.5:0,roll:n<300?.5:0,pitch:0,yaw:0};
         if(n===100)weather.target.direction=1;
         world['flightInput'](step);

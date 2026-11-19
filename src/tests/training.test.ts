@@ -129,16 +129,19 @@ test("controller mapping covers asymmetric range, center, deadzone, inversion an
   assert.ok(
     !validController({ ...p, axes: { ...p.axes, roll: { ...a, center: 1 } } }),
   );
-  assert.deepEqual(keyboardRC(new Set(["KeyR", "KeyD", "KeyE", "KeyW"])), {
+  assert.deepEqual(keyboardRC(new Set(["KeyJ", "KeyD", "KeyE", "KeyW"])), {
     throttle: 1,
     yaw: 1,
     pitch: 1,
     roll: 1,
   });
+  assert.equal(keyboardRC(new Set(["KeyK"])).throttle, -1);
+  assert.equal(keyboardRC(new Set(["KeyJ", "KeyK"])).throttle, 0);
+  assert.equal(keyboardRC(new Set(["KeyR", "KeyF"])).throttle, 0);
 });
 test("changing input sources clears stale connection state and pending movement", () => {
   const input = new ControllerInput();
-  input.poll(new Set(["KeyR"]), true);
+  input.poll(new Set(["KeyJ"]), true);
   assert.equal(input.connected, true);
   input.source = "Gamepad";
   assert.equal(input.connected, false);
@@ -158,10 +161,10 @@ test("gamepad disconnect never substitutes keyboard; focus loss neutralizes all 
     buttons: [],
   } as unknown as Gamepad;
   assert.equal(input.poll(new Set(), true, [pad]).throttle, 1);
-  assert.equal(input.poll(new Set(["KeyR"]), true, []).throttle, 0);
+  assert.equal(input.poll(new Set(["KeyJ"]), true, []).throttle, 0);
   assert.match(input.fault, /disconnected/);
   input.source = "Keyboard";
-  assert.equal(input.poll(new Set(["KeyR"]), false).throttle, 0);
+  assert.equal(input.poll(new Set(["KeyJ"]), false).throttle, 0);
   assert.match(input.fault, /focus/);
 });
 test("camera menu focus neutralizes controls without interrupting an active flight", () => {
@@ -174,9 +177,9 @@ test("camera menu focus neutralizes controls without interrupting an active flig
     velocity = o.d.velocity.toArray(),
     orientation = o.d.orientation.toArray(),
     progress = o.s.dwell;
-  o.input.poll(new Set(["KeyR"]), true);
+  o.input.poll(new Set(["KeyJ"]), true);
   assert.equal(o.input.value.throttle, 1);
-  o.input.poll(new Set(["KeyR"]), false, [], true);
+  o.input.poll(new Set(["KeyJ"]), false, [], true);
   assert.deepEqual(o.input.value, { throttle: 0, yaw: 0, pitch: 0, roll: 0 });
   assert.equal(o.input.fault, "");
   const before = o.s.attempt.result.completedTasks.length;

@@ -108,7 +108,7 @@ export function keyboardRC(keys: Set<string>): RC {
   const pair = (positive: string, negative: string) =>
     Number(keys.has(positive)) - Number(keys.has(negative));
   return {
-    throttle: pair("KeyR", "KeyF"),
+    throttle: pair("KeyJ", "KeyK"),
     yaw: pair("KeyE", "KeyQ"),
     pitch: pair("KeyW", "KeyS"),
     roll: pair("KeyD", "KeyA"),

@@ -397,7 +397,7 @@ export function TrainingDesk({
                 </>
               ) : (
                 <>
-                  Bắt đầu bay, rồi nhấn <kbd>R</kbd> để đưa máy bay lên độ cao 5
+                  Bắt đầu bay, rồi nhấn <kbd>J</kbd> để đưa máy bay lên độ cao 5
                   m. Thả phím để giữ vị trí.
                 </>
               )}
@@ -615,7 +615,7 @@ export function TrainingDesk({
             "Đẩy nhẹ cần trái xuống để hạ trên H."
           ) : (
             <>
-              Nhấn <kbd>F</kbd> để hạ xuống H.
+              Nhấn <kbd>K</kbd> để hạ xuống H.
             </>
           )}{" "}
           Chạm đất ổn định rồi chọn Tắt động cơ.
@@ -827,7 +827,7 @@ export function ControlGuide({ gamepad = false }: { gamepad?: boolean }) {
         : [
             ["W S", "Tiến / lùi"],
             ["A D", "Trái / phải"],
-            ["R F", "Lên / xuống"],
+            ["J K", "Lên / xuống"],
             ["Q E", "Xoay hướng"],
           ]
       ).map(([key, label]) => (

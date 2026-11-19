@@ -970,7 +970,7 @@ export class World {
     if (this.replay) return;
     if (this.workspace === "Reference missions") {
       const key = (k: string) => Number(this.keys.has(k));
-      this.drone.manual(new T.Vector3(key("KeyD") - key("KeyA"), key("KeyR") - key("KeyF"),
+      this.drone.manual(new T.Vector3(key("KeyD") - key("KeyA"), key("KeyJ") - key("KeyK"),
         key("KeyS") - key("KeyW")).multiplyScalar(2), (key("KeyQ") - key("KeyE")) * .7, dt);
       return;
     }
@@ -1061,8 +1061,8 @@ export class World {
         "KeyD",
         "KeyQ",
         "KeyE",
-        "KeyR",
-        "KeyF",
+        "KeyJ",
+        "KeyK",
         "Space",
       ].includes(e.code)
     ) {

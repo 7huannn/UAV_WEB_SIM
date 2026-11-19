@@ -450,9 +450,9 @@ try {
   await page.getByRole("button", { name: "Thử lại từ H", exact: true }).click();
   await prepare("Focus-loss QA", "foundations");
   await canvas.click();
-  await page.keyboard.down("KeyR");
+  await page.keyboard.down("KeyJ");
   await fast(0.1);
-  await page.keyboard.up("KeyR");
+  await page.keyboard.up("KeyJ");
   await page.evaluate(() => window.dispatchEvent(new Event("blur")));
   await page.waitForFunction(
     () => window.__UAV__.session.state === "INCOMPLETE",

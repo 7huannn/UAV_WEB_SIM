@@ -189,9 +189,9 @@ try {
   await capture("ready");
   await button("Bắt đầu bay").click();
   await page.waitForFunction(() => window.__UAV__.session?.state === "ACTIVE");
-  await page.keyboard.down("KeyR");
+  await page.keyboard.down("KeyJ");
   await page.waitForFunction(() => window.__UAV__.drone.altitude > 0.3);
-  await page.keyboard.up("KeyR");
+  await page.keyboard.up("KeyJ");
   await capture("flight");
   const optics = await page.evaluate(() => {
     const w = window.__UAV__;

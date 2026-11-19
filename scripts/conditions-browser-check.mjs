@@ -152,9 +152,9 @@ try {
     "Conditions available in all four practice maps before start; initial recording and actual weather match selected levels without advancing physics",
   );
   await button("Bắt đầu bay").click();
-  await page.keyboard.down("KeyR");
+  await page.keyboard.down("KeyJ");
   await page.waitForFunction(() => window.__UAV__.drone.altitude > 0.4);
-  await page.keyboard.up("KeyR");
+  await page.keyboard.up("KeyJ");
   await conditions();
   await page.waitForFunction(() => window.__UAV__.session.state === "PAUSED");
   const paused = await page.evaluate(() => ({

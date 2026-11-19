@@ -56,9 +56,16 @@ try {
     const w = window.__UAV__;
     window.__cameraTest = { world: w, session: w.session, drone: w.drone };
   });
-  await page.keyboard.down("KeyR");
-  await page.waitForFunction(() => window.__UAV__.drone.altitude > 0.3);
-  await page.keyboard.up("KeyR");
+  await page.keyboard.down("KeyJ");
+  await page.waitForFunction(() => window.__UAV__.drone.altitude > 2);
+  await page.keyboard.up("KeyJ");
+  await page.waitForFunction(() => Math.abs(window.__UAV__.drone.velocity.y) < 0.1);
+  const climbAltitude = await page.evaluate(() => window.__UAV__.drone.altitude);
+  const climbTarget = await page.evaluate(() => window.__UAV__.drone.target.y);
+  await page.keyboard.down("KeyK");
+  await page.waitForFunction((target) => window.__UAV__.drone.target.y < target - 0.6, climbTarget);
+  await page.keyboard.up("KeyK");
+  await page.waitForFunction((altitude) => window.__UAV__.drone.altitude < altitude - 0.1, climbAltitude);
   const before = await state();
   assert.deepEqual(before.station, [0, 1.615, 17]);
   assert.ok(before.eye.every((v, i) => Math.abs(v - [0, 6.115, 25.5][i]) < 1e-9));
@@ -124,6 +131,13 @@ try {
       assert.ok(Math.abs(current.pitch - before.pitch) < 1e-9);
       assert.equal(current.fov, before.fov);
     }
+    await canvas.focus();
+    for (const [key, throttle] of [["KeyJ", 1], ["KeyK", -1]]) {
+      await page.keyboard.down(key);
+      await page.waitForFunction((expected) => window.__UAV__.input.value.throttle === expected, throttle);
+      await page.keyboard.up(key);
+      await page.waitForFunction(() => window.__UAV__.input.value.throttle === 0);
+    }
     assert.equal(await page.getByRole("region", { name: "Kết quả bài bay" }).count(), 0);
   }
   await page.waitForFunction((frames) => window.__UAV__.session.attempt.frames.length > frames, before.frames);
@@ -137,7 +151,7 @@ try {
   assert.equal(await page.getByRole("region", { name: "Kết quả bài bay" }).count(), 1);
   assert.equal(await page.evaluate(() => window.__UAV__.setCamera("Overview")), true);
   assert.equal(await page.evaluate(() => window.__UAV__.session.state), "ABORTED");
-  console.log("Pilot Pointer Lock toggles, ESC unlocks, FPV ignores clicks, and camera switches preserve the active flight.");
+  console.log("J climbs, K descends, both keys work across camera modes, and Pointer Lock/camera switches preserve the active flight.");
 } finally {
   await browser.close();
 }

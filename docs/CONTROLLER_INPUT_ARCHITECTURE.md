@@ -18,7 +18,7 @@ Manual start requires neutral normalized demand (±0.08 training tolerance) and 
 
 ## Focus, interruption and recovery
 
-Keyboard: W/S forward/back, A/D lateral, R/F climb/descent, Q/E yaw. Keyboard fallback is explicit, recorded and not equivalent to physical RC ergonomics. Flight shortcuts are ignored during text entry. Buttons and guidance checkboxes remain usable. Window blur/hidden-tab clears keys; text/select editing neutralizes inputs. Active input loss/disconnect interrupts the attempt as INCOMPLETE, records the reason and captures a stabilized hold. It does not report a pass or execute a return/landing route. Simulation pause is separately logged and requires review. A new attempt requires the existing grounded-H and neutral-input checks. Physical checklists were removed by the latest training workflow.
+Keyboard: W/S forward/back, A/D lateral, J/K climb/descent, Q/E yaw. Keyboard fallback is explicit, recorded and not equivalent to physical RC ergonomics. Flight shortcuts are ignored during text entry. Buttons and guidance checkboxes remain usable. Window blur/hidden-tab clears keys; text/select editing neutralizes inputs. Active input loss/disconnect interrupts the attempt as INCOMPLETE, records the reason and captures a stabilized hold. It does not report a pass or execute a return/landing route. Simulation pause is separately logged and requires review. A new attempt requires the existing grounded-H and neutral-input checks. Physical checklists were removed by the latest training workflow.
 
 ## Verification and pending hardware checks
 

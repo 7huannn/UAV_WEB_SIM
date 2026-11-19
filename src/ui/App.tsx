@@ -576,7 +576,7 @@ function Reference({ w, t }: { w: World; t: typeof initial }) {
               Hạ cánh tự động
             </button>
             <p>
-              Chỉ dùng trong sân bay mẫu. WASD di chuyển, R/F lên xuống, Q/E
+              Chỉ dùng trong sân bay mẫu. WASD di chuyển, J/K lên xuống, Q/E
               xoay hướng.
             </p>
           </div>
