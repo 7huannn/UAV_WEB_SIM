@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-19T04:11:21.560Z",
+  "bundle": "/assets/index-CIdY77HX.js",
+  "browser": "147.0.7727.101",
+  "profile": {
+    "warmupFrames": 60,
+    "measuredFrames": 300,
+    "wallSeconds": 36.7645,
+    "simulatedSeconds": 34.812,
+    "realTimeFactor": 0.9468917025935345,
+    "medianMs": 98,
+    "p95Ms": 107,
+    "p99Ms": 120.60000000149012,
+    "calls": 116,
+    "triangles": 22696,
+    "memory": {
+      "geometries": 79,
+      "textures": 15
+    },
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "quality": "Low",
+    "reflectionCaptures": 2,
+    "reflectionCaptureMaxMs": 657
+  },
+  "errors": []
+}

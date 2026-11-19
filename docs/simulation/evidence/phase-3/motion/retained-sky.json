@@ -1,0 +1,189 @@
+{
+  "label": "retained-sky",
+  "url": "http://127.0.0.1:4190",
+  "bundle": "/assets/index-D8eKH9VN.js",
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1280,
+    800
+  ],
+  "dpr": 1,
+  "fixture": "actual force-integrated figure-eight reference mission; live weather transitions; 200 rendered RAF frames, every second captured",
+  "framesDir": "docs/simulation/evidence/phase-3/motion/retained-sky-frames",
+  "frames": 100,
+  "intendedPlaybackFps": 10,
+  "segments": [
+    {
+      "name": "clear-ground",
+      "preset": "Clear skies",
+      "frames": 40,
+      "start": {
+        "time": 0.1,
+        "pose": [
+          -20,
+          0.32,
+          0
+        ],
+        "camera": "Ground"
+      },
+      "end": {
+        "time": 14.196,
+        "pose": [
+          -12.691393133759858,
+          5.359393632437593,
+          -0.0002666133131951111
+        ],
+        "camera": "Ground",
+        "atmosphere": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        }
+      }
+    },
+    {
+      "name": "clear-pilot",
+      "preset": "Clear skies",
+      "frames": 40,
+      "start": {
+        "time": 14.196,
+        "pose": [
+          -12.691393133759858,
+          5.359393632437593,
+          -0.0002666133131951111
+        ],
+        "camera": "PILOT VLOS"
+      },
+      "end": {
+        "time": 28.564,
+        "pose": [
+          9.209913257596854,
+          5.321458154100103,
+          5.870119310629175
+        ],
+        "camera": "PILOT VLOS",
+        "atmosphere": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        }
+      }
+    },
+    {
+      "name": "partly-follow",
+      "preset": "Partly cloudy",
+      "frames": 40,
+      "start": {
+        "time": 28.564,
+        "pose": [
+          9.209913257596854,
+          5.321458154100103,
+          5.870119310629175
+        ],
+        "camera": "Follow"
+      },
+      "end": {
+        "time": 43.564,
+        "pose": [
+          -3.207082479950315,
+          5.320380910819623,
+          3.550289424884317
+        ],
+        "camera": "Follow",
+        "atmosphere": {
+          "wind": 3.1992250618074296,
+          "direction": 79.9916970907937,
+          "gust": 1.1996678836317551,
+          "turbulence": 0.2499446472719593,
+          "cloud": 0.41983394181587785,
+          "rain": 0,
+          "visibility": 500.083029092061,
+          "timeOfDay": 14.000830290920598
+        }
+      }
+    },
+    {
+      "name": "overcast-fpv",
+      "preset": "Overcast",
+      "frames": 40,
+      "start": {
+        "time": 43.564,
+        "pose": [
+          -3.207082479950315,
+          5.320380910819623,
+          3.550289424884317
+        ],
+        "camera": "FPV"
+      },
+      "end": {
+        "time": 58.548,
+        "pose": [
+          -20.116216693206177,
+          4.956699899260574,
+          0.04851102271500443
+        ],
+        "camera": "FPV",
+        "atmosphere": {
+          "wind": 3.799664549297819,
+          "direction": 109.98324445012088,
+          "gust": 1.7996647963557044,
+          "turbulence": 0.2999720509218581,
+          "cloud": 0.9197207253942262,
+          "rain": 0,
+          "visibility": 260.1340536637054,
+          "timeOfDay": 13.000558827151666
+        }
+      }
+    },
+    {
+      "name": "heavy-overview",
+      "preset": "Heavy rain",
+      "frames": 40,
+      "start": {
+        "time": 58.548,
+        "pose": [
+          -20.116216693206177,
+          4.956699899260574,
+          0.04851102271500443
+        ],
+        "camera": "Overview"
+      },
+      "end": {
+        "time": 73.512,
+        "pose": [
+          -20.02984438886051,
+          0.33223306804588154,
+          0.09979471295889702
+        ],
+        "camera": "Overview",
+        "atmosphere": {
+          "wind": 6.998196261882736,
+          "direction": 114.99717252473658,
+          "gust": 2.999323480357784,
+          "turbulence": 0.5498590819792579,
+          "cloud": 0.9999547541008151,
+          "rain": 0.9494645712903919,
+          "visibility": 95.09307095332112,
+          "timeOfDay": 13.000000314487899
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "video": "docs/simulation/evidence/phase-3/motion/retained-sky.mp4",
+  "videoDimensions": [
+    1280,
+    712
+  ],
+  "videoSHA256": "49f0d4ab33210bf2d643c38b4ac9314190f3340e6da02a718cdfa67f7fad573c"
+}

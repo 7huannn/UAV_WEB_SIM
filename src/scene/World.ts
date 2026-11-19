@@ -1112,8 +1112,9 @@ export class World {
     const dt = Math.min(rawDt, 0.1);
     this.last = stamp;
     if (document.hidden) return;
+    const windowFocused = document.hasFocus();
     this.inputFocused =
-      document.hasFocus() &&
+      windowFocused &&
       !document.activeElement?.matches(
         "input:not([type=checkbox]):not([type=range]):not([type=button]),select,textarea,[contenteditable=true]",
       );
@@ -1123,6 +1124,7 @@ export class World {
       typeof navigator.getGamepads === "function"
         ? navigator.getGamepads()
         : [],
+      windowFocused,
     );
     // Keep device readiness live on setup screens without rendering an invisible 3D field.
     if (!this.presentationActive && !this.session?.active && !this.drone.missionActive && !this.replay) {

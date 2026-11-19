@@ -160,6 +160,38 @@ test("gamepad disconnect never substitutes keyboard; focus loss neutralizes all 
   assert.equal(input.poll(new Set(["KeyR"]), false).throttle, 0);
   assert.match(input.fault, /focus/);
 });
+test("camera menu focus neutralizes controls without interrupting an active flight", () => {
+  const o = setup("foundations");
+  ready(o);
+  fixtureMove(o, -20, 5.32, 0, 4);
+  fixtureHover(o, 0.5);
+  assert.ok(o.s.dwell > 0);
+  const position = o.d.position.toArray(),
+    velocity = o.d.velocity.toArray(),
+    orientation = o.d.orientation.toArray(),
+    progress = o.s.dwell;
+  o.input.poll(new Set(["KeyR"]), true);
+  assert.equal(o.input.value.throttle, 1);
+  o.input.poll(new Set(["KeyR"]), false, [], true);
+  assert.deepEqual(o.input.value, { throttle: 0, yaw: 0, pitch: 0, roll: 0 });
+  assert.equal(o.input.fault, "");
+  const before = o.s.attempt.result.completedTasks.length;
+  for (const camera of ["Overview", "Follow", "FPV", "PILOT VLOS"]) {
+    const state = o.d.simulation.snapshot();
+    o.d.simulation.restore({ ...state, tick: state.tick + 1, time: state.time + dt });
+    o.s.sample(o.d, o.w, o.input, camera, false);
+    assert.equal(o.s.state, "ACTIVE");
+    assert.equal(o.s.attempt.result.completedTasks.length, before);
+  }
+  assert.ok(o.s.dwell > progress);
+  assert.deepEqual(o.d.position.toArray(), position);
+  assert.deepEqual(o.d.velocity.toArray(), velocity);
+  assert.deepEqual(o.d.orientation.toArray(), orientation);
+  assert.ok(o.s.attempt.frames.length > 0);
+  o.input.poll(new Set(), false, [], false);
+  o.tick();
+  assert.equal(o.s.state, "INCOMPLETE");
+});
 test("manual-only dynamics prohibit automatic takeoff, landing and reference missions; input remains force driven", () => {
   const { d } = setup();
   assert.equal(d.takeoff(), false);

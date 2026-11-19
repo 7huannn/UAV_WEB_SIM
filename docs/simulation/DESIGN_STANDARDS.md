@@ -2,7 +2,7 @@
 
 Updated: 2026-11-19, Asia/Ho_Chi_Minh. Program direction: [MASTER_PLAN](MASTER_PLAN.md). Decisions: [ARCHITECTURE_DECISIONS](ARCHITECTURE_DECISIONS.md). Delivery status: [PHASE_HANDOFF](PHASE_HANDOFF.md).
 
-**This is the persistent art-direction and review standard, not a claim that the current scene meets it.** Phases 1 and 2 were formally accepted within their documented scope. The user approved [P3-v1](PHASE_3_CONTRACT.md) implementation on 2026-11-19. Its [interim images](evidence/phase-3/INTERIM_VISUAL_BOARD.md) still show a pale seam and fail the art objective; a [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) is proposed for the sky/path root cause. It is not approved. No human Phase 3 aesthetic acceptance has occurred.
+**This is the persistent art-direction and review standard, not a claim that the current scene meets it.** Phases 1 and 2 were formally accepted within their documented scope. The user approved [P3-v1](PHASE_3_CONTRACT.md) and the narrow [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) on 2026-11-19. The test-only [P3-v2 comparison board](evidence/phase-3/P3_V2_PROTOTYPE_BOARD.html) shows an improved clear Ground seam but fails the full-composition standard: a heavy-weather FPV step, weak low-sun color, flat sky/depth and repeated cloud strips remain. The [P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) is proposed, not approved. No human Phase 3 aesthetic acceptance has occurred.
 
 ## Accepted Phase 2 preservation and Phase 3 implementation boundary
 

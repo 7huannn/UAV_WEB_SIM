@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UAV ARENA — P3-v2 diagnostic prototype comparison</title>
+<style>
+  :root { color-scheme: dark; font: 15px/1.5 system-ui, sans-serif; background: #151b1f; color: #e7eced; }
+  body { margin: 0 auto; padding: 24px; max-width: 1700px; }
+  h1 { font-size: 1.55rem; margin: 0 0 8px; }
+  p { max-width: 92ch; color: #c9d1d2; }
+  strong { color: #fff; }
+  .warning { padding: 12px 16px; border-left: 4px solid #dcad6c; background: #293029; }
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+  label { display: grid; gap: 4px; }
+  select { background: #263136; color: white; border: 1px solid #56646b; border-radius: 4px; padding: 8px; min-width: 180px; }
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  figure { margin: 0; }
+  figcaption { margin-bottom: 7px; font-weight: 650; }
+  img { display: block; width: 100%; border: 1px solid #526068; }
+  a { color: #a7d7df; }
+  video { width: 100%; background: #000; }
+  @media (max-width: 850px) { .pair { grid-template-columns: 1fr; } }
+</style>
+<h1>Phase 3 P3-v2 — diagnostic sky replacement</h1>
+<p class="warning"><strong>Rejected diagnostic prototype; Phase 3 is incomplete.</strong> The test-only local-radiance model improves one clear Ground seam, but leaves a heavy-weather FPV step, flat upper sky, weak low-sun color, horizontal cloud strips and gray heavy-weather composition. These frames are evidence for the proposed controlled revision, not a final aesthetic acceptance board.</p>
+<p>Matched 1280×800, DPR 1, Low-quality captures. The retained build is the in-scope P3-v1 implementation; the prototype is an isolated copy that was never installed in production. Five weather states × five cameras are available below. The low-sun pair uses the same current retained-sky bundle as the motion comparison. Lighting, geometry, weather values, camera optics and sky appearance must be judged as a whole.</p>
+<div class="controls">
+  <label>Weather <select id="weather"><option value="clear-skies">Clear skies</option><option value="partly-cloudy">Partly cloudy</option><option value="overcast">Overcast</option><option value="heavy-rain">Heavy rain</option><option value="light-rain">Light rain</option><option value="low-sun-clear-skies">Low sun — clear</option><option value="low-sun-overcast">Low sun — overcast</option></select></label>
+  <label>Camera <select id="camera"><option value="ground">Ground</option><option value="pilot-vlos">Pilot VLOS</option><option value="overview">Overview</option><option value="follow">Follow</option><option value="fpv">FPV</option></select></label>
+</div>
+<div class="pair">
+  <figure><figcaption>Retained P3-v1 sky</figcaption><a id="oldlink"><img id="old" alt="Retained sky comparison frame"></a></figure>
+  <figure><figcaption>Isolated P3-v2 local-radiance prototype</figcaption><a id="newlink"><img id="new" alt="Prototype comparison frame"></a></figure>
+</div>
+<p id="annotation"></p>
+<h2>Matched actual-flight motion</h2>
+<p>These sequences use the force-integrated figure-eight reference mission, live weather changes and Ground → Pilot VLOS → Follow → FPV → Overview camera transitions. Captures sample every second rendered browser frame and are encoded for review at 10 fps; approximately 73 simulated seconds play in ten seconds, so use them to inspect continuity rather than real-time cadence. Source timings and camera poses are in the linked manifests. The two runs follow the same scenario but are not frame-locked.</p>
+<div class="pair"><figure><figcaption>Retained sky</figcaption><video controls preload="metadata" src="motion/retained-sky.mp4"></video><a href="motion/retained-sky.json">Motion manifest</a></figure><figure><figcaption>Prototype</figcaption><video controls preload="metadata" src="motion/local-prototype.mp4"></video><a href="motion/local-prototype.json">Motion manifest</a></figure></div>
+<p><a href="after/evidence.json">Retained still manifest</a> · <a href="prototype/evidence.json">Prototype still manifest</a> · <a href="low-sun/retained-sky/evidence.json">Low-sun retained manifest</a> · <a href="low-sun/local-prototype/evidence.json">Low-sun prototype manifest</a> · <a href="prototype-comparison-metrics.json">Measured pixel samples</a></p>
+<script>
+  const weather = document.querySelector('#weather');
+  const camera = document.querySelector('#camera');
+  const notes = {
+    'clear-skies-ground': 'The retained sky has a pale horizon strip. The prototype smooths this local sample but makes the upper sky uniformly blue and distant turf gray.',
+    'partly-cloudy-ground': 'Horizontal cloud strips persist; the sky-model swap does not repair cloud morphology.',
+    'partly-cloudy-follow': 'In moving Follow views the distant context has a straight termination, exposing the sky abruptly; inspect motion frame 0050.',
+    'overcast-ground': 'The prototype compresses sky, terrain and court into a flat gray hierarchy.',
+    'heavy-rain-fpv': 'A hard sky/terrain color step remains in the prototype near the horizon; the P3-D gate is failed.',
+    'low-sun-clear-skies-ground': 'The retained sky shows a warm-to-blue low-sun gradient. The prototype stays almost uniformly cool blue.',
+  };
+  function update() {
+    const w = weather.value, c = camera.value;
+    const low = w.startsWith('low-sun-');
+    const key = low ? w.slice(8) : w;
+    const left = low ? `low-sun/retained-sky/${key}-${c}.png` : `after/${key}-${c}.png`;
+    const right = low ? `low-sun/local-prototype/${key}-${c}.png` : `prototype/${key}-${c}.png`;
+    for (const [id, src] of [['old', left], ['new', right]]) {
+      document.getElementById(id).src = src;
+      document.getElementById(id + 'link').href = src;
+    }
+    document.querySelector('#annotation').textContent = notes[`${w}-${c}`] || 'Review horizon, depth, cloud shape, color temperature, materials and camera composition together.';
+  }
+  weather.addEventListener('change', update);
+  camera.addEventListener('change', update);
+  update();
+</script>
+</html>

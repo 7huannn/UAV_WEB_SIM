@@ -1,0 +1,150 @@
+{
+  "definition": "sRGB8 decoded by IEC 61966-2-1 transfer, Rec.709 linear luminance weights 0.2126/0.7152/0.0722; center column x=640, no UI in samples",
+  "samples": {
+    "retainedClearGround": {
+      "image": "after/clear-skies-ground.png",
+      "a": {
+        "xy": [
+          640,
+          233
+        ],
+        "srgb8": [
+          236,
+          241,
+          243
+        ],
+        "linearRec709Luminance": 0.8721452554638806
+      },
+      "b": {
+        "xy": [
+          640,
+          234
+        ],
+        "srgb8": [
+          206,
+          220,
+          222
+        ],
+        "linearRec709Luminance": 0.6958213721671763
+      },
+      "absoluteLuminanceDelta": 0.17632388329670423,
+      "relativeToFirst": 0.20217261080314
+    },
+    "prototypeClearGround": {
+      "image": "prototype/clear-skies-ground.png",
+      "a": {
+        "xy": [
+          640,
+          233
+        ],
+        "srgb8": [
+          170,
+          196,
+          220
+        ],
+        "linearRec709Luminance": 0.5319321010902752
+      },
+      "b": {
+        "xy": [
+          640,
+          234
+        ],
+        "srgb8": [
+          175,
+          199,
+          221
+        ],
+        "linearRec709Luminance": 0.5518126579215599
+      },
+      "absoluteLuminanceDelta": 0.019880556831284646,
+      "relativeToFirst": 0.03737423778436466
+    },
+    "prototypeHeavyFpv": {
+      "image": "prototype/heavy-rain-fpv.png",
+      "a": {
+        "xy": [
+          640,
+          457
+        ],
+        "srgb8": [
+          195,
+          203,
+          210
+        ],
+        "linearRec709Luminance": 0.5896711725633412
+      },
+      "b": {
+        "xy": [
+          640,
+          458
+        ],
+        "srgb8": [
+          179,
+          189,
+          196
+        ],
+        "linearRec709Luminance": 0.49964420129602133
+      },
+      "absoluteLuminanceDelta": 0.0900269712673199,
+      "relativeToFirst": 0.1526731769436285
+    },
+    "retainedLowSunClearGround": {
+      "image": "low-sun/retained-sky/clear-skies-ground.png",
+      "a": {
+        "xy": [
+          640,
+          50
+        ],
+        "srgb8": [
+          129,
+          179,
+          202
+        ],
+        "linearRec709Luminance": 0.4117159422627162
+      },
+      "b": {
+        "xy": [
+          640,
+          225
+        ],
+        "srgb8": [
+          188,
+          186,
+          186
+        ],
+        "linearRec709Luminance": 0.4935434781479099
+      },
+      "absoluteLuminanceDelta": 0.0818275358851937,
+      "relativeToFirst": 0.19874755258561133
+    },
+    "prototypeLowSunClearGround": {
+      "image": "low-sun/local-prototype/clear-skies-ground.png",
+      "a": {
+        "xy": [
+          640,
+          50
+        ],
+        "srgb8": [
+          163,
+          191,
+          216
+        ],
+        "linearRec709Luminance": 0.5000600153378971
+      },
+      "b": {
+        "xy": [
+          640,
+          225
+        ],
+        "srgb8": [
+          164,
+          193,
+          217
+        ],
+        "linearRec709Luminance": 0.510421956182399
+      },
+      "absoluteLuminanceDelta": 0.010361940844501927,
+      "relativeToFirst": 0.020721394486020298
+    }
+  }
+}

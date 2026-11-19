@@ -1,6 +1,8 @@
-# Phase 3 contract amendment proposed — P3-v2, approval required
+# Phase 3 contract amendment — P3-v2 approved, prototype rejected
 
-Prepared 2026-11-19. **P3-v2 is a proposal, not implementation authority.** P3-v1 was approved and remains the baseline for all unaffected requirements and P3-A–L gates. Phase 4 remains unauthorized. This amendment is required by P3-v1 §4 Stage C and §7: replacing the existing sky model requires isolated evidence, a cost comparison, and explicit approval. No replacement sky, new full-screen pass, LUT, volumetric effect, grading, exposure change, camera override, weather coefficient change, or Phase 4 rain work has been implemented.
+**Status update, 2026-11-19:** The user explicitly approved P3-v2 strictly within its documented scope, with a mandatory isolated minimal prototype before production replacement. The prototype was tested, failed P3-D/I visual selection, and was **not** installed in production. See the [evaluation](PHASE_3_INTERIM_HANDOFF.md), [comparison board](evidence/phase-3/P3_V2_PROTOTYPE_BOARD.html), and [proposed P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md). Phase 3 remains incomplete; Phase 4 remains unauthorized. The original proposal language below is historical contract text.
+
+Prepared 2026-11-19. **At preparation, P3-v2 was a proposal, not implementation authority.** P3-v1 was approved and remains the baseline for all unaffected requirements and P3-A–L gates. Phase 4 remains unauthorized. This amendment was required by P3-v1 §4 Stage C and §7: replacing the existing sky model required isolated evidence, a cost comparison, and explicit approval. At proposal time, no replacement sky, new full-screen pass, LUT, volumetric effect, grading, exposure change, camera override, weather coefficient change, or Phase 4 rain work had been implemented.
 
 ## Evidence that the approved path cannot yet meet P3-D/I
 

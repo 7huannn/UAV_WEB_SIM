@@ -1,0 +1,189 @@
+{
+  "label": "local-prototype",
+  "url": "http://127.0.0.1:4191",
+  "bundle": "/assets/index-CIdY77HX.js",
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1280,
+    800
+  ],
+  "dpr": 1,
+  "fixture": "actual force-integrated figure-eight reference mission; live weather transitions; 200 rendered RAF frames, every second captured",
+  "framesDir": "docs/simulation/evidence/phase-3/motion/local-prototype-frames",
+  "frames": 100,
+  "intendedPlaybackFps": 10,
+  "segments": [
+    {
+      "name": "clear-ground",
+      "preset": "Clear skies",
+      "frames": 40,
+      "start": {
+        "time": 0,
+        "pose": [
+          -20,
+          0.32,
+          0
+        ],
+        "camera": "Ground"
+      },
+      "end": {
+        "time": 15.132,
+        "pose": [
+          -12.843956445035541,
+          5.34264635760962,
+          -0.465289244931469
+        ],
+        "camera": "Ground",
+        "atmosphere": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        }
+      }
+    },
+    {
+      "name": "clear-pilot",
+      "preset": "Clear skies",
+      "frames": 40,
+      "start": {
+        "time": 15.132,
+        "pose": [
+          -12.843956445035541,
+          5.34264635760962,
+          -0.465289244931469
+        ],
+        "camera": "PILOT VLOS"
+      },
+      "end": {
+        "time": 30.016000000000002,
+        "pose": [
+          12.16123838938173,
+          5.321538358858345,
+          4.599382010907831
+        ],
+        "camera": "PILOT VLOS",
+        "atmosphere": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        }
+      }
+    },
+    {
+      "name": "partly-follow",
+      "preset": "Partly cloudy",
+      "frames": 40,
+      "start": {
+        "time": 30.016000000000002,
+        "pose": [
+          12.16123838938173,
+          5.321538358858345,
+          4.599382010907831
+        ],
+        "camera": "Follow"
+      },
+      "end": {
+        "time": 44.212,
+        "pose": [
+          -4.1876491567300445,
+          5.320360053780126,
+          4.48268873691172
+        ],
+        "camera": "Follow",
+        "atmosphere": {
+          "wind": 3.1988423087782607,
+          "direction": 79.9875961654813,
+          "gust": 1.199503846619255,
+          "turbulence": 0.2499173077698758,
+          "cloud": 0.4197519233096275,
+          "rain": 0,
+          "visibility": 500.1240383451861,
+          "timeOfDay": 14.00124038345185
+        }
+      }
+    },
+    {
+      "name": "overcast-fpv",
+      "preset": "Overcast",
+      "frames": 40,
+      "start": {
+        "time": 44.212,
+        "pose": [
+          -4.1876491567300445,
+          5.320360053780126,
+          4.48268873691172
+        ],
+        "camera": "FPV"
+      },
+      "end": {
+        "time": 58.932,
+        "pose": [
+          -20.073426061628123,
+          3.980607747354403,
+          0.053045361018046855
+        ],
+        "camera": "FPV",
+        "atmosphere": {
+          "wind": 3.7996169320092696,
+          "direction": 109.98087557577298,
+          "gust": 1.7996173534683162,
+          "turbulence": 0.2999680864478362,
+          "cloud": 0.9196812332550236,
+          "rain": 0,
+          "visibility": 260.15301119853166,
+          "timeOfDay": 13.000638007631379
+        }
+      }
+    },
+    {
+      "name": "heavy-overview",
+      "preset": "Heavy rain",
+      "frames": 40,
+      "start": {
+        "time": 58.932,
+        "pose": [
+          -20.073426061628123,
+          3.980607747354403,
+          0.053045361018046855
+        ],
+        "camera": "Overview"
+      },
+      "end": {
+        "time": 73.244,
+        "pose": [
+          -20.02708086142883,
+          0.3303691857164365,
+          0.08535798500562686
+        ],
+        "camera": "Overview",
+        "atmosphere": {
+          "wind": 6.997502785931735,
+          "direction": 114.9960836706457,
+          "gust": 2.9990633585373074,
+          "turbulence": 0.5498049036034633,
+          "cloud": 0.9999373287773657,
+          "rain": 0.9492587281683141,
+          "visibility": 95.12886641447567,
+          "timeOfDay": 13.000000497032467
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "video": "docs/simulation/evidence/phase-3/motion/local-prototype.mp4",
+  "videoDimensions": [
+    1280,
+    712
+  ],
+  "videoSHA256": "3250411e39d4703c87cec68d60d371f7ca9369993e6aa92ecbbb8baaa47e3f74"
+}

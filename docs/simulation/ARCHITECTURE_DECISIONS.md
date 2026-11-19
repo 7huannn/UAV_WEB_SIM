@@ -6,7 +6,7 @@ Statuses: **Active governance** records an explicit user requirement now in forc
 
 ## ADR-001 — Persistent phased governance and preservation
 
-- **Status:** Active governance, from the user's 2026-11-19 master-plan request. The user formally accepted both scoped Phase 1 and Phase 2 results and explicitly approved P3-v1 implementation. A proposed P3-v2 amendment awaits approval before replacement sky/path work. Phase 3 aesthetic acceptance and Phase 4 remain pending separate user decisions.
+- **Status:** Active governance, from the user's 2026-11-19 master-plan request. The user formally accepted both scoped Phase 1 and Phase 2 results and explicitly approved P3-v1 and P3-v2 implementation. The isolated P3-v2 sky candidate failed visual selection and was not installed in production; [P3-v3](PHASE_3_ALTERNATIVE_PROPOSAL.md) is proposed. Phase 3 aesthetic acceptance and Phase 4 remain pending separate user decisions.
 - **Problem:** Chat history is insufficient project memory; historical handoffs contain superseded workflows and competing next-action guidance.
 - **Options:** rely on chat; rewrite the large historical handoff; create a separate unlinked plan; establish four focused authoritative records with a pointer from the existing handoff.
 - **Selected approach:** the four linked simulation records own roadmap, art/motion standard, decisions and current handoff. Add a short discovery pointer to `AGENT_HANDOFF_CONTEXT.md`; preserve historical evidence. Follow the user's six-phase order and explicit stop after each phase report.
@@ -87,7 +87,7 @@ Statuses: **Active governance** records an explicit user requirement now in forc
 
 ## ADR-007 — Unified art direction with staged evidence, not premature technique selection
 
-- **Status:** Active governance for standards/review boundaries. P3-v1 implementation was approved and is incomplete; the P3-v2 sky/path amendment awaits approval. Phase 3 human aesthetic acceptance and Phase 4–6 work remain unauthorized.
+- **Status:** Active governance for standards/review boundaries. P3-v1 and P3-v2 were approved, but Phase 3 remains incomplete after the isolated P3-v2 candidate failed whole-scene visual review. P3-v3 is proposed, not approved. Phase 3 human aesthetic acceptance and Phase 4–6 work remain unauthorized.
 - **Problem:** sky, fog, ground matte, cloud/rain optics and lighting use independent mappings; technical passes alone do not establish cohesive visuals or natural motion.
 - **Options:** layer cosmetic fixes; mandate volumetrics/new renderer now; define persistent standards and choose bounded techniques in the owning phase from controlled comparisons.
 - **Selected approach:** DESIGN_STANDARDS governs color, light, atmospheric depth, material state, motion, optics and camera invariants. Phase 3 resolves horizon/extinction before Phase 4 rain optics. Each visual change requires observed matched scenes and moving sequences. Retain current renderer/physics unless evidence proves a replacement necessary.
@@ -133,14 +133,14 @@ Statuses: **Active governance** records an explicit user requirement now in forc
 
 ## ADR-011 — One atmospheric radiance/visibility state before rain optics
 
-- **Status:** P3-v1 explicitly approved for implementation on 2026-11-19; partially implemented and validated with P3-D/J failures in the [interim handoff](PHASE_3_INTERIM_HANDOFF.md). A replacement shared sky/path model requires the proposed [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md), which is not approved. Final ADR/visual acceptance is pending.
+- **Status:** P3-v1 and the [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) were explicitly approved on 2026-11-19. The required isolated prototype tested a shared local sky/path source but failed P3-D/I and was not selected for production. Repeated retained-build profiles put the original one-run P3-J regression in doubt; final matched profiling is pending. The [P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) is proposed, not approved. Final ADR/visual acceptance is pending.
 - **Problem/evidence:** ATM-01/02 and LIGHT-01: isolated Ground/Pilot/FPV/Overview captures show the nearly white lower band persists in `sky-only`, `no-clouds` and `no-fog`; the camera-height context alpha created a separate hard terrain termination. The initial shared MOR/context repair leaves a measured 19% adjacent-row linear-luminance change at the sky/ground boundary. One software profile also exceeds P3-J. See the interim handoff and visual board.
 - **Options:** increase fog/grade to hide the band; add volumetrics or a replacement renderer immediately; isolate contributors, then derive one daytime atmospheric/solar/visibility state from the existing EnvironmentSnapshot and reuse it across sky, surface transfer, cloud light and reflection invalidation.
 - **Selected proposal:** diagnostic isolation first; a bounded shared linear-light optical transfer and sky/path radiance, preserving one Weather/Simulation owner and current renderer where it meets evidence. Visibility has a declared 5% contrast convention. Terrain context is repaired at the shared geometry/transfer boundary, without per-camera overrides. Reflection updates are driven by meaningful radiance inputs and measured cost. Rain-level editing ceases to change solar time. Details and P3-A–L gates are in P3-v1.
 - **Trade-offs/rejected alternatives:** the proposed homogeneous extinction is an illustrative local-air approximation, not measured atmospheric chemistry or planetary multiple scattering. Existing cloud shells may suffice or may fail expert review; full volumetrics, LUT sky, new renderer, arbitrary silhouettes, exposure changes and rain rendering require separate evidence and controlled revision. Do not hide source defects with fog, grading or brightness.
 - **Affected modules after approval:** atmosphere.ts, World.ts, weatherPresets.ts, focused tests/evidence; no physical plant, recording schema, pilot optics, missions, assets or Phase 4 rain trajectories.
 - **Validation:** isolated before/after component frames, quantitative visibility/horizon/solar/reflection checks, static and moving multi-camera/weather scenes, expert art rubric, regression/performance and anti-patchwork audit. User acceptance of a final Phase 3 result remains a later decision.
-- **Revisit:** triggered by failed P3-D/J and isolated sky/path mismatch. The P3-v2 proposal contains the evidence, bounded replacement, unchanged invariants and repeated validation plan. No replacement sky is authorized until explicitly approved.
+- **Revisit:** P3-v2 approval authorized a minimal isolated experiment; its visual failure triggers the controlled P3-v3 proposal. No new production sky replacement or additional atmosphere technique is authorized until that proposal is explicitly approved.
 
 ## Change procedure
 

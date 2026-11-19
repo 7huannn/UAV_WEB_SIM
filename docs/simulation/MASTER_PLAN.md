@@ -4,7 +4,7 @@ Updated: 2026-11-19, Asia/Ho_Chi_Minh. Baseline: `main`, `aeeeccd617e39b0bff7c9a
 
 ## Status and authority
 
-**Phases 1 and 2 were formally accepted. The user approved P3-v1 implementation on 2026-11-19. Phase 3 is incomplete: isolated sky/path and performance failures require the proposed [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) before that architectural change. Phase 4 remains unauthorized.** See the [interim handoff](PHASE_3_INTERIM_HANDOFF.md) and retained [approved P3-v1 baseline](PHASE_3_CONTRACT.md). Human aesthetic acceptance has not occurred.
+**Phases 1 and 2 were formally accepted. The user approved P3-v1 and then the bounded P3-v2 amendment on 2026-11-19. The required isolated P3-v2 sky prototype was tested before production replacement and failed visual selection; the production P3-v1 sky remains. Phase 3 is incomplete and the [controlled P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) awaits explicit approval. Phase 4 remains unauthorized.** See the [P3-v2 evaluation](PHASE_3_INTERIM_HANDOFF.md), [matched comparison board](evidence/phase-3/P3_V2_PROTOTYPE_BOARD.html), and retained [P3-v1 baseline](PHASE_3_CONTRACT.md). Human aesthetic acceptance has not occurred.
 
 This file owns the six-phase roadmap and phase implementation contracts. Read it with [DESIGN_STANDARDS](DESIGN_STANDARDS.md), [ARCHITECTURE_DECISIONS](ARCHITECTURE_DECISIONS.md), and [PHASE_HANDOFF](PHASE_HANDOFF.md), in that order, before continuing. The user's latest instructions take precedence. These records govern this simulation-realism program; older reports remain historical evidence, not competing roadmaps.
 
@@ -93,7 +93,7 @@ Earlier one-off audit probes are useful corroboration, not permanent regression 
 
 ## Six-phase roadmap and dependencies
 
-Phases 1 and 2 are **implemented, scoped validation passed and formally accepted**, each with documented limits. Phase 3 implementation was explicitly authorized under [P3-v1](PHASE_3_CONTRACT.md), but its [interim validation](PHASE_3_INTERIM_HANDOFF.md) is incomplete and includes P3-D/J failures. The [P3-v2 sky/path amendment](PHASE_3_REVISION_PROPOSAL.md) is proposed and awaits approval before dependent implementation. Phases 4–6 are **not started**; Phase 4 additionally requires final human aesthetic acceptance of Phase 3.
+Phases 1 and 2 are **implemented, scoped validation passed and formally accepted**, each with documented limits. Phase 3 implementation was explicitly authorized under [P3-v1](PHASE_3_CONTRACT.md) and [P3-v2](PHASE_3_REVISION_PROPOSAL.md), but its [interim validation](PHASE_3_INTERIM_HANDOFF.md) is incomplete. The isolated P3-v2 prototype failed P3-D/I and P3-G's measured capture budget and was not selected. The [P3-v3 controlled alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) awaits approval before dependent implementation. Phases 4–6 are **not started**; Phase 4 additionally requires final human aesthetic acceptance of Phase 3.
 
 ### Phase 1 — Unified environment and simulation time
 
@@ -105,7 +105,7 @@ Entry: Phase 1 accepted and detailed P2-v1 explicitly approved (both satisfied).
 
 ### Phase 3 — Atmospheric visual foundation
 
-Entry: accepted Phases 1 and 2 and explicit P3-v1 approval (both satisfied). Initial in-scope implementation defines 5% MOR extinction, repairs camera-height context alpha, decouples rain editing from solar time and updates reflection invalidation. Isolated captures prove the retained Three sky and local path radiance fail to converge at the horizon; the first SwiftShader profile also fails P3-J. The proposed [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) narrowly permits a shared sky/path radiance replacement inside the existing renderer if approved. P3-A–L and expert art review remain mandatory; no Phase 3 visual acceptance is claimed.
+Entry: accepted Phases 1 and 2 and explicit P3-v1/P3-v2 approval (satisfied). Initial in-scope implementation defines 5% MOR extinction, repairs camera-height context alpha, decouples rain editing from solar time and updates reflection invalidation. Isolated captures prove the retained Three sky and local path radiance fail to converge at the horizon. The approved [P3-v2 amendment](PHASE_3_REVISION_PROPOSAL.md) permitted a test-only shared model, which failed whole-scene visual selection and PMREM capture cost, so the retained production sky remains. Repeated profiles did not reproduce the first P3-J outlier. The [P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) is proposed. P3-A–L and expert art review remain mandatory; no Phase 3 visual acceptance is claimed.
 
 ### Phase 4 — Rain realism and weather presentation
 
@@ -298,7 +298,7 @@ Excluded: new lift/side force/aero moments, CG shifts, rotor inflow/flapping/gyr
 
 Exit report must map P2-A–J to PASS/FAIL/UNVERIFIED with source/build, fixtures, measured values, traces/tests and limitations. Evaluate all five dimensions: architecture; model/physical equations (real-aircraft calibration separately UNVERIFIED); appearance regression (art improvement N/A); observed animation; performance/maintainability. Answer all twelve anti-patchwork questions in PHASE_HANDOFF with actual evidence. Preserve accepted ADRs and report any proposed revisions. Required failed or unobserved gates leave Phase 2 incomplete; hardware calibration remains a separately unverified external category rather than a fabricated software pass.
 
-**Approval boundary history:** the pre-implementation boundary was satisfied by the user's explicit P2-v1 approval. Implementation and scoped validation are reported in PHASE_2_HANDOFF, and the user subsequently accepted that scoped result. P3-v1 was later approved; the current Phase 3 stop concerns the proposed P3-v2 sky/path amendment, while Phase 4 remains unauthorized. A later behavioral remedy beyond P2-v1 still needs a concrete approved revision; do not conceal a failed gate.
+**Approval boundary history:** the pre-implementation boundary was satisfied by the user's explicit P2-v1 approval. Implementation and scoped validation are reported in PHASE_2_HANDOFF, and the user subsequently accepted that scoped result. P3-v1 and P3-v2 were later approved; the current Phase 3 stop concerns the [proposed P3-v3 alternative](PHASE_3_ALTERNATIVE_PROPOSAL.md) after the minimal isolated P3-v2 prototype failed visual selection. Phase 4 remains unauthorized. A later behavioral remedy beyond P2-v1 still needs a concrete approved revision; do not conceal a failed gate.
 
 ## Change control, handoff and completion
 

@@ -144,6 +144,7 @@ export class ControllerInput {
     keys: Set<string>,
     focused: boolean,
     pads: readonly (Gamepad | null)[] = [],
+    windowFocused = focused,
   ) {
     this.fault = "";
     if (this.source === "Gamepad") {
@@ -169,7 +170,7 @@ export class ControllerInput {
     }
     if (!focused) {
       this.value = neutral();
-      this.fault = "Input focus lost";
+      if (!windowFocused) this.fault = "Input focus lost";
     }
     return this.value;
   }

@@ -1,0 +1,9 @@
+{
+  "status": "isolated P3-v2 candidate; never installed in production",
+  "bundle": "/assets/index-CIdY77HX.js",
+  "files": {
+    "atmosphere.ts": "cb88d45b0b7db03079164d83982f8f678e4f24a5e48dd0b6248914262a1f2f31",
+    "localRadiance.ts": "5852e5a19551ccad022a74d5e97c9ceccda64c74d2e1b0d42e41818208a24984",
+    "optics.ts": "54cd2910cd824046b747c70936206e73472db948b78e27c278f15f61b53e01b5"
+  }
+}
