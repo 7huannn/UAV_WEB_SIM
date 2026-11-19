@@ -19,6 +19,12 @@ npm run preview     # serve the production build locally
 npm test            # native Node geometry/physics checks, no browser needed
 ```
 
+## Deploy to Netlify
+
+Import this repository from GitHub and deploy the `main` branch. `netlify.toml` sets `npm run build` as the build command and `dist` as the publish directory; `.nvmrc` selects Node.js 24. No environment variables, server functions, or Netlify plugin are required. Push these files to GitHub before starting the Netlify deploy.
+
+The app stores practice recordings and preferences in each visitor's browser. Netlify hosts the site and its static assets; it does not sync those records between devices. Export JSON backups when needed.
+
 ## Individual practice and test flights
 
 The Vietnamese interface opens on a home hub with one primary **Bắt đầu luyện tập** action and secondary access to **Thi thử**, **Xem lại bài bay**, and **Cài đặt**. There is no instructor workspace or permanent destination menu. A contextual **Trang chủ** control returns home; a compact closed menu switches between idle tasks.
