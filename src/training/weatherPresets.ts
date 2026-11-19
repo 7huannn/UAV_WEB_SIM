@@ -50,7 +50,7 @@ export function weatherAtLevels(base: WeatherParams, wind?: number, rain?: numbe
   if (wind !== undefined) Object.assign(result, { wind: wind * 0.9, gust: wind * 0.4, turbulence: wind * 0.07 });
   if (rain !== undefined) {
     const r = rain / 10;
-    Object.assign(result, { rain: r, cloud: 0.12 + 0.88 * r, visibility: 650 - 555 * r, timeOfDay: 15.5 - 2.5 * r });
+    Object.assign(result, { rain: r, cloud: 0.12 + 0.88 * r, visibility: 650 - 555 * r });
   }
   return result;
 }

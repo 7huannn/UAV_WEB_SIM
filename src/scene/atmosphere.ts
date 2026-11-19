@@ -1,7 +1,9 @@
 import * as T from "three";
 import { Sky } from "three/addons/objects/Sky.js";
-import type { Weather } from "../weather/Weather";
+import { sampleWind } from "../weather/Weather";
+import { cloudReference, type EnvironmentSnapshot } from "../simulation/Simulation";
 import { seeded } from "./grass";
+import { extinctionForVisibility, installBeerLambertFog } from "./optics";
 // Deterministic periodic value-noise atlas, filtered/mipmapped by the GPU.
 function cloudNoise() {
   const size = 256,
@@ -18,6 +20,7 @@ function cloudNoise() {
   return texture;
 }
 export function makeAtmosphere(scene: T.Scene) {
+  installBeerLambertFog();
   const sky = new Sky();
   sky.scale.setScalar(900);
   sky.material.uniforms.turbidity.value = 3;
@@ -120,7 +123,7 @@ export function makeAtmosphere(scene: T.Scene) {
     overcastAmbient = new T.Color("#ccd6d8");
   const clearFog = new T.Color("#cbdbe0"),
     overcastFog = new T.Color("#a9b9bd");
-  let previousTime = 0;
+  const wind = new T.Vector3(), rainCentre = new T.Vector3();
   let rainBudget = 3500;
   return {
     sky,
@@ -138,8 +141,9 @@ export function makeAtmosphere(scene: T.Scene) {
     dispose: () => {
       cloudMaterial.uniforms.uNoise.value.dispose();
     },
-    update: (weather: Weather, time: number, camera: T.Camera) => {
-      const w = weather.current,
+    update: (environment: EnvironmentSnapshot, camera: T.Camera) => {
+      const time = environment.time;
+      const w = environment.current,
         elevation = Math.max(
           0.08,
           Math.sin(((w.timeOfDay - 6) / 12) * Math.PI),
@@ -167,15 +171,9 @@ export function makeAtmosphere(scene: T.Scene) {
       fog.color
         .copy(clearFog)
         .lerp(overcastFog, T.MathUtils.smoothstep(w.cloud, 0.35, 0.95));
-      fog.density = (1 / Math.max(50, w.visibility)) * 0.75;
-      const wind = weather.windAt(time);
-      const elapsed = Math.max(0, time - previousTime);
-      previousTime = time;
-      // Integrate displacement; changing wind never repositions the whole cloud field.
-      cloudMaterial.uniforms.uOffset.value.addScaledVector(
-        new T.Vector2(wind.x, wind.z),
-        elapsed * 0.3,
-      );
+      fog.density = extinctionForVisibility(w.visibility);
+      cloudMaterial.uniforms.uOffset.value.fromArray(environment.cloudOffset);
+      sampleWind(w, environment.seed, time, cloudReference, wind);
       cloudMaterial.uniforms.uTime.value = time;
       cloudMaterial.uniforms.uCoverage.value = w.cloud;
       cloudMaterial.uniforms.uWind.value.copy(wind);
@@ -183,6 +181,9 @@ export function makeAtmosphere(scene: T.Scene) {
       cloudMaterial.uniforms.uRain.value = w.rain;
       rain.visible = w.rain > 0.015;
       if (rain.visible) {
+        // P1 bulk sample follows the current volume centre; trajectories remain RAIN-01 (Phase 4).
+        rainCentre.set(camera.position.x * 0.35, 15, camera.position.z * 0.35);
+        sampleWind(w, environment.seed, time, rainCentre, wind);
         const count = Math.floor(rainBudget * w.rain);
         rainGeo.setDrawRange(0, count * 2);
         rainMat.opacity = 0.16 + w.rain * 0.22;

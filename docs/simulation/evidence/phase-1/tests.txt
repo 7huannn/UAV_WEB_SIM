@@ -1,0 +1,58 @@
+
+> uav-arena@0.3.0 test
+> node --import tsx --test --test-isolation=none src/tests/*.test.ts
+
+✔ map weather edits snapshot READY, preserve started recordings, and lock all mock/replay/final setters (3.504709ms)
+✔ P1-B: unchanged plant matches pre-change calm and seeded-wind characterization (50.651257ms)
+✔ P1-A/C: exactly-once single tick, invalid elapsed admission, bounded overload and pause (0.890239ms)
+✔ P1-C: actual reference/training command adapters are render-cadence independent (38.148863ms)
+✔ P1-D: angular wrap, endpoint equivalence and half-turn tie use the declared arc (0.316036ms)
+✔ P1-E: world tile wind respects analytic gradient bound and stays independent of aircraft/camera (61.703837ms)
+✔ P1-F/G: reset/READY are repeatable; playback/seek cannot contaminate live context (17.929607ms)
+✔ P1-G: versioned environmental capture validates; legacy adaptation is immutable and seek-order independent (59.792813ms)
+✔ world-space vegetation seeds reproduce fixed tiles, keep density prefixes and exclude the court (28.492213ms)
+✔ mission definitions preserve analytical figure eight and exact M1–M5 ordering, transfers and H return (0.481967ms)
+✔ figure-eight: physical takeoff, full route, H return, landing, pause/resume and no teleport (95.904215ms)
+✔ outer-circuit: physical takeoff, full route, H return, landing, pause/resume and no teleport (112.569364ms)
+✔ abort holds through controller; reset restores H; starting away from H is rejected (15.934598ms)
+✔ dimension calibration, finite grass and reference course stay inside V1 (0.269841ms)
+✔ zero thrust is gravitational free fall, followed by finite ground collision (2.254011ms)
+✔ symmetric hover thrust creates no roll, pitch or yaw torque (1.520211ms)
+✔ cascaded controller takes off, holds, moves through real motor forces, and lands (21.924902ms)
+✔ wind produces physical drift and controller compensation; seeded replay matches (28.593689ms)
+✔ fixed clock is independent of render cadence, pause discards hidden time (7.81511ms)
+✔ motor saturation, differential reaction torque, and disarm lag stay finite (0.698096ms)
+✔ static ground friction holds a disarmed aircraft in ordinary wind (2.679174ms)
+✔ yaw mixer follows the requested heading with opposing rotor reaction torque (7.611639ms)
+✔ paint widths and mitered V1 outer extent preserve official dimensions (0.7019ms)
+✔ pilot camera remains fixed under head look; bearing and perspective size follow geometry (0.628068ms)
+✔ controller mapping covers asymmetric range, center, deadzone, inversion and missing axes (0.272105ms)
+✔ changing input sources clears stale connection state and pending movement (0.163738ms)
+✔ gamepad disconnect never substitutes keyboard; focus loss neutralizes all channels (0.179959ms)
+✔ manual-only dynamics prohibit automatic takeoff, landing and reference missions; input remains force driven (9.743008ms)
+✔ manual fixed-step commands are independent of render cadence; reset preserves hooks and restrictions (4.080886ms)
+✔ software readiness skips physical checks; arming and task completion still gate flight (0.734276ms)
+✔ figure-eight: full ordered route required; endpoint, wrong direction and missed lobe shortcuts fail (333.917357ms)
+✔ outer-circuit: full ordered route required; endpoint, wrong direction and missed lobe shortcuts fail (117.508143ms)
+✔ bounds use body extent, strict camera/automation and controller faults interrupt attempts (15.948331ms)
+✔ pause records an interruption and legal resume; abort is terminal (0.499304ms)
+✔ recording uses monotonic sim time, complete channels, immutable exports, replay interpolation and checksum rejection (56.993089ms)
+✔ figure-eight: synthetic manual velocity inputs physically fly every gate, land and finalize without a physical checklist (317.662922ms)
+✔ outer-circuit: synthetic manual velocity inputs physically fly every gate, land and finalize without a physical checklist (168.864998ms)
+✔ body-frame stick mapping preserves nose/tail reversal and right yaw convention (0.233506ms)
+✔ orientation exercise requires every requested heading and stable dwell (12.671707ms)
+✔ neutral input gates manual start and recording duration is bounded while ready (0.778124ms)
+✔ malformed replay weather and geometry are rejected before rendering (3.248525ms)
+✔ front pilot station follows court midpoint and outward edge normal, including rotated edges (0.190821ms)
+✔ simple wind presets reuse existing physical values independently of cloud and rain (0.137795ms)
+✔ legacy archived station stays importable and Vietnamese reporting never edits evidence (23.510273ms)
+✔ 0–10 weather levels are monotonic, independent, bounded and use the existing engine (12.55398ms)
+✔ ground guide projects vertically to court/turf, fades on landing and is Training only (1.152324ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1905.601757

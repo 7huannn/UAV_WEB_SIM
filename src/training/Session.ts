@@ -3,6 +3,7 @@ import type { DroneDynamics } from "../simulation/DroneDynamics";
 import { config } from "../arena/geometry";
 import { path } from "../simulation/missions";
 import { aircraft } from "../simulation/parameters";
+import type { EnvironmentSnapshot } from "../simulation/Simulation";
 import type { Weather } from "../weather/Weather";
 import {
   rules,
@@ -34,6 +35,7 @@ export type CameraPose = {
   verticalFov: number;
 };
 export type Frame = {
+  environment?: EnvironmentSnapshot;
   time: number;
   cameraPose?: CameraPose;
   wetness: number;
@@ -76,6 +78,7 @@ export type Result = {
   limitations: string[];
 };
 export type Attempt = {
+  environment?: EnvironmentSnapshot;
   schema: 1;
   softwareVersion: string;
   geometry: typeof config;
@@ -152,6 +155,7 @@ export class TrainingSession {
     this.lastSample = d.time;
     this.lastDropped = d.droppedTime;
     this.attempt = {
+      environment: d.simulation.snapshot(),
       schema: 1,
       softwareVersion: "uav-arena-0.3.0",
       geometry: clone(config),
@@ -532,6 +536,7 @@ export class TrainingSession {
             this.attempt.rules.penaltyPerSecond,
       );
       this.attempt.frames.push({
+        environment: d.simulation.snapshot(),
         time: d.time - this.startTime,
         cameraPose: cameraPose ? clone(cameraPose) : undefined,
         wetness: w.wetness,

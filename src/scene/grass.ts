@@ -1,4 +1,6 @@
 import * as T from "three";
+import { sampleWind } from "../weather/Weather";
+import type { EnvironmentSnapshot } from "../simulation/Simulation";
 import { seeded } from "./random";
 export { seeded } from "./random";
 import { grassTiles, tileSize } from "./grassTiles";
@@ -6,7 +8,6 @@ import type { Quality } from "./World";
 export function makeGrass() {
   const group = new T.Group(),
     time = { value: 0 },
-    wind = { value: new T.Vector3() },
     wet = { value: 0 };
   const positions: number[] = [],
     uvs: number[] = [],
@@ -39,9 +40,9 @@ export function makeGrass() {
     roughness: 1,
     side: T.DoubleSide,
   });
-  material.onBeforeCompile = (shader) => {
+  const bend = (shader: T.WebGLProgramParametersWithUniforms, tileWind: { value: T.Vector3 }) => {
     shader.uniforms.uGrassTime = time;
-    shader.uniforms.uGrassWind = wind;
+    shader.uniforms.uGrassWind = tileWind;
     shader.uniforms.uWet = wet;
     shader.vertexShader = shader.vertexShader
       .replace(
@@ -70,7 +71,11 @@ export function makeGrass() {
   };
   const meshes: T.InstancedMesh[] = [];
   for (const tile of grassTiles(tileSize * tileSize * 64, 1209)) {
-    const mesh = new T.InstancedMesh(geo, material, tile.points.length);
+    const tileWind = { value: new T.Vector3() }, tileMaterial = material.clone();
+    tileMaterial.onBeforeCompile = shader => bend(shader, tileWind);
+    tileMaterial.customProgramCacheKey = () => "grass-tile-wind-v1";
+    const mesh = new T.InstancedMesh(geo, tileMaterial, tile.points.length);
+    mesh.userData.wind = tileWind.value;
     mesh.position.set(tile.x, 0, tile.z);
     const rand = seeded(Math.round(tile.x * 771 + tile.z * 31)),
       color = new T.Color();
@@ -105,11 +110,13 @@ export function makeGrass() {
     group,
     meshes,
     time,
-    wind,
     wet,
     setQuality,
-    update(camera: T.Camera) {
+    update(camera: T.Camera, environment: EnvironmentSnapshot) {
+      time.value = environment.time;
+      wet.value = environment.wetness;
       for (const mesh of meshes) {
+        sampleWind(environment.current, environment.seed, environment.time, mesh.position, mesh.userData.wind);
         const distance = Math.hypot(
           camera.position.x - mesh.position.x,
           camera.position.y,

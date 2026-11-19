@@ -39,7 +39,7 @@ import {
   validFrontStation,
   type PilotStation,
 } from "../training/pilot";
-import { replayAt } from "../training/records";
+import { replayAt, replayEnvironment } from "../training/records";
 import { type ProfileId } from "../training/profiles";
 export type CameraMode =
   | "PILOT VLOS"
@@ -75,11 +75,7 @@ export class World {
     speed: number;
     recordedCamera?: boolean;
   } | null = null;
-  private replayWeather: {
-    current: Weather["current"];
-    target: Weather["target"];
-    wetness: number;
-  } | null = null;
+  private replayPaused: boolean | null = null;
   private trace = new T.Line(
     new T.BufferGeometry(),
     new T.LineBasicMaterial({ color: "#de7847" }),
@@ -98,6 +94,7 @@ export class World {
   controls: OrbitControls;
   weather = new Weather();
   drone = new DroneDynamics(this.weather);
+  presentationEnvironment = this.drone.simulation.snapshot();
   cameraMode: CameraMode = "Overview";
   quality: Quality = "High";
   labels: T.Group;
@@ -134,7 +131,10 @@ export class World {
   private disposed = false;
   private environmentScene = new T.Scene();
   private pmrem: T.PMREMGenerator;
-  private environmentKey = "15.50:0.12";
+  private reflectedAtmosphere = { timeOfDay: 15.5, cloud: 0.12, rain: 0 };
+  private lastReflectionTime = -Infinity;
+  reflectionCaptures = 0;
+  reflectionCaptureMaxMs = 0;
   private environmentTarget: T.WebGLRenderTarget | null = null;
   private textures: T.Texture[] = [];
   private texturesLoaded = 0;
@@ -201,13 +201,14 @@ export class World {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.015;
     this.controls.target.set(0, 0, 0);
     this.atmosphere = makeAtmosphere(this.scene);
-    this.atmosphere.update(this.weather, 0, this.camera);
+    this.atmosphere.update(this.drone.simulation.snapshot(), this.camera);
     this.environmentScene.add(
       this.atmosphere.sky.clone(),
       this.atmosphere.clouds.clone(),
     );
     this.pmrem = new T.PMREMGenerator(this.renderer);
     this.refreshEnvironment();
+    this.reflectedAtmosphere = { ...this.drone.simulation.snapshot().current };
     this.scene.environmentIntensity = 0.06;
     const concreteMaps = this.loadMaps("concrete", 45 / 0.7, 27 / 0.7),
       grassMaps = this.loadMaps("grass", 60 / 2, 42 / 2);
@@ -374,26 +375,17 @@ export class World {
       mesh.receiveShadow = true;
       this.scene.add(mesh);
     }
-    // Optional atmospheric context matte. No collider/vegetation; official ground remains 60×42m.
+    // Noninteractive visual context. Optical extinction, rather than camera-height
+    // alpha, makes its far edge disappear; official ground remains 60×42m.
     this.context = new T.Group();
     this.context.name = "Visual context only · noninteractive";
     const contextMat = this.groundMaterial.clone();
-    contextMat.transparent = true;
-    contextMat.depthWrite = false;
-    contextMat.onBeforeCompile = (shader) => {
-      this.groundMaterial.onBeforeCompile(shader, this.renderer);
-      shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <dithering_fragment>",
-        `#include <dithering_fragment>
-        gl_FragColor.a*=1.-smoothstep(35.+cameraPosition.y*4.,200.+cameraPosition.y*4.,length(vTurfWorld.xz-cameraPosition.xz));
-      `,
-      );
-    };
+    contextMat.transparent = false;
     for (const [w, h, x, z] of [
-      [600, 279, 0, -160.5],
-      [600, 279, 0, 160.5],
-      [270, 42, -165, 0],
-      [270, 42, 165, 0],
+      [2000, 979, 0, -510.5],
+      [2000, 979, 0, 510.5],
+      [970, 42, -515, 0],
+      [970, 42, 515, 0],
     ]) {
       const geo = new T.PlaneGeometry(w, h),
         uv = geo.attributes.uv;
@@ -481,7 +473,8 @@ export class World {
     this.trainingReference.visible = false;
     this.scene.add(this.trainingReference);
     this.drone.resetGuard = () => !this.session?.active;
-    this.drone.beforeStep = (dt) => this.trainingInput(dt);
+    this.drone.simulation.onResume = () => { this.last = 0; };
+    this.drone.beforeStep = (dt) => this.flightInput(dt);
     this.drone.afterStep = () =>
       this.session?.sample(
         this.drone,
@@ -579,6 +572,7 @@ export class World {
     this.frame = requestAnimationFrame(this.tick);
   }
   private refreshEnvironment() {
+    const start = performance.now();
     const environment = this.pmrem.fromScene(
       this.environmentScene,
       0.04,
@@ -588,6 +582,8 @@ export class World {
     this.scene.environment = environment.texture;
     this.environmentTarget?.dispose();
     this.environmentTarget = environment;
+    this.reflectionCaptures++;
+    this.reflectionCaptureMaxMs = Math.max(this.reflectionCaptureMaxMs, performance.now() - start);
   }
   private loadMaps(name: string, x: number, y: number) {
     const load = (suffix: string, srgb = false) => {
@@ -803,8 +799,10 @@ export class World {
   }
   private weatherChanged() {
     if (this.session?.state === "READY") {
-      this.weather.current = { ...this.weather.target };
-      this.session.attempt.initialWeather = { ...this.weather.target };
+      this.drone.simulation.initializeWeather();
+      this.weather.windAt(this.drone.time, this.drone.position, this.drone.wind);
+      this.session.attempt.initialWeather = { ...this.weather.current };
+      this.session.attempt.environment = this.drone.simulation.snapshot();
     }
     if (this.session?.active)
       this.session.event("WEATHER_CHANGE", JSON.stringify(this.weather.target));
@@ -911,7 +909,7 @@ export class World {
     if (profile in missions) this.selectMission(profile as MissionId);
     this.keys.clear();
     // Freeze the chosen simulation environment, including blend destination.
-    this.weather.current = { ...this.weather.target };
+    this.drone.reset();
     this.session = new TrainingSession(
       candidate,
       mode,
@@ -947,15 +945,10 @@ export class World {
   setReplay(attempt: Attempt | null) {
     if (this.session?.active || (attempt && !attempt.frames.length))
       return false;
-    if (attempt && !this.replay)
-      this.replayWeather = {
-        current: { ...this.weather.current },
-        target: { ...this.weather.target },
-        wetness: this.weather.wetness,
-      };
-    if (!attempt && this.replayWeather) {
-      Object.assign(this.weather, this.replayWeather);
-      this.replayWeather = null;
+    if (attempt && !this.replay) this.replayPaused = this.drone.paused;
+    if (!attempt && this.replayPaused !== null) {
+      this.drone.paused = this.replayPaused;
+      this.replayPaused = null;
     }
     this.groundGuide.group.visible = false;
     this.replay = attempt
@@ -966,13 +959,19 @@ export class World {
           speed: 1,
         }
       : null;
-    this.drone.paused = !!attempt;
+    if (attempt) this.drone.paused = true;
     if (!attempt) this.setCamera(this.cameraMode);
     this.traceCount = -1;
     return true;
   }
-  private trainingInput(dt: number) {
-    if (this.workspace === "Reference missions" || this.replay) return;
+  private flightInput(dt: number) {
+    if (this.replay) return;
+    if (this.workspace === "Reference missions") {
+      const key = (k: string) => Number(this.keys.has(k));
+      this.drone.manual(new T.Vector3(key("KeyD") - key("KeyA"), key("KeyR") - key("KeyF"),
+        key("KeyS") - key("KeyW")).multiplyScalar(2), (key("KeyQ") - key("KeyE")) * .7, dt);
+      return;
+    }
     const s = this.session;
     if (!s?.active || !["ACTIVE", "TASK_COMPLETE", "LANDING"].includes(s.state))
       return;
@@ -1133,14 +1132,6 @@ export class World {
       }
       return;
     }
-    const key = (k: string) => (this.keys.has(k) ? 1 : 0);
-    const command = new T.Vector3(
-      key("KeyD") - key("KeyA"),
-      key("KeyR") - key("KeyF"),
-      key("KeyS") - key("KeyW"),
-    ).multiplyScalar(2);
-    if (!this.drone.paused && this.workspace === "Reference missions")
-      this.drone.manual(command, (key("KeyQ") - key("KeyE")) * 0.7, dt);
     const beforeTime = this.drone.time;
     this.drone.advance(rawDt);
     this.physicsSteps += (this.drone.time - beforeTime) / aircraft.fixedDt;
@@ -1155,11 +1146,6 @@ export class World {
     const playback = this.replay
       ? replayAt(this.replay.attempt.frames, this.replay.time)
       : null;
-    if (playback) {
-      this.weather.current = { ...playback.weather };
-      this.weather.target = { ...playback.weather };
-      this.weather.wetness = playback.wetness;
-    }
     const viewPosition = playback
       ? new T.Vector3().fromArray(playback.position)
       : this.drone.position;
@@ -1240,39 +1226,41 @@ export class World {
       this.camera.zoom = 1;
       this.camera.updateProjectionMatrix();
     }
-    this.atmosphere.update(this.weather, this.drone.time, this.camera);
-    const current = this.weather.current,
-      target = this.weather.target;
-    const environmentKey = `${target.timeOfDay.toFixed(2)}:${target.cloud.toFixed(2)}`;
-    // Refresh reflections once a weather/time transition settles, never every frame.
-    if (
-      environmentKey !== this.environmentKey &&
+    const environment = this.replay
+      ? replayEnvironment(this.replay.attempt, this.replay.time, playback)
+      : this.drone.simulation.presentation(alpha);
+    this.presentationEnvironment = environment;
+    this.atmosphere.update(environment, this.camera);
+    const current = environment.current,
+      target = environment.target;
+    const reflectionChanged =
+      Math.abs(current.timeOfDay - this.reflectedAtmosphere.timeOfDay) >= 0.05 ||
+      Math.abs(current.cloud - this.reflectedAtmosphere.cloud) >= 0.05 ||
+      Math.abs(current.rain - this.reflectedAtmosphere.rain) >= 0.05;
+    const settled =
+      Math.abs(current.timeOfDay - target.timeOfDay) < 0.04 &&
       Math.abs(current.cloud - target.cloud) < 0.02 &&
-      Math.abs(current.timeOfDay - target.timeOfDay) < 0.04
-    ) {
+      Math.abs(current.rain - target.rain) < 0.02;
+    // PMREM shares the visible sky/cloud materials. Coalesce transitions in
+    // simulation time, but capture completed READY edits and replay seeks now.
+    if (reflectionChanged && (settled || environment.time < this.lastReflectionTime ||
+        environment.time - this.lastReflectionTime >= 0.5)) {
       this.refreshEnvironment();
-      this.environmentKey = environmentKey;
+      this.reflectedAtmosphere = { ...current };
+      this.lastReflectionTime = environment.time;
     }
-    this.grass.update(this.camera);
-    this.grass.time.value = this.drone.time;
-    this.grass.wind.value.copy(this.drone.wind);
-    this.grass.wet.value = this.weather.wetness;
-    this.clumps.update(
-      this.camera,
-      this.drone.time,
-      this.drone.wind,
-      this.weather.wetness,
-    );
-    this.concrete.userData.wet.value = this.weather.wetness;
+    this.grass.update(this.camera, environment);
+    this.clumps.update(this.camera, environment);
+    this.concrete.userData.wet.value = environment.wetness;
     this.groundMaterial.color
       .set("#91b477")
-      .multiplyScalar(1 - this.weather.wetness * 0.22);
+      .multiplyScalar(1 - environment.wetness * 0.22);
     this.context.children.forEach((mesh) => {
       (
         mesh as T.Mesh<T.BufferGeometry, T.MeshStandardMaterial>
       ).material.color.copy(this.groundMaterial.color);
     });
-    this.scene.environmentIntensity = 0.06 + 0.025 * this.weather.current.cloud;
+    this.scene.environmentIntensity = 0.06 + 0.025 * environment.current.cloud;
     updateLabels(
       this.labels,
       this.camera,

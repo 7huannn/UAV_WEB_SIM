@@ -1,0 +1,1171 @@
+{
+  "stage": "after",
+  "date": "2026-11-19T01:37:45.834Z",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-I7FYVFLg.js",
+  "source": "P1-v1 final source; see source-manifest.json",
+  "shots": [
+    {
+      "name": "clear-skies-ground",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        0.2655234447237989,
+        0.5197147062878564
+      ],
+      "calls": 116,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "target": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          0.2655234447237989,
+          0.5197147062878564
+        ]
+      }
+    },
+    {
+      "name": "clear-skies-overview",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Overview",
+      "eye": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "orientation": [
+        -0.4190010335287275,
+        0.09392430017805757,
+        0.043627208742797546,
+        0.9020604338930029
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        0.2655234447237989,
+        0.5197147062878564
+      ],
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "target": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          0.2655234447237989,
+          0.5197147062878564
+        ]
+      }
+    },
+    {
+      "name": "clear-skies-fpv",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "FPV",
+      "eye": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fov": 85,
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        0.2655234447237989,
+        0.5197147062878564
+      ],
+      "calls": 89,
+      "triangles": 47822,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "target": {
+          "wind": 1.8,
+          "direction": 65,
+          "gust": 0.6,
+          "turbulence": 0.15,
+          "cloud": 0.12,
+          "rain": 0,
+          "visibility": 650,
+          "timeOfDay": 15.5
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          0.2655234447237989,
+          0.5197147062878564
+        ]
+      }
+    },
+    {
+      "name": "overcast-ground",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        -0.37998207611043383,
+        1.1666640489544093
+      ],
+      "calls": 116,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          -0.37998207611043383,
+          1.1666640489544093
+        ]
+      }
+    },
+    {
+      "name": "overcast-overview",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Overview",
+      "eye": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "orientation": [
+        -0.4190010335287275,
+        0.09392430017805757,
+        0.043627208742797546,
+        0.9020604338930029
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        -0.37998207611043383,
+        1.1666640489544093
+      ],
+      "calls": 115,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          -0.37998207611043383,
+          1.1666640489544093
+        ]
+      }
+    },
+    {
+      "name": "overcast-fpv",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "FPV",
+      "eye": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fov": 85,
+      "weather": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0,
+      "cloud": [
+        -0.37998207611043383,
+        1.1666640489544093
+      ],
+      "calls": 89,
+      "triangles": 47822,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 3.8,
+          "direction": 110,
+          "gust": 1.8,
+          "turbulence": 0.3,
+          "cloud": 0.92,
+          "rain": 0,
+          "visibility": 260,
+          "timeOfDay": 13
+        },
+        "wetness": 0,
+        "cloudOffset": [
+          -0.37998207611043383,
+          1.1666640489544093
+        ]
+      }
+    },
+    {
+      "name": "light-rain-ground",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 4,
+        "direction": 100,
+        "gust": 1.5,
+        "turbulence": 0.3,
+        "cloud": 0.85,
+        "rain": 0.3,
+        "visibility": 180,
+        "timeOfDay": 14
+      },
+      "time": 1,
+      "wetness": 0.3,
+      "cloud": [
+        -0.17799117430772113,
+        1.2648388138068027
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "target": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "wetness": 0.3,
+        "cloudOffset": [
+          -0.17799117430772113,
+          1.2648388138068027
+        ]
+      }
+    },
+    {
+      "name": "light-rain-overview",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Overview",
+      "eye": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "orientation": [
+        -0.4190010335287275,
+        0.09392430017805757,
+        0.043627208742797546,
+        0.9020604338930029
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 4,
+        "direction": 100,
+        "gust": 1.5,
+        "turbulence": 0.3,
+        "cloud": 0.85,
+        "rain": 0.3,
+        "visibility": 180,
+        "timeOfDay": 14
+      },
+      "time": 1,
+      "wetness": 0.3,
+      "cloud": [
+        -0.17799117430772113,
+        1.2648388138068027
+      ],
+      "calls": 116,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "target": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "wetness": 0.3,
+        "cloudOffset": [
+          -0.17799117430772113,
+          1.2648388138068027
+        ]
+      }
+    },
+    {
+      "name": "light-rain-fpv",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "FPV",
+      "eye": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fov": 85,
+      "weather": {
+        "wind": 4,
+        "direction": 100,
+        "gust": 1.5,
+        "turbulence": 0.3,
+        "cloud": 0.85,
+        "rain": 0.3,
+        "visibility": 180,
+        "timeOfDay": 14
+      },
+      "time": 1,
+      "wetness": 0.3,
+      "cloud": [
+        -0.17799117430772113,
+        1.2648388138068027
+      ],
+      "calls": 90,
+      "triangles": 47822,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "target": {
+          "wind": 4,
+          "direction": 100,
+          "gust": 1.5,
+          "turbulence": 0.3,
+          "cloud": 0.85,
+          "rain": 0.3,
+          "visibility": 180,
+          "timeOfDay": 14
+        },
+        "wetness": 0.3,
+        "cloudOffset": [
+          -0.17799117430772113,
+          1.2648388138068027
+        ]
+      }
+    },
+    {
+      "name": "heavy-rain-ground",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0.95,
+      "cloud": [
+        -0.8773305580867548,
+        2.056157142591719
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -0.8773305580867548,
+          2.056157142591719
+        ]
+      }
+    },
+    {
+      "name": "heavy-rain-overview",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Overview",
+      "eye": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "orientation": [
+        -0.4190010335287275,
+        0.09392430017805757,
+        0.043627208742797546,
+        0.9020604338930029
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0.95,
+      "cloud": [
+        -0.8773305580867548,
+        2.056157142591719
+      ],
+      "calls": 116,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -0.8773305580867548,
+          2.056157142591719
+        ]
+      }
+    },
+    {
+      "name": "heavy-rain-fpv",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "FPV",
+      "eye": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "orientation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "fov": 85,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 1,
+      "wetness": 0.95,
+      "cloud": [
+        -0.8773305580867548,
+        2.056157142591719
+      ],
+      "calls": 90,
+      "triangles": 47822,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 250,
+        "time": 1,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -0.8773305580867548,
+          2.056157142591719
+        ]
+      }
+    },
+    {
+      "name": "motion-0",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 5,
+      "wetness": 0.95,
+      "cloud": [
+        -4.566099677265671,
+        9.864987727932004
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 1250,
+        "time": 5,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -4.566099677265671,
+          9.864987727932004
+        ]
+      }
+    },
+    {
+      "name": "motion-1",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 9,
+      "wetness": 0.95,
+      "cloud": [
+        -8.016581135330958,
+        17.2915416824936
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 2250,
+        "time": 9,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -8.016581135330958,
+          17.2915416824936
+        ]
+      }
+    },
+    {
+      "name": "motion-2",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 13,
+      "wetness": 0.95,
+      "cloud": [
+        -11.438369807362854,
+        24.682270105845188
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 3250,
+        "time": 13,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -11.438369807362854,
+          24.682270105845188
+        ]
+      }
+    },
+    {
+      "name": "motion-3",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "orientation": [
+        -0.06340586097757751,
+        -0.4555713478076066,
+        -0.03255330379731694,
+        0.8873413809027124
+      ],
+      "fov": 45,
+      "weather": {
+        "wind": 7,
+        "direction": 115,
+        "gust": 3,
+        "turbulence": 0.55,
+        "cloud": 1,
+        "rain": 0.95,
+        "visibility": 95,
+        "timeOfDay": 13
+      },
+      "time": 17,
+      "wetness": 0.95,
+      "cloud": [
+        -15.150909914968704,
+        32.495091746870095
+      ],
+      "calls": 117,
+      "triangles": 64663,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "environment": {
+        "version": 1,
+        "model": "sinusoidal-bulk-v1",
+        "seed": 42,
+        "tick": 4250,
+        "time": 17,
+        "current": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "target": {
+          "wind": 7,
+          "direction": 115,
+          "gust": 3,
+          "turbulence": 0.55,
+          "cloud": 1,
+          "rain": 0.95,
+          "visibility": 95,
+          "timeOfDay": 13
+        },
+        "wetness": 0.95,
+        "cloudOffset": [
+          -15.150909914968704,
+          32.495091746870095
+        ]
+      }
+    }
+  ],
+  "profile": {
+    "frameCount": 40,
+    "wallSeconds": 4.931199999999255,
+    "simulatedSeconds": 4.316,
+    "realTimeFactor": 0.8752433484751484,
+    "median": 109,
+    "p95": 114.5,
+    "p99": 117.70000000018626,
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "quality": "Low",
+    "viewport": [
+      1280,
+      800
+    ],
+    "dpr": 1,
+    "calls": 116,
+    "triangles": 22696,
+    "memory": {
+      "geometries": 83,
+      "textures": 19
+    },
+    "gpuTiming": null,
+    "components": {},
+    "note": "SwiftShader RAF timing; GPU timestamps unavailable; not a hardware budget claim."
+  },
+  "errors": []
+}

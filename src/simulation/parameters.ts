@@ -1,4 +1,6 @@
 // Illustrative 15kg airframe. These are not calibrated flight-test parameters.
+// arm is each body X/Z motor offset in m; dragArea is effective Cd*A in m².
+// torqueRatio has units m; airDensity is fixed kg/m³. Do not infer measured geometry.
 export const aircraft = {
   mass: 15,
   inertia: [0.65, 1.05, 0.65] as const,

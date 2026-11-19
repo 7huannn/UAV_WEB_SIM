@@ -1,0 +1,1 @@
+{"bundle":"/assets/index-C0vYNo8f.js","screenshots":39,"videoBytes":483701,"landed":{"mode":"Disarmed","position":[-14.700753229304883,0.3696348582805305,0.3919064823128639]},"liveAltitudes":[1.4077442787903993,5.738671233070946,5.409727649035003,5.350557374255822],"errors":[]}

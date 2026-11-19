@@ -1,3 +1,4 @@
+const evidenceRoot = process.env.UAV_EVIDENCE_DIR ?? "docs";
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -39,7 +40,7 @@ async function capture(name) {
     }
   });
   await page.screenshot({
-    path: `docs/conditions-screenshots/${name}.png`,
+    path: `${evidenceRoot}/conditions-screenshots/${name}.png`,
     fullPage: true,
     animations: "disabled",
   });
@@ -83,7 +84,7 @@ async function layout() {
   );
 }
 try {
-  await mkdir("docs/conditions-screenshots", { recursive: true });
+  await mkdir(`${evidenceRoot}/conditions-screenshots`, { recursive: true });
   await page.goto(process.env.UAV_URL ?? "http://127.0.0.1:4175", {
     waitUntil: "networkidle",
   });
@@ -331,7 +332,7 @@ try {
   );
   assert.deepEqual(errors, []);
   await writeFile(
-    "docs/conditions-browser-evidence.json",
+    `${evidenceRoot}/conditions-browser-evidence.json`,
     JSON.stringify(
       {
         date: new Date().toISOString(),

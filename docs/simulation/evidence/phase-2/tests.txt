@@ -1,0 +1,69 @@
+
+> uav-arena@0.3.0 test
+> node --import tsx --test --test-isolation=none src/tests/*.test.ts
+
+✔ map weather edits snapshot READY, preserve started recordings, and lock all mock/replay/final setters (3.627906ms)
+✔ P1-B: unchanged plant matches pre-change calm and seeded-wind characterization (47.505894ms)
+✔ P1-A/C: exactly-once single tick, invalid elapsed admission, bounded overload and pause (0.830837ms)
+✔ P1-C: actual reference/training command adapters are render-cadence independent (34.641891ms)
+✔ P1-D: angular wrap, endpoint equivalence and half-turn tie use the declared arc (0.195689ms)
+✔ P1-E: world tile wind respects analytic gradient bound and stays independent of aircraft/camera (60.58993ms)
+✔ P1-F/G: reset/READY are repeatable; playback/seek cannot contaminate live context (21.623922ms)
+P2-D drag decay convergence (h s, velocity error m/s, displacement error m): [{"h":0.004,"ev":0.00012556302224986382,"ex":0.0012948844260129988},{"h":0.002,"ev":0.00006277128425313805,"ex":0.0006473910773348024},{"h":0.001,"ev":0.00003138308615557861,"ex":0.0003236827569494949}]
+P2-D angular decay convergence (h s, rate error rad/s, attitude geodesic rad): [{"h":0.004,"rate":0.000020790628241951215,"attitude":0.0002270673020303505,"norm":1.1102230246251565e-16},{"h":0.002,"rate":0.000010393865557956072,"attitude":0.00011346529023084485,"norm":0},{"h":0.001,"rate":0.000005196570724508298,"attitude":0.00005671554669211737,"norm":0}]
+✔ P1-G: versioned environmental capture validates; legacy adaptation is immutable and seek-order independent (62.827899ms)
+✔ world-space vegetation seeds reproduce fixed tiles, keep density prefixes and exclude the court (30.348245ms)
+✔ mission definitions preserve analytical figure eight and exact M1–M5 ordering, transfers and H return (0.480888ms)
+✔ figure-eight: physical takeoff, full route, H return, landing, pause/resume and no teleport (101.507377ms)
+✔ outer-circuit: physical takeoff, full route, H return, landing, pause/resume and no teleport (120.41939ms)
+✔ abort holds through controller; reset restores H; starting away from H is rejected (14.290952ms)
+✔ P2-A: accepted calm and seeded Phase 1 trajectories stay exact with diagnostics on/off (85.927093ms)
+✔ P2-B: drag obeys air-relative force, rotation, work and weather independence (0.851692ms)
+✔ P2-C: motors obey exponential lag and the actual four-rotor wrench (4.896786ms)
+✔ P2-C: malformed motor overrides reject before weather, hooks, tick or aircraft mutation (0.555073ms)
+✔ P2-D: semi-implicit gravity, drag decay and first-order refinement (10.116799ms)
+✔ P2-D: rigid-body damping, gyroscopic signs and quaternion norm (7.862249ms)
+✔ P2-C/G: demand, clipping and lagged achievement stay distinct during yaw saturation (30.894078ms)
+✔ P2-W2: unsaturated controller request closes through the mixer and contact is separate (11.780473ms)
+✔ P2-H/J: optional diagnostics do not change saved attempt bytes or replay channels (17.22542ms)
+✔ dimension calibration, finite grass and reference course stay inside V1 (0.294592ms)
+✔ zero thrust is gravitational free fall, followed by finite ground collision (3.340082ms)
+✔ symmetric hover thrust creates no roll, pitch or yaw torque (1.594799ms)
+✔ cascaded controller takes off, holds, moves through real motor forces, and lands (23.176491ms)
+✔ wind produces physical drift and controller compensation; seeded replay matches (30.269184ms)
+✔ fixed clock is independent of render cadence, pause discards hidden time (9.02582ms)
+✔ motor saturation, differential reaction torque, and disarm lag stay finite (0.818262ms)
+✔ static ground friction holds a disarmed aircraft in ordinary wind (2.756498ms)
+✔ yaw mixer follows the requested heading with opposing rotor reaction torque (8.998479ms)
+✔ paint widths and mitered V1 outer extent preserve official dimensions (0.776767ms)
+✔ pilot camera remains fixed under head look; bearing and perspective size follow geometry (0.663993ms)
+✔ controller mapping covers asymmetric range, center, deadzone, inversion and missing axes (0.269228ms)
+✔ changing input sources clears stale connection state and pending movement (0.164526ms)
+✔ gamepad disconnect never substitutes keyboard; focus loss neutralizes all channels (0.220521ms)
+✔ manual-only dynamics prohibit automatic takeoff, landing and reference missions; input remains force driven (9.929679ms)
+✔ manual fixed-step commands are independent of render cadence; reset preserves hooks and restrictions (4.650629ms)
+✔ software readiness skips physical checks; arming and task completion still gate flight (0.979222ms)
+✔ figure-eight: full ordered route required; endpoint, wrong direction and missed lobe shortcuts fail (345.319961ms)
+✔ outer-circuit: full ordered route required; endpoint, wrong direction and missed lobe shortcuts fail (128.797391ms)
+✔ bounds use body extent, strict camera/automation and controller faults interrupt attempts (18.021826ms)
+✔ pause records an interruption and legal resume; abort is terminal (0.456464ms)
+✔ recording uses monotonic sim time, complete channels, immutable exports, replay interpolation and checksum rejection (59.912738ms)
+✔ figure-eight: synthetic manual velocity inputs physically fly every gate, land and finalize without a physical checklist (318.449266ms)
+✔ outer-circuit: synthetic manual velocity inputs physically fly every gate, land and finalize without a physical checklist (172.044343ms)
+✔ body-frame stick mapping preserves nose/tail reversal and right yaw convention (0.2208ms)
+✔ orientation exercise requires every requested heading and stable dwell (10.641478ms)
+✔ neutral input gates manual start and recording duration is bounded while ready (0.800822ms)
+✔ malformed replay weather and geometry are rejected before rendering (3.236746ms)
+✔ front pilot station follows court midpoint and outward edge normal, including rotated edges (0.186316ms)
+✔ simple wind presets reuse existing physical values independently of cloud and rain (0.145204ms)
+✔ legacy archived station stays importable and Vietnamese reporting never edits evidence (21.925744ms)
+✔ 0–10 weather levels are monotonic, independent, bounded and use the existing engine (12.425594ms)
+✔ ground guide projects vertically to court/turf, fades on landing and is Training only (1.163451ms)
+ℹ tests 55
+ℹ suites 0
+ℹ pass 55
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2183.480648

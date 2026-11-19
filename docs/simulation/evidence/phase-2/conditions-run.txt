@@ -1,0 +1,22 @@
+Captured home-desktop
+Captured criteria
+Captured settings-desktop
+Captured ready-basic
+Captured ready-eight
+Captured ready-circuit
+Captured ready-abnormal
+Captured paused-conditions
+Captured advanced-conditions
+Captured practice-390x844
+Captured practice-768x1024
+Captured practice-1024x768
+Captured practice-844x390
+Captured exam-ready-conditions
+Captured exam-locked-conditions
+Captured demo-ready-conditions
+Captured demo-live-conditions
+Captured demo-390x844
+Captured demo-768x1024
+Captured demo-844x390
+Captured home-mobile
+{"checks":5,"screenshots":21,"errors":[]}

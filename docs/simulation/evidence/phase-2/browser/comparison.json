@@ -1,0 +1,286 @@
+{
+  "beforeBundle": "/assets/index-I7FYVFLg.js",
+  "afterBundle": "/assets/index-C0vYNo8f.js",
+  "pairs": [
+    {
+      "name": "calm-ground",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0,
+      "callsBeforeAfter": [
+        92,
+        92
+      ],
+      "trianglesBeforeAfter": [
+        55767,
+        55767
+      ]
+    },
+    {
+      "name": "calm-pilot-vlos",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0,
+      "callsBeforeAfter": [
+        140,
+        140
+      ],
+      "trianglesBeforeAfter": [
+        222089,
+        222089
+      ]
+    },
+    {
+      "name": "calm-follow",
+      "changedPixels": 641173,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0005921277880291953,
+      "callsBeforeAfter": [
+        100,
+        100
+      ],
+      "trianglesBeforeAfter": [
+        47823,
+        47823
+      ]
+    },
+    {
+      "name": "calm-fpv",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0,
+      "callsBeforeAfter": [
+        91,
+        91
+      ],
+      "trianglesBeforeAfter": [
+        50643,
+        50643
+      ]
+    },
+    {
+      "name": "command-pilot-vlos",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0,
+      "callsBeforeAfter": [
+        140,
+        140
+      ],
+      "trianglesBeforeAfter": [
+        222089,
+        222089
+      ]
+    },
+    {
+      "name": "command-follow",
+      "changedPixels": 657689,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0034785492116853334,
+      "callsBeforeAfter": [
+        109,
+        109
+      ],
+      "trianglesBeforeAfter": [
+        51319,
+        51319
+      ]
+    },
+    {
+      "name": "wind-pilot-vlos",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0,
+      "callsBeforeAfter": [
+        140,
+        140
+      ],
+      "trianglesBeforeAfter": [
+        222089,
+        222089
+      ]
+    },
+    {
+      "name": "wind-follow",
+      "changedPixels": 12234,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.00164004464293388,
+      "callsBeforeAfter": [
+        102,
+        102
+      ],
+      "trianglesBeforeAfter": [
+        48145,
+        48145
+      ]
+    },
+    {
+      "name": "wind-fpv",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0,
+      "callsBeforeAfter": [
+        91,
+        91
+      ],
+      "trianglesBeforeAfter": [
+        50643,
+        50643
+      ]
+    },
+    {
+      "name": "yaw-pulse",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0,
+      "callsBeforeAfter": [
+        79,
+        79
+      ],
+      "trianglesBeforeAfter": [
+        45143,
+        45143
+      ]
+    },
+    {
+      "name": "yaw-recovered",
+      "changedPixels": 0,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 0.0,
+      "callsBeforeAfter": [
+        79,
+        79
+      ],
+      "trianglesBeforeAfter": [
+        45143,
+        45143
+      ]
+    },
+    {
+      "name": "live-0",
+      "changedPixels": 780680,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.3180560772456571,
+      "maxCameraPositionDifference": 0.2401510831621545,
+      "callsBeforeAfter": [
+        105,
+        101
+      ],
+      "trianglesBeforeAfter": [
+        62224,
+        46417
+      ]
+    },
+    {
+      "name": "live-20",
+      "changedPixels": 732600,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.007411905207700187,
+      "maxCameraPositionDifference": 0.00333865581174031,
+      "callsBeforeAfter": [
+        101,
+        101
+      ],
+      "trianglesBeforeAfter": [
+        48623,
+        48623
+      ]
+    },
+    {
+      "name": "live-39",
+      "changedPixels": 497722,
+      "totalPixels": 911360,
+      "maxPoseComponentDifference": 0.0,
+      "maxCameraPositionDifference": 1.0746467651756575e-05,
+      "callsBeforeAfter": [
+        100,
+        100
+      ],
+      "trianglesBeforeAfter": [
+        47823,
+        47823
+      ]
+    }
+  ],
+  "identicalImages": [
+    "calm-ground",
+    "calm-pilot-vlos",
+    "calm-fpv",
+    "command-pilot-vlos",
+    "wind-pilot-vlos",
+    "wind-fpv",
+    "yaw-pulse",
+    "yaw-recovered"
+  ],
+  "nonidenticalImagesNote": "Follow camera smoothing depends on rendered frame history; live RAF pose timing differs. Fixed Ground/Pilot VLOS/FPV and settled yaw scenes are exact; physics state for deterministic shots is equal.",
+  "profile": {
+    "before": {
+      "warmupFrames": 60,
+      "measuredFrames": 300,
+      "wallSeconds": 39.364,
+      "simulatedSeconds": 35.78,
+      "realTimeFactor": 0.9089523422416422,
+      "medianMs": 107.20000000018626,
+      "p95Ms": 115.20000000018626,
+      "p99Ms": 122.5,
+      "calls": 116,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "admittedSeconds": 35.78,
+      "droppedSeconds": 3.568399999999975,
+      "gpuTiming": null,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "quality": "Low",
+      "viewport": [
+        1280,
+        800
+      ],
+      "dpr": 1,
+      "note": "Chrome/ANGLE SwiftShader wall RAF samples; no hardware GPU timestamps."
+    },
+    "after": {
+      "warmupFrames": 60,
+      "measuredFrames": 300,
+      "wallSeconds": 39.683400000000375,
+      "simulatedSeconds": 35.728,
+      "realTimeFactor": 0.900326080930557,
+      "medianMs": 107.59999999962747,
+      "p95Ms": 115.5,
+      "p99Ms": 122.70000000111759,
+      "calls": 116,
+      "triangles": 22696,
+      "memory": {
+        "geometries": 83,
+        "textures": 19
+      },
+      "admittedSeconds": 35.728,
+      "droppedSeconds": 3.9518999999999878,
+      "gpuTiming": null,
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "quality": "Low",
+      "viewport": [
+        1280,
+        800
+      ],
+      "dpr": 1,
+      "note": "Chrome/ANGLE SwiftShader wall RAF samples; no hardware GPU timestamps."
+    },
+    "medianChangePercent": 0.37313432783629796,
+    "p95ChangePercent": 0.26041666650455764,
+    "p99ChangePercent": 0.16326530703476497
+  }
+}

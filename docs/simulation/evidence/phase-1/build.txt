@@ -1,0 +1,14 @@
+
+> uav-arena@0.3.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 56 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.58 kB │ gzip:   0.40 kB
+dist/assets/index-D9pGnXdO.css     50.13 kB │ gzip:  11.27 kB
+dist/assets/index-I7FYVFLg.js   1,113.60 kB │ gzip: 308.07 kB
+
+✓ built in 267ms

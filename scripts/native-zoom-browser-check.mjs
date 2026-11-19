@@ -1,3 +1,4 @@
+const evidenceRoot = process.env.UAV_EVIDENCE_DIR ?? "docs";
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
@@ -40,7 +41,7 @@ async function capture(name) {
     captureBeyondViewport: false,
   });
   await writeFile(
-    `docs/redesign-screenshots/${name}.png`,
+    `${evidenceRoot}/redesign-screenshots/${name}.png`,
     Buffer.from(result.data, "base64"),
   );
   await cdp.detach();
@@ -54,7 +55,7 @@ async function overflow() {
   );
 }
 try {
-  await mkdir("docs/redesign-screenshots", { recursive: true });
+  await mkdir(`${evidenceRoot}/redesign-screenshots`, { recursive: true });
   // Native Chrome Page zoom. A disposable profile keeps the user's browser untouched.
   await page.goto("chrome://settings/appearance");
   await page.locator("#zoomLevel").selectOption({ label: "200%" });
@@ -147,7 +148,7 @@ try {
     "Native Chrome Page zoom 200%: actual683×384 CSS/DPR2 on1366×768 viewport, no pinch scale; keyboard disclosure/input/sliders, automatic readiness, flight start and pause/resume retain functionality without horizontal overflow",
   ];
   await writeFile(
-    "docs/redesign-native-zoom-evidence.json",
+    `${evidenceRoot}/redesign-native-zoom-evidence.json`,
     JSON.stringify(
       {
         date: new Date().toISOString(),

@@ -31,3 +31,7 @@ Phone flight controls use one row above pause/emergency actions. Expanded panels
 Screens are reviewed together across desktop, tablet, 390px phone and short landscape. Browser checks use synthetic input and software rendering; they do not establish physical-controller compatibility or participant usability results.
 
 Final validation: all three browser suites passed against the final production build (`index-By_fCJN0.js`): 16 grouped checks, 54 screenshots, zero page/console/app-request errors. Preview responded HTTP 200; the owned server was stopped after verification. No commit or publication was created.
+
+## Phase 1 environment lifecycle (2026-11-19)
+
+The workflow/locks above remain intact. The approved Phase 1 coordinator now owns fixed-step weather/time/transport; READY edits synchronize versioned initial environment metadata and preview wetness (normalized rain, existing model equilibrium). Started edits retain the same blend/lag. Replay selects separate snapshots without mutating live Weather; resume invalidates the host wall-time baseline. The original rain-slider solar-time mapping remains WEATHER-01 for Phase 3. See [current phase handoff](simulation/PHASE_HANDOFF.md) for validation and remaining limits.

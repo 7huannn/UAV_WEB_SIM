@@ -1,0 +1,14 @@
+{
+  "stage": "P3-v1 partial, amendment pending",
+  "baselinePreservedCount": 289,
+  "changedFromP3Entry": [
+    "src/scene/World.ts",
+    "src/scene/atmosphere.ts",
+    "src/tests/conditions.test.ts",
+    "src/training/weatherPresets.ts"
+  ],
+  "phase2SourceHashMismatches": [],
+  "head": "aeeeccd617e39b0bff7c9aae717c6c7af0416946",
+  "branch": "main",
+  "phase4Work": false
+}

@@ -1,4 +1,6 @@
 import * as T from "three";
+import { sampleWind } from "../weather/Weather";
+import type { EnvironmentSnapshot } from "../simulation/Simulation";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { Quality } from "./World";
 import { seeded } from "./random";
@@ -11,15 +13,14 @@ export function makeGrassClumps(
 ) {
   const group = new T.Group();
   const time = { value: 0 },
-    wind = { value: new T.Vector3() },
     wet = { value: 0 };
   const meshes: T.InstancedMesh[] = [];
   let quality: Quality = "High",
     disposed = false;
   const state = { ready: false };
-  function bend(shader: T.WebGLProgramParametersWithUniforms) {
+  function bend(shader: T.WebGLProgramParametersWithUniforms, tileWind: { value: T.Vector3 }) {
     shader.uniforms.uClumpTime = time;
-    shader.uniforms.uClumpWind = wind;
+    shader.uniforms.uClumpWind = tileWind;
     shader.uniforms.uClumpWet = wet;
     shader.vertexShader = shader.vertexShader.replace(
       "#include <common>",
@@ -91,7 +92,6 @@ export function makeGrassClumps(
         material.depthWrite = true;
         material.roughness = 1;
         material.normalScale.set(0.7, 0.7);
-        material.onBeforeCompile = bend;
         material.customProgramCacheKey = () => "grass-clump-pbr";
         const geometry = source.geometry.clone();
         const depth = new T.MeshDepthMaterial({
@@ -100,15 +100,19 @@ export function makeGrassClumps(
           alphaTest: 0.45,
           side: T.DoubleSide,
         });
-        depth.onBeforeCompile = bend;
         for (const tile of grassTiles(
           28,
           78 + meshes.length * 11 + name.length * 19,
           2,
         )) {
+          const tileWind = { value: new T.Vector3() }, tileMaterial = material.clone(), tileDepth = depth.clone();
+          tileMaterial.onBeforeCompile = shader => bend(shader, tileWind);
+          tileMaterial.customProgramCacheKey = () => "grass-clump-pbr-tile-v1";
+          tileDepth.onBeforeCompile = shader => bend(shader, tileWind);
+          tileDepth.customProgramCacheKey = () => "grass-clump-depth-tile-v1";
           const mesh = new T.InstancedMesh(
             geometry,
-            material,
+            tileMaterial,
             tile.points.length,
           );
           mesh.position.set(tile.x, 0, tile.z);
@@ -125,7 +129,8 @@ export function makeGrassClumps(
             mesh.setColorAt(i, color);
           });
           mesh.receiveShadow = true;
-          mesh.customDepthMaterial = depth;
+          mesh.userData.wind = tileWind.value;
+          mesh.customDepthMaterial = tileDepth;
           mesh.computeBoundingSphere();
           mesh.boundingSphere!.radius += 0.4;
           meshes.push(mesh);
@@ -173,12 +178,11 @@ export function makeGrassClumps(
     dispose,
     update: (
       camera: T.Camera,
-      t: number,
-      windVector: T.Vector3,
-      wetness: number,
+      environment: EnvironmentSnapshot,
     ) => {
       group.visible = state.ready && camera.position.y < 6;
       for (const mesh of meshes) {
+        sampleWind(environment.current, environment.seed, environment.time, mesh.position, mesh.userData.wind);
         const distance = Math.hypot(
           camera.position.x - mesh.position.x,
           camera.position.y,
@@ -188,9 +192,8 @@ export function makeGrassClumps(
         // Ultra shadows use the same wind/LOD shader, fading before tile culling.
         mesh.castShadow = quality === "Ultra";
       }
-      time.value = t;
-      wind.value.copy(windVector);
-      wet.value = wetness;
+      time.value = environment.time;
+      wet.value = environment.wetness;
     },
   };
 }

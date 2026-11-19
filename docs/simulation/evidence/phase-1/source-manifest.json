@@ -1,0 +1,34 @@
+{
+  "baseline": "aeeeccd617e39b0bff7c9aae717c6c7af0416946",
+  "finalBundle": "/assets/index-I7FYVFLg.js",
+  "controllerMotorForceAndContactKernels": "unchanged",
+  "preservedFiles": [
+    "src/simulation/parameters.ts",
+    "src/simulation/missions.ts",
+    "src/arena/arenaGeometry.json",
+    "src/training/input.ts",
+    "src/training/profiles.ts"
+  ],
+  "sourceSHA256": {
+    "scripts/conditions-browser-check.mjs": "b4cb4d76dd8a3d987d1a3b7de7473242e1f72a171690a363a824b686f3db9dc0",
+    "scripts/native-zoom-browser-check.mjs": "2f668d09f4ef0dd2eb92cdd49b1859e33c8d79fe4de680942517fe3baa0dfb49",
+    "scripts/phase1-browser-check.mjs": "2104aebb9743219ff9b46832cec0b570dd4f480bf5dd760371432bda5387f398",
+    "scripts/phase1-metrics.ts": "1f985d5f45e36c0ab0c5e6604c19f66fcaec9583993577e1d769d6d016735448",
+    "scripts/phase1-motion-check.mjs": "d4b0f88b245e35b4297de70114344939bfbe71e6794e5d3dc46d42d71f6b169b",
+    "scripts/redesign-browser-check.mjs": "2ba1489273d841300a90cbc095c4dd1a4d0603242ba9210cae3e1f362501a92f",
+    "src/scene/World.ts": "ff440bf3874d084cdf7e04e8d34d1200b589985d22f75a515a9dd63f9f498860",
+    "src/scene/atmosphere.ts": "0509daa4126a83e2c42868c0177de9796727020f1e5f56e7741531825df4932c",
+    "src/scene/grass.ts": "b88c7c75fd859f2555f28fd9de9b5e7efc64e9784bfdd882d9d8d613333bfb05",
+    "src/scene/grassClumps.ts": "e5fdb219c7aa48a1cb885dab295d67eb1147048b09cb2f3d1b6571ead99c20ce",
+    "src/simulation/DroneDynamics.ts": "921c5f993a7401037d95edc34065540d7d279eaaf53d01e611b7b06ffe7e09c9",
+    "src/simulation/Simulation.ts": "33ee02b9fd2b1b35f29eb07e1ba94fcb3a4dcca01917abc7af67fcd81aabb44d",
+    "src/tests/conditions.test.ts": "2630e778cab581d32b392f68e6c696783016468f47cccb77e61330a855e6d8b2",
+    "src/tests/environment.test.ts": "7f4e303a8f0c7f169aae6bc2d6e6724ca1f30a54442adb4b884e0d1990f0cd17",
+    "src/tests/training.test.ts": "a9d1964ff3aa27e6f5e4942c68075714c8f1ded8973bdbfb164c106e86f7a7ee",
+    "src/training/Session.ts": "2e334321939176b4c4e959b1f4cc2c340773f3ee3988e6aa6c3853f1ef119b31",
+    "src/training/records.ts": "7b5b6399ea65f4a8a3ef1df65949e8bc274a9b451ae7a54b198c6d1081f63d05",
+    "src/ui/Review.tsx": "9068319868602ee2e90665e93d09c49e6a0ea8599381add49febf8101367ffc8",
+    "src/weather/Weather.ts": "191ad2358be8e886c6fc7250480a84fdfa9b3d768b1c558987328f8441ff2afe"
+  },
+  "buildHTML": "<!doctype html><html lang=\"vi\"><head><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/><meta name=\"theme-color\" content=\"#101914\"/><meta name=\"description\" content=\"M\u00f4 ph\u1ecfng luy\u1ec7n bay UAV th\u1ef1c h\u00e0nh b\u1eb1ng ti\u1ebfng Vi\u1ec7t.\"/><link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\"/><title>UAV ARENA \u00b7 Luy\u1ec7n bay th\u1ef1c h\u00e0nh</title>  <script type=\"module\" crossorigin src=\"/assets/index-I7FYVFLg.js\"></script>\n  <link rel=\"stylesheet\" crossorigin href=\"/assets/index-D9pGnXdO.css\">\n</head><body><div id=\"root\"></div></body></html>\n"
+}

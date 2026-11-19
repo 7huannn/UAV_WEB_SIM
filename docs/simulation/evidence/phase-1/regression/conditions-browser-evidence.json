@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-19T01:34:09.732Z",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-I7FYVFLg.js",
+  "checks": [
+    "Home learning links reach criteria; contextual return goes home; obsolete settings weather and discovery controls removed",
+    "Conditions available in all four practice maps before start; initial recording and actual weather match selected levels without advancing physics",
+    "Opening practice conditions pauses flight; keyboard sliders do not fly or resume; editing preserves ID, position, time, progress and seed; resumed wind/rain/wetness blend through existing physics and changes are recorded; advanced controls retained",
+    "Mock conditions editable on map before start; all four weather APIs and sliders lock after start including paused state",
+    "Homepage demo entry works; conditions adjust before/during automatic demonstration without resetting mission or changing saved practice conditions; desktop/tablet/mobile/short landscape panels fit viewport"
+  ],
+  "screenshots": [
+    "home-desktop",
+    "criteria",
+    "settings-desktop",
+    "ready-basic",
+    "ready-eight",
+    "ready-circuit",
+    "ready-abnormal",
+    "paused-conditions",
+    "advanced-conditions",
+    "practice-390x844",
+    "practice-768x1024",
+    "practice-1024x768",
+    "practice-844x390",
+    "exam-ready-conditions",
+    "exam-locked-conditions",
+    "demo-ready-conditions",
+    "demo-live-conditions",
+    "demo-390x844",
+    "demo-768x1024",
+    "demo-844x390",
+    "home-mobile"
+  ],
+  "errors": [],
+  "limitations": [
+    "Synthetic browser input and software rendering; no physical-controller or human usability validation"
+  ]
+}

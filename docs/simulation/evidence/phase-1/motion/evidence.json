@@ -1,0 +1,287 @@
+{
+  "date": "2026-11-19T01:37:06.920Z",
+  "browser": "147.0.7727.101",
+  "checks": [
+    "Cloud motion observed at 11 selected times over 10 simulated seconds; repeated paused renders do not advance authoritative state.",
+    "Real RAF-driven takeoff observed and recorded in motion, separately from fast-forwarded selected-time fixtures.",
+    "Force-integrated manual climb recorded; environmental state identical at 4 seconds after forward, backward and random seeks.",
+    "Playback speed and all principal camera switches preserve the live authoritative environment; selected-time snapshot agrees.",
+    "Ultra near vegetation and matching depth shaders compile/render without errors; local wind motion captured across four additional simulated seconds.",
+    "Fresh reset reproduces environment; legacy adaptation is deterministic and does not mutate original payload."
+  ],
+  "errors": [],
+  "cloud": [
+    {
+      "time": 0,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "time": 1,
+      "offset": [
+        0.21653962956850936,
+        1.0118026368767212
+      ]
+    },
+    {
+      "time": 2,
+      "offset": [
+        0.37365298424543725,
+        2.1403073247289375
+      ]
+    },
+    {
+      "time": 3,
+      "offset": [
+        0.5192362284272564,
+        2.803908032787276
+      ]
+    },
+    {
+      "time": 4,
+      "offset": [
+        0.6713233473110197,
+        3.6857144049213457
+      ]
+    },
+    {
+      "time": 5,
+      "offset": [
+        0.8608069138146544,
+        4.879689754790904
+      ]
+    },
+    {
+      "time": 6,
+      "offset": [
+        1.0526615959869927,
+        5.772126889891544
+      ]
+    },
+    {
+      "time": 7,
+      "offset": [
+        1.1753631597789644,
+        6.669512617294512
+      ]
+    },
+    {
+      "time": 8,
+      "offset": [
+        1.3764329524845096,
+        7.646322106125827
+      ]
+    },
+    {
+      "time": 9,
+      "offset": [
+        1.5233162878443531,
+        8.580025308962876
+      ]
+    },
+    {
+      "time": 10,
+      "offset": [
+        1.6637565255518372,
+        9.366652317277087
+      ]
+    }
+  ],
+  "liveFlight": [
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 1.6336357002826052,
+      "position": [
+        -19.998391529361207,
+        1.9536357002826052,
+        0.03631921536352921
+      ],
+      "speed": 3.86484090686213,
+      "groundSpeed": 0.07376839189454293,
+      "verticalSpeed": 3.864136832426122,
+      "roll": 0.03740885479968793,
+      "pitch": -0.7645240245912692,
+      "yaw": -0.0005116920201450523,
+      "rates": [
+        -0.024148701510026956,
+        -0.000025493815276957525,
+        0.0018104006169139064
+      ],
+      "rpm": [
+        4818.4896041848515,
+        4818.152612728165,
+        4814.434527350038,
+        4814.47815361921
+      ],
+      "thrust": [
+        48.3763045384606,
+        48.36953817281375,
+        48.29491509772169,
+        48.29579035586459
+      ],
+      "wind": [
+        0.9399788802151582,
+        0.06548254045762318,
+        4.360307728804594
+      ],
+      "progress": 0,
+      "time": 10.932,
+      "droppedTime": 0.40009999999999857,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 5.533509657537705,
+      "position": [
+        -19.997619860334304,
+        5.853509657537705,
+        0.06592168210923215
+      ],
+      "speed": 0.39847029524807426,
+      "groundSpeed": 0.050498816046656646,
+      "verticalSpeed": 0.3952574424004859,
+      "roll": 0.018670426858225824,
+      "pitch": -0.21023722307461057,
+      "yaw": -0.0000732621365974193,
+      "rates": [
+        0.009082376717061807,
+        -0.0000024818957654061363,
+        0.0007553765559525417
+      ],
+      "rpm": [
+        3966.8080080799327,
+        3966.8632872566736,
+        3963.58149912582,
+        3963.549682156525
+      ],
+      "thrust": [
+        32.7863597213737,
+        32.78727351180588,
+        32.733046094256814,
+        32.73252057856216
+      ],
+      "wind": [
+        0.5330998890191169,
+        -0.034727413240944215,
+        2.31599818419482
+      ],
+      "progress": 0,
+      "time": 12.68,
+      "droppedTime": 1.2000999999999984,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 5.481721853513499,
+      "position": [
+        -19.998000713046526,
+        5.8017218535135,
+        0.05265114453694924
+      ],
+      "speed": 0.13830724752475693,
+      "groundSpeed": 0.016613884785706575,
+      "verticalSpeed": -0.13730576663127317,
+      "roll": 0.06377496957016553,
+      "pitch": -1.2550248812359197,
+      "yaw": -0.0014011947086966564,
+      "rates": [
+        -0.0001829745522360023,
+        -0.000012112493913067198,
+        0.0005745808370642134
+      ],
+      "rpm": [
+        4204.38379086336,
+        4204.869163211178,
+        4207.4012841324275,
+        4207.304527128136
+      ],
+      "thrust": [
+        36.83117237053884,
+        36.839676762804295,
+        36.884058929971964,
+        36.88236251464494
+      ],
+      "wind": [
+        0.6250920386406716,
+        0.04729785942215051,
+        3.3483029136533817
+      ],
+      "progress": 0,
+      "time": 14.564,
+      "droppedTime": 1.9167999999999956,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 5.267320331170797,
+      "position": [
+        -19.99861684823483,
+        5.5873203311707975,
+        0.03112111014288428
+      ],
+      "speed": 0.07667639941628228,
+      "groundSpeed": 0.016414798879355853,
+      "verticalSpeed": -0.0748987623742579,
+      "roll": 0.03791668050467496,
+      "pitch": -0.652707972683239,
+      "yaw": -0.0004324981817613313,
+      "rates": [
+        0.004073599222632842,
+        0.00001482085899559978,
+        -0.0012894614247495099
+      ],
+      "rpm": [
+        4206.210361756715,
+        4206.363567181054,
+        4205.3834182983455,
+        4205.301801831993
+      ],
+      "thrust": [
+        36.86318151353584,
+        36.865866943761276,
+        36.848688291550985,
+        36.84725801504815
+      ],
+      "wind": [
+        0.31595401104174087,
+        -0.07958355341770013,
+        3.137301676682558
+      ],
+      "progress": 0,
+      "time": 16.616,
+      "droppedTime": 2.650099999999998,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    }
+  ],
+  "note": "Selected-time frames and real browser video; synthetic input is not a human flight. SwiftShader, no hardware GPU claim."
+}

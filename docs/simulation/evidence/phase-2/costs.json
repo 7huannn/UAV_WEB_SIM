@@ -1,0 +1,138 @@
+{
+  "date": "2026-11-19T02:25:02.162Z",
+  "contract": "P2-v1",
+  "node": "v24.15.0",
+  "cpu": "13th Gen Intel(R) Core(TM) i7-13620H",
+  "finalSourceSHA256": "4aeca76e4748d91a0c78a354201a56dcdb77e7401dcb284b49c48ebaef9e6e3b",
+  "comparator": "diagnostics-stripped derivative of final Dynamics source; one plant equation set, same current Simulation/Weather/parameters; exact final states checked",
+  "removedDiagnosticIfStatements": 23,
+  "batchesPerMode": 9,
+  "stepsPerBatch": 10000,
+  "warmupSteps": 10000,
+  "units": "microseconds per tick; batch means, not individual-tick latency",
+  "scenarios": {
+    "F0": {
+      "exactState": true,
+      "stats": {
+        "stripped": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 1.522201199999995,
+          "p95MicrosecondsPerTick": 1.9375278000000093,
+          "p99MicrosecondsPerTick": 1.9375278000000093,
+          "rawBatchMeanMicrosecondsPerTick": [
+            1.9375278000000093,
+            1.7430599000000029,
+            1.522201199999995,
+            1.5108119999999985,
+            1.5729656000000205,
+            1.5329615999999988,
+            1.5095250999999963,
+            1.5128767000000152,
+            1.4969088000000057
+          ]
+        },
+        "off": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 1.5586463000000095,
+          "p95MicrosecondsPerTick": 2.0255473000000053,
+          "p99MicrosecondsPerTick": 2.0255473000000053,
+          "rawBatchMeanMicrosecondsPerTick": [
+            2.0255473000000053,
+            1.7925842999999986,
+            1.5586121999999931,
+            1.5586463000000095,
+            1.612829499999998,
+            1.5680807999999842,
+            1.5532742999999982,
+            1.556819500000006,
+            1.5425505000000157
+          ]
+        },
+        "on": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 1.8724388999999975,
+          "p95MicrosecondsPerTick": 2.4381853999999974,
+          "p99MicrosecondsPerTick": 2.4381853999999974,
+          "rawBatchMeanMicrosecondsPerTick": [
+            2.4381853999999974,
+            1.8302508999999987,
+            1.850422900000001,
+            1.8724388999999975,
+            1.8742993999999953,
+            1.883039800000006,
+            1.8172861000000011,
+            1.8220000000000027,
+            1.8946296999999959
+          ]
+        }
+      },
+      "disabledCost": 0.03644510000001455,
+      "enabledCost": 0.35023770000000254,
+      "disabledMedianPass": true,
+      "disabledP95Pass": true,
+      "enabledMedianPass": true
+    },
+    "F2": {
+      "exactState": true,
+      "stats": {
+        "stripped": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 1.5331699000000072,
+          "p95MicrosecondsPerTick": 1.6191620000000058,
+          "p99MicrosecondsPerTick": 1.6191620000000058,
+          "rawBatchMeanMicrosecondsPerTick": [
+            1.5473461000000044,
+            1.5241776999999956,
+            1.5225995000000012,
+            1.5375487999999904,
+            1.5064743000000136,
+            1.5452314999999999,
+            1.521494800000005,
+            1.5331699000000072,
+            1.6191620000000058
+          ]
+        },
+        "off": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 1.551355599999988,
+          "p95MicrosecondsPerTick": 1.615313500000002,
+          "p99MicrosecondsPerTick": 1.615313500000002,
+          "rawBatchMeanMicrosecondsPerTick": [
+            1.582700899999986,
+            1.5588686000000052,
+            1.615313500000002,
+            1.551355599999988,
+            1.5405936999999994,
+            1.545720600000004,
+            1.5450791999999864,
+            1.5335616000000072,
+            1.558535699999993
+          ]
+        },
+        "on": {
+          "batches": 9,
+          "medianMicrosecondsPerTick": 2.0281011000000033,
+          "p95MicrosecondsPerTick": 2.039299600000004,
+          "p99MicrosecondsPerTick": 2.039299600000004,
+          "rawBatchMeanMicrosecondsPerTick": [
+            2.039299600000004,
+            2.0243645000000017,
+            2.0333194000000048,
+            2.028391399999987,
+            2.024438400000008,
+            2.0281011000000033,
+            2.0342102000000066,
+            1.9950546000000031,
+            2.0105504999999995
+          ]
+        }
+      },
+      "disabledCost": 0.018185699999980764,
+      "enabledCost": 0.49493119999999613,
+      "disabledMedianPass": true,
+      "disabledP95Pass": true,
+      "enabledMedianPass": true
+    }
+  },
+  "limit": "Measures optional diagnostic branch cost. The narrow Simulation override guard is shared by both comparators. This is Node CPU, not browser/GPU capacity."
+}

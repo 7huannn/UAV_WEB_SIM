@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-19T01:38:35.877Z",
+  "node": "v24.15.0",
+  "cpu": "13th Gen Intel(R) Core(TM) i7-13620H",
+  "baseline": "aeeeccd617e39b0bff7c9aae717c6c7af0416946",
+  "before": {
+    "stepsPerBatch": 10000,
+    "batches": 7,
+    "medianBatchMs": 13.229591000000028,
+    "minBatchMs": 12.414367999999968,
+    "maxBatchMs": 22.294137000000006,
+    "medianMicrosecondsPerTick": 1.3229591000000027
+  },
+  "after": {
+    "stepsPerBatch": 10000,
+    "batches": 7,
+    "medianBatchMs": 14.927365000000009,
+    "minBatchMs": 14.63084699999996,
+    "maxBatchMs": 22.41249899999997,
+    "medianMicrosecondsPerTick": 1.4927365000000008
+  },
+  "addedCpuMsPerSimulatedSecond": 0.04244434999999952,
+  "recording": {
+    "seconds": 600,
+    "frames": 30000,
+    "bytes": 33716049,
+    "legacyBytes": 22930898,
+    "extensionBytesPerSecond": 17975.251666666667,
+    "serializationMs": 198.6318100000001,
+    "observedProcessMemory": {
+      "rss": 508383232,
+      "heapTotal": 470753280,
+      "heapUsed": 386653128,
+      "external": 13102152,
+      "arrayBuffers": 4717631
+    },
+    "memoryNote": "Node workload holds new attempt, encoded JSON and legacy clone; not a browser/GPU footprint or normalized peak.",
+    "below100MBImportLimit": true,
+    "legacyTransportCacheBytes": 480000,
+    "cacheBuildMs": 10.027633999999807,
+    "thousandSeeksMs": 8.779072999999926,
+    "totalFixtureMs": 1481.38185
+  },
+  "limits": "Node CPU microbenchmark, no rendering; old kernel uses unchanged current wind formula; not a hardware GPU or real-aircraft benchmark."
+}

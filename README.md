@@ -37,6 +37,8 @@ The Vietnamese interface opens on a home hub with one primary **Bắt đầu luy
 
 Attempts checkpoint to IndexedDB every 10 simulated seconds, seal on completion/abort, and serialize writes to avoid stale checkpoints replacing final records. Recording is bounded to 600 simulated seconds; JSON imports are limited to 100 MB and validate schema, finite values, timestamps, quaternions and checksum. Export backups because browser storage can be cleared or quota-limited.
 
+Fresh H resets and READY weather previews initialize current conditions and wetness consistently (wetness equals normalized rain in the existing surface model). Pause freezes environmental evolution; resume discards paused wall time. New recordings include versioned environment snapshots for deterministic seeking. Legacy imports remain unchanged and replay displays an approximate-environment notice because their original wind phase/cloud transport was not recorded. See the [current simulation handoff](docs/simulation/PHASE_HANDOFF.md) and [Phase 2 physics report](docs/simulation/PHASE_2_HANDOFF.md) for evidence and limits; later atmosphere/rain phases remain pending review.
+
 ## Reference demonstrations
 
 Open **Trang chủ → Tìm hiểu trước khi bay → Xem bay mẫu tự động** to observe the preserved figure-eight or M1–M5 automatic course. Select a mission and camera, then start, pause/resume or stop the demonstration. **Đặt lại về H** recovers the aircraft. Automatic flight stays separate from manual task evaluation and never counts as learner performance.
@@ -47,7 +49,7 @@ Overview, Orbit and Ground support orbit/zoom; Follow tracks the aircraft, FPV f
 
 Six blendable presets: clear skies, partly cloudy, overcast, light rain, heavy rain and wind/gusts. Open **Điều kiện bay** in the map’s control dock for 0–10 wind/rain levels. Practice flights pause while editing; changes blend through the existing weather model after resuming, preserving position and progress. Demonstration conditions can change live. **Tinh chỉnh môi trường** retains all presets and numerical wind, direction, gusts, turbulence, cloud cover, rain, visibility and time controls. Starting-weather metadata updates while READY; later changes are logged without overwriting the original starting conditions. **Direction is wind towards**, measured from world +X towards +Z. Rain intensity is normalized 0–1, not measured mm/h. Rain affects visuals only.
 
-The same deterministic wind field drives body-relative drag, grass bending, rain slant and slow cloud advection. Sunlight, sky scattering, three stable cloud-height layers, continuous fog/ambient colors, PBR roughness and surface wetness respond to weather. Cloud structures use a seeded filtered noise atlas with no screen-space jitter or per-frame regeneration. Sky/cloud reflections refresh once a weather/time transition settles, rather than on every frame.
+One shared deterministic wind sampler drives body-relative drag at the aircraft, vegetation at fixed tile centres, and declared bulk samples for rain/clouds. A fixed-step coordinator owns environmental time and cloud transport; render calls do not accumulate weather history. Sunlight, sky scattering, three stable cloud-height layers, continuous fog/ambient colors, PBR roughness and surface wetness respond to weather. Cloud structures use a seeded filtered noise atlas with no screen-space jitter or per-frame regeneration. Sky/cloud reflections refresh once a weather/time transition settles, rather than on every frame.
 
 Concrete retains the local 2K albedo/normal/roughness maps, now sampled at micro/mid/macro scales. Its shallow 3.5 cm edge includes a 5 mm bevel and narrow soil/contact band; paint sits 1.5–2 mm above the surface with polygon offset. Wet roughness is restrained to avoid a mirror finish.
 
@@ -59,10 +61,10 @@ Low/Medium/High/Ultra vary pixel ratio, grass density, 1K/1K/2K/4K shadow maps, 
 
 - Meters, seconds, kilograms, radians; X follows the 45 m edge, Z the 27 m edge, Y points up. Court center(0,0,0); concrete topY=0, turfY=−0.035.
 - Quaternion maps body coordinates to world. Body+Y is rotor thrust, +X is right and+Z is rear. Angular velocity is body-frame; rendered FPV looks body−Z.
-- 250 Hz semi-implicit force/velocity/position integration and normalized quaternion integration, independent of renderer cadence. Each motor has lag, quadratic rotor-speed thrust, bounds and alternating reaction torque.
+- 250 Hz semi-implicit force/velocity/position integration and normalized quaternion integration under one fixed-step coordinator, independent of renderer batching for equal admitted simulation time. Each motor has lag, quadratic rotor-speed thrust, bounds and alternating reaction torque.
 - Cascaded position/velocity→attitude→body-rate PID with output limits and bounded integrals. Gravity, diagonal inertia, gyroscopic torque, rotational damping and body-frame quadratic drag are applied before integration.
 - Four landing-foot contacts against finite concrete/turf heights, penetration correction, low restitution and Coulomb friction. Paint, blades and rain have no colliders.
-- 15 kg demonstrator parameters are in `src/simulation/parameters.ts`. **Not calibrated to a real aircraft**; no digital-twin, sensor-fidelity or engineering-validation claim.
+- 15 kg demonstrator parameters are in `src/simulation/parameters.ts`. Phase 2 documented their units, frames and motor/drag/moment accounting, tested numerical and closed-loop responses, and added optional diagnostics outside saved attempts. The physical coefficients/gains remain illustrative. **Not calibrated to a real aircraft**; no digital-twin, sensor-fidelity or engineering-validation claim.
 
 ## Reference and assumptions
 

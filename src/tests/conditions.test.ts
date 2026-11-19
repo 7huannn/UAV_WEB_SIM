@@ -6,6 +6,30 @@ import { DroneDynamics } from "../simulation/DroneDynamics";
 import { TrainingSession } from "../training/Session";
 import { ControllerInput } from "../training/input";
 import { PILOT_STATION } from "../training/pilot";
+import { weatherAtLevels } from "../training/weatherPresets";
+import { extinctionForVisibility, transmittance, MOR_CONTRAST } from "../scene/optics";
+
+test("P3-C: meteorological visibility uses five-percent Beer–Lambert contrast", () => {
+  for (const visibility of [95, 180, 260, 650]) {
+    assert.equal(transmittance(0, visibility), 1);
+    assert.ok(Math.abs(transmittance(visibility, visibility) - MOR_CONTRAST) < 1e-12);
+    assert.ok(transmittance(visibility / 2, visibility) > MOR_CONTRAST);
+    assert.ok(transmittance(visibility * 2, visibility) < MOR_CONTRAST);
+    assert.ok(extinctionForVisibility(visibility) > 0);
+  }
+});
+
+test("P3-H: rain-level editing preserves the selected solar time", () => {
+  const base = new Weather().target;
+  for (const solarTime of [7, 13, 15.5, 17.5, 18]) {
+    for (const rain of [0, 1, 5, 10]) {
+      const source = { ...base, timeOfDay: solarTime };
+      const edited = weatherAtLevels(source, undefined, rain);
+      assert.equal(edited.timeOfDay, solarTime);
+      assert.equal(source.timeOfDay, solarTime);
+    }
+  }
+});
 
 test("map weather edits snapshot READY, preserve started recordings, and lock all mock/replay/final setters", () => {
   // Exercise World policy without constructing a renderer; dynamics/session are real.
@@ -31,12 +55,21 @@ test("map weather edits snapshot READY, preserve started recordings, and lock al
       replay: null,
     });
     assert.ok(w.setWeatherLevels(3, 4));
+    const solarTime = weather.target.timeOfDay;
+    assert.ok(w.setWeatherLevels(undefined, 10));
+    assert.equal(weather.target.timeOfDay, solarTime);
     assert.deepEqual(session.attempt.initialWeather, weather.target);
     assert.deepEqual(weather.current, weather.target);
+    assert.deepEqual(session.attempt.environment, drone.simulation.snapshot());
+    assert.equal(weather.wetness, weather.current.rain);
     const original = structuredClone(session.attempt.initialWeather);
     drone.arm();
     assert.ok(drone.armed);
     assert.ok(session.start(drone));
+    const startedSolarTime = weather.target.timeOfDay;
+    assert.equal(w.setWeatherLevels(undefined, 7), mode === "Training");
+    assert.equal(weather.target.timeOfDay, startedSolarTime);
+    assert.equal(weather.current.timeOfDay, startedSolarTime);
     const setters = [
       () => w.setWeatherLevels(8, 7),
       () => w.setAdvancedWeather("direction", 120),

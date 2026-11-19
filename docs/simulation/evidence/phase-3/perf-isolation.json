@@ -1,0 +1,129 @@
+{
+  "date": "2026-11-19T03:47:23.441Z",
+  "bundle": "/assets/index-D8eKH9VN.js",
+  "browser": "147.0.7727.101",
+  "fixture": "same heavy-rain/Low/Overview live simulation; 1280×800 DPR1 SwiftShader; 30 warm/120 measured each",
+  "samples": [
+    {
+      "mode": "baseline",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 16.926400000000374,
+      "medianMs": 103.59999999962747,
+      "p95Ms": 116.29999999888241,
+      "p99Ms": 136.5,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "no-context",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 11.2225,
+      "medianMs": 74.40000000037253,
+      "p95Ms": 84.20000000111759,
+      "p99Ms": 93.20000000111759,
+      "calls": 112,
+      "triangles": 22688,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "baseline",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.416400000000372,
+      "medianMs": 101.70000000111759,
+      "p95Ms": 109.40000000037253,
+      "p99Ms": 118.80000000074506,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "context-last",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.884099999999627,
+      "medianMs": 105,
+      "p95Ms": 114.59999999962747,
+      "p99Ms": 119.69999999925494,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "baseline",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.681300000000745,
+      "medianMs": 103.60000000149012,
+      "p95Ms": 114.20000000111759,
+      "p99Ms": 139.90000000037253,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "no-clouds",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 14.634,
+      "medianMs": 97.70000000111759,
+      "p95Ms": 104.5,
+      "p99Ms": 107.29999999888241,
+      "calls": 115,
+      "triangles": 21736,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "baseline",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.644599999999627,
+      "medianMs": 104.09999999962747,
+      "p95Ms": 115.40000000037253,
+      "p99Ms": 123,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "no-sky",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 14.102700000001118,
+      "medianMs": 93.10000000149012,
+      "p95Ms": 104.30000000074506,
+      "p99Ms": 117.90000000037253,
+      "calls": 115,
+      "triangles": 22684,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "baseline",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.771099999999628,
+      "medianMs": 104.80000000074506,
+      "p95Ms": 112.5,
+      "p99Ms": 123.59999999962747,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    },
+    {
+      "mode": "context-last",
+      "warmup": 30,
+      "measured": 120,
+      "wallSeconds": 15.968099999999627,
+      "medianMs": 106.30000000074506,
+      "p95Ms": 113.09999999962747,
+      "p99Ms": 116.70000000111759,
+      "calls": 116,
+      "triangles": 22696,
+      "reflectionCaptures": 2
+    }
+  ],
+  "errors": []
+}

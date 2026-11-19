@@ -1,0 +1,245 @@
+{
+  "label": "retained-sky",
+  "url": "http://127.0.0.1:4190",
+  "bundle": "/assets/index-D8eKH9VN.js",
+  "browser": "147.0.7727.101",
+  "viewport": [
+    1280,
+    800
+  ],
+  "dpr": 1,
+  "fixture": "synthetic 5.32 m pose; named preset plus 17.5 solar time, paused",
+  "shots": [
+    {
+      "name": "clear-skies-ground",
+      "current": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "clear-skies-pilot-vlos",
+      "current": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        0,
+        1.615,
+        17
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "clear-skies-overview",
+      "current": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "clear-skies-follow",
+      "current": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        3,
+        7.722392574986057,
+        4
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "clear-skies-fpv",
+      "current": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "overcast-ground",
+      "current": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "overcast-pilot-vlos",
+      "current": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        0,
+        1.615,
+        17
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "overcast-overview",
+      "current": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        8.584851860040521,
+        49.36289819523298,
+        40.77804633519247
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "overcast-follow",
+      "current": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        3,
+        7.722093359487973,
+        4
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    },
+    {
+      "name": "overcast-fpv",
+      "current": {
+        "wind": 3.8,
+        "direction": 110,
+        "gust": 1.8,
+        "turbulence": 0.3,
+        "cloud": 0.92,
+        "rain": 0,
+        "visibility": 260,
+        "timeOfDay": 17.5
+      },
+      "camera": [
+        0,
+        5.36,
+        -0.4
+      ],
+      "sun": [
+        7.010788151628535,
+        10.485472958846326,
+        63.76443919868101
+      ]
+    }
+  ],
+  "errors": []
+}

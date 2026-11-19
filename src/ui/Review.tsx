@@ -413,6 +413,9 @@ export function Review({
               </span>
               <h2>{vi(current.profile.name)}</h2>
             </div>
+            {replay && !replay.attempt.environment && (
+              <p className="library-note">Bản ghi cũ: môi trường được tái dựng gần đúng từ dữ liệu đã lưu.</p>
+            )}
             {replay && (
               <>
                 <div className="replay-views">

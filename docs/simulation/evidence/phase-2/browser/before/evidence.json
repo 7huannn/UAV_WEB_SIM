@@ -1,0 +1,742 @@
+{
+  "stage": "before",
+  "date": "2026-11-19T02:11:00.641Z",
+  "browser": "147.0.7727.101",
+  "bundle": "/assets/index-I7FYVFLg.js",
+  "shots": [
+    {
+      "name": "calm-ground",
+      "time": 22,
+      "mode": "Position hold",
+      "position": [
+        -19.99840069138008,
+        5.323880748357077,
+        0.007210652836458734
+      ],
+      "orientation": [
+        -0.0026772538347268654,
+        -0.0000012345708799594521,
+        0.0004424674556659539,
+        0.999996318259688
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Ground",
+      "eye": [
+        -22.9,
+        1.6500000000000004,
+        5.599999999999997
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 92,
+      "triangles": 55767,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "calm-pilot-vlos",
+      "time": 22,
+      "mode": "Position hold",
+      "position": [
+        -19.99840069138008,
+        5.323880748357077,
+        0.007210652836458734
+      ],
+      "orientation": [
+        -0.0026772538347268654,
+        -0.0000012345708799594521,
+        0.0004424674556659539,
+        0.999996318259688
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "PILOT VLOS",
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "quality": "Low",
+      "calls": 140,
+      "triangles": 222089,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "calm-follow",
+      "time": 22,
+      "mode": "Position hold",
+      "position": [
+        -19.99840069138008,
+        5.323880748357077,
+        0.007210652836458734
+      ],
+      "orientation": [
+        -0.0026772538347268654,
+        -0.0000012345708799594521,
+        0.0004424674556659539,
+        0.999996318259688
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Follow",
+      "eye": [
+        -16.998419640187898,
+        7.725972433827154,
+        4.007224864370693
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 100,
+      "triangles": 47823,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "calm-fpv",
+      "time": 22,
+      "mode": "Position hold",
+      "position": [
+        -19.99840069138008,
+        5.323880748357077,
+        0.007210652836458734
+      ],
+      "orientation": [
+        -0.0026772538347268654,
+        -0.0000012345708799594521,
+        0.0004424674556659539,
+        0.999996318259688
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "FPV",
+      "eye": [
+        -19.998434153050567,
+        5.36173836453462,
+        -0.392997792573768
+      ],
+      "fov": 85,
+      "quality": "Low",
+      "calls": 91,
+      "triangles": 50643,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "command-pilot-vlos",
+      "time": 37,
+      "mode": "Position hold",
+      "position": [
+        -14.945606950794897,
+        5.320028966743904,
+        -0.003211330766382356
+      ],
+      "orientation": [
+        -0.0013537840266855704,
+        -5.670291464275681e-7,
+        0.00023232550774710315,
+        0.999999056646228
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "PILOT VLOS",
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "quality": "Low",
+      "calls": 140,
+      "triangles": 222089,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "command-follow",
+      "time": 37,
+      "mode": "Position hold",
+      "position": [
+        -14.945606950794897,
+        5.320028966743904,
+        -0.003211330766382356
+      ],
+      "orientation": [
+        -0.0013537840266855704,
+        -5.670291464275681e-7,
+        0.00023232550774710315,
+        0.999999056646228
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Follow",
+      "eye": [
+        -11.945613897405558,
+        7.721529124369005,
+        3.9967938791820457
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 109,
+      "triangles": 51319,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "wind-pilot-vlos",
+      "time": 42,
+      "mode": "Position hold",
+      "position": [
+        -19.995134036964384,
+        5.327258207874032,
+        0.12130812952920798
+      ],
+      "orientation": [
+        -0.05259556243614892,
+        -0.00016315410704760463,
+        0.0031216521034768815,
+        0.9986110030842378
+      ],
+      "weather": {
+        "wind": 9,
+        "direction": 80,
+        "gust": 4,
+        "turbulence": 0.7,
+        "cloud": 0.4,
+        "rain": 0,
+        "visibility": 450,
+        "timeOfDay": 15
+      },
+      "camera": "PILOT VLOS",
+      "eye": [
+        0,
+        1.615,
+        17
+      ],
+      "fov": 55,
+      "quality": "Low",
+      "calls": 140,
+      "triangles": 222089,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "wind-follow",
+      "time": 42,
+      "mode": "Position hold",
+      "position": [
+        -19.995134036964384,
+        5.327258207874032,
+        0.12130812952920798
+      ],
+      "orientation": [
+        -0.05259556243614892,
+        -0.00016315410704760463,
+        0.0031216521034768815,
+        0.9986110030842378
+      ],
+      "weather": {
+        "wind": 9,
+        "direction": 80,
+        "gust": 4,
+        "turbulence": 0.7,
+        "cloud": 0.4,
+        "rain": 0,
+        "visibility": 450,
+        "timeOfDay": 15
+      },
+      "camera": "Follow",
+      "eye": [
+        -16.997635099835044,
+        7.7322369147108185,
+        4.123182641560927
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 102,
+      "triangles": 48145,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "wind-fpv",
+      "time": 42,
+      "mode": "Position hold",
+      "position": [
+        -19.995134036964384,
+        5.327258207874032,
+        0.12130812952920798
+      ],
+      "orientation": [
+        -0.05259556243614892,
+        -0.00016315410704760463,
+        0.0031216521034768815,
+        0.9986110030842378
+      ],
+      "weather": {
+        "wind": 9,
+        "direction": 80,
+        "gust": 4,
+        "turbulence": 0.7,
+        "cloud": 0.4,
+        "rain": 0,
+        "visibility": 450,
+        "timeOfDay": 15
+      },
+      "camera": "FPV",
+      "eye": [
+        -19.995121045733203,
+        5.325018526400621,
+        -0.28068065595880237
+      ],
+      "fov": 85,
+      "quality": "Low",
+      "calls": 91,
+      "triangles": 50643,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "yaw-pulse",
+      "time": 44,
+      "mode": "Position hold",
+      "position": [
+        -19.947511604403136,
+        6.0813028443358315,
+        -0.053896413773283816
+      ],
+      "orientation": [
+        0.013815934166742493,
+        -0.9577344258565786,
+        0.052199729059357436,
+        -0.28254040025879446
+      ],
+      "weather": {
+        "wind": 9,
+        "direction": 80,
+        "gust": 4,
+        "turbulence": 0.7,
+        "cloud": 0.4,
+        "rain": 0,
+        "visibility": 450,
+        "timeOfDay": 15
+      },
+      "camera": "FPV",
+      "eye": [
+        -20.16444616631262,
+        6.157941523372659,
+        0.2757487116641041
+      ],
+      "fov": 85,
+      "quality": "Low",
+      "calls": 79,
+      "triangles": 45143,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "yaw-recovered",
+      "time": 64,
+      "mode": "Position hold",
+      "position": [
+        -19.92143454198502,
+        6.080741450906762,
+        -0.008891357502561224
+      ],
+      "orientation": [
+        0.0349454114155524,
+        -0.9556823586970282,
+        0.06146141666893574,
+        -0.2857840824072089
+      ],
+      "weather": {
+        "wind": 9,
+        "direction": 80,
+        "gust": 4,
+        "turbulence": 0.7,
+        "cloud": 0.4,
+        "rain": 0,
+        "visibility": 450,
+        "timeOfDay": 15
+      },
+      "camera": "FPV",
+      "eye": [
+        -20.142914383832036,
+        6.15934215535756,
+        0.31725064978147155
+      ],
+      "fov": 85,
+      "quality": "Low",
+      "calls": 79,
+      "triangles": 45143,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "live-0",
+      "time": 0.864,
+      "mode": "Takeoff",
+      "position": [
+        -19.99774440287358,
+        1.6983152128541301,
+        0.007641684989893485
+      ],
+      "orientation": [
+        -0.0014496924611659759,
+        -6.555584030533771e-7,
+        0.0004365191742014954,
+        0.9999988539205177
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Follow",
+      "eye": [
+        -16.998526355951466,
+        3.586802875536801,
+        4.005003041826517
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 105,
+      "triangles": 62224,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "live-20",
+      "time": 3.648,
+      "mode": "Takeoff",
+      "position": [
+        -19.998136202749624,
+        5.923579530551575,
+        0.009309138790775376
+      ],
+      "orientation": [
+        -0.0007225691870453602,
+        -6.353342029559019e-8,
+        0.00007557855680992304,
+        0.9999997360907892
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Follow",
+      "eye": [
+        -16.997727952495044,
+        8.328639040399286,
+        4.010638442363473
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 101,
+      "triangles": 48623,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    },
+    {
+      "name": "live-39",
+      "time": 6.416,
+      "mode": "Takeoff",
+      "position": [
+        -19.997799803981994,
+        5.602130106897716,
+        0.00873910816513483
+      ],
+      "orientation": [
+        -0.0010809658631976706,
+        -4.173133310343757e-7,
+        0.00038679087348711893,
+        0.9999993409525073
+      ],
+      "weather": {
+        "wind": 1.8,
+        "direction": 65,
+        "gust": 0.6,
+        "turbulence": 0.15,
+        "cloud": 0.12,
+        "rain": 0,
+        "visibility": 650,
+        "timeOfDay": 15.5
+      },
+      "camera": "Follow",
+      "eye": [
+        -16.997604792480956,
+        8.020134679986487,
+        4.01035778180115
+      ],
+      "fov": 45,
+      "quality": "Low",
+      "calls": 100,
+      "triangles": 47823,
+      "memory": {
+        "geometries": 82,
+        "textures": 19
+      }
+    }
+  ],
+  "live": [
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 1.37831521285413,
+      "position": [
+        -19.99774440287358,
+        1.6983152128541301,
+        0.007641684989893485
+      ],
+      "speed": 3.629180270275649,
+      "groundSpeed": 0.017603108746849463,
+      "verticalSpeed": 3.6291375786432343,
+      "roll": 0.05002168089731992,
+      "pitch": -0.16612252880149686,
+      "yaw": -0.000147637658808338,
+      "rates": [
+        -0.00487214777232029,
+        -0.000003692455594227557,
+        0.001282576217742901
+      ],
+      "rpm": [
+        5074.8865791221315,
+        5074.905651718945,
+        5074.70703024627,
+        5074.677572139421
+      ],
+      "thrust": [
+        53.66158766248722,
+        53.661991008545534,
+        53.657790648642234,
+        53.65716769550108
+      ],
+      "wind": [
+        0.9523114245735504,
+        -0.005857581764710358,
+        2.0422888998388675
+      ],
+      "progress": 0,
+      "time": 0.864,
+      "droppedTime": 1.6332000000000004,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 5.603579530551575,
+      "position": [
+        -19.998136202749624,
+        5.923579530551575,
+        0.009309138790775376
+      ],
+      "speed": 0.10384383992133948,
+      "groundSpeed": 0.0020321692984836587,
+      "verticalSpeed": -0.1038239537753744,
+      "roll": 0.008660676705322558,
+      "pitch": -0.08280033606616721,
+      "yaw": -0.000013538335315637901,
+      "rates": [
+        -0.004188661699947742,
+        -0.0000014846459234738556,
+        0.0009177993875814188
+      ],
+      "rpm": [
+        4168.345231643094,
+        4168.127017436343,
+        4167.489565795827,
+        4167.678458548341
+      ],
+      "thrust": [
+        36.202469717862286,
+        36.198679395328064,
+        36.187608166936776,
+        36.190888670327595
+      ],
+      "wind": [
+        0.84786658872778,
+        0.04791019974029607,
+        1.7955763011726047
+      ],
+      "progress": 0,
+      "time": 3.648,
+      "droppedTime": 3.8663000000000127,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    },
+    {
+      "mode": "Takeoff",
+      "armed": true,
+      "altitude": 5.282130106897716,
+      "position": [
+        -19.997799803981994,
+        5.602130106897716,
+        0.00873910816513483
+      ],
+      "speed": 0.07955708847601231,
+      "groundSpeed": 0.00714401917572782,
+      "verticalSpeed": -0.07923568209334027,
+      "roll": 0.044323099694080256,
+      "pitch": -0.1238695598786954,
+      "yaw": -0.00009573239408524311,
+      "rates": [
+        0.0004887333864436974,
+        0.000001761174884020252,
+        -0.0007962369006601707
+      ],
+      "rpm": [
+        4206.500981518784,
+        4206.583972141888,
+        4206.112202913005,
+        4206.039214433207
+      ],
+      "thrust": [
+        36.86827566633455,
+        36.86973043901453,
+        36.86146100755044,
+        36.86018170803176
+      ],
+      "wind": [
+        0.5972761813032526,
+        0.003906615212926049,
+        1.5976324866883396
+      ],
+      "progress": 0,
+      "time": 6.416,
+      "droppedTime": 6.016300000000021,
+      "paused": false,
+      "missionPaused": false,
+      "selectedMission": "figure-eight",
+      "missionPhase": "IDLE",
+      "missionActive": false,
+      "activeWaypoint": "H",
+      "visitedWaypoints": []
+    }
+  ],
+  "profile": {
+    "warmupFrames": 60,
+    "measuredFrames": 300,
+    "wallSeconds": 39.364,
+    "simulatedSeconds": 35.78,
+    "realTimeFactor": 0.9089523422416422,
+    "medianMs": 107.20000000018626,
+    "p95Ms": 115.20000000018626,
+    "p99Ms": 122.5,
+    "calls": 116,
+    "triangles": 22696,
+    "memory": {
+      "geometries": 83,
+      "textures": 19
+    },
+    "admittedSeconds": 35.78,
+    "droppedSeconds": 3.568399999999975,
+    "gpuTiming": null,
+    "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "quality": "Low",
+    "viewport": [
+      1280,
+      800
+    ],
+    "dpr": 1,
+    "note": "Chrome/ANGLE SwiftShader wall RAF samples; no hardware GPU timestamps."
+  },
+  "errors": []
+}

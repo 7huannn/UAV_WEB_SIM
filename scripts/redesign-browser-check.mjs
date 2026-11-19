@@ -1,3 +1,4 @@
+const evidenceRoot = process.env.UAV_EVIDENCE_DIR ?? "docs";
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -33,7 +34,7 @@ const frames = () =>
 async function capture(name) {
   await frames();
   await page.screenshot({
-    path: `docs/redesign-screenshots/${name}.png`,
+    path: `${evidenceRoot}/redesign-screenshots/${name}.png`,
     fullPage: true,
     animations: "disabled",
   });
@@ -60,7 +61,7 @@ async function switchTo(name) {
     .click();
   await frames();
 }
-await mkdir("docs/redesign-screenshots", { recursive: true });
+await mkdir(`${evidenceRoot}/redesign-screenshots`, { recursive: true });
 async function fast(seconds, rc = { throttle: 0, yaw: 0, pitch: 0, roll: 0 }) {
   await page.evaluate(
     ({ seconds, rc }) => {
@@ -452,7 +453,7 @@ try {
   );
   assert.deepEqual(errors, []);
   await writeFile(
-    "docs/redesign-browser-evidence.json",
+    `${evidenceRoot}/redesign-browser-evidence.json`,
     JSON.stringify(
       {
         date: new Date().toISOString(),

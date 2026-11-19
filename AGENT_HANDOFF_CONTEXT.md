@@ -1,5 +1,13 @@
 # UAV ARENA — AGENT HANDOFF & LIVE PROJECT CONTEXT
 
+## Current simulation-realism program — Phase 3 planning only (2026-11-19)
+
+The user formally accepted Phases 1 and 2 within their documented scope and authorized Phase 3 **planning and contract preparation only**. Read the four governance records under [docs/simulation](docs/simulation/MASTER_PLAN.md), the accepted [Phase 2 handoff](docs/simulation/PHASE_2_HANDOFF.md), and proposed [P3-v1 contract](docs/simulation/PHASE_3_CONTRACT.md). The visual assessment, reference baseline, P3-A–L gates and Phase 4 inheritance are in P3-v1. No Phase 3 application code has changed; its implementation awaits explicit contract approval. Phase 4 is unauthorized. Earlier sections below record prior checkpoints and do not override this status.
+
+## Historical checkpoint — Phase 2 ready for result review (2026-11-19)
+
+The user formally accepted Phase 1, then explicitly approved the complete P2-v1 implementation contract. Phase 2 now adds optional last-tick force/controller diagnostics and pre-tick finite four-motor override validation; existing coefficients, gains, force laws, flight paths, visual style and record schema remain unchanged. Scoped P2-A–J gates pass: 55 Node tests, typecheck/build, 16 existing browser groups, six Phase 1 motion/replay groups, and new force-integrated flight-motion/cost evidence. Read the four governance records in order: [master plan / approved P2-v1](docs/simulation/MASTER_PLAN.md), [visual/motion standards](docs/simulation/DESIGN_STANDARDS.md), [architecture decisions](docs/simulation/ARCHITECTURE_DECISIONS.md), [current handoff](docs/simulation/PHASE_HANDOFF.md), then [complete Phase 2 evidence and limitations](docs/simulation/PHASE_2_HANDOFF.md). **STOP for user review/acceptance of Phase 2. Phase 3 is not started or authorized.** Baseline remains `main` at `aeeeccd617e39b0bff7c9aae717c6c7af0416946`; changes are uncommitted. Historical sections below do not override this current status.
+
 ## Latest implementation — in-map conditions and learning discovery (2026-11-18)
 
 This section and `docs/FLIGHT_CONDITIONS_UX.md` supersede the historical UX/weather-navigation descriptions below. Current UI has a homepage hub, four manual exercise maps with automatic READY, saved-flight review, settings/calibration, and separate automatic demos. Instructor UI and physical checklists were removed in the preceding redesign; archived checklist fields still import.

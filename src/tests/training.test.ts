@@ -49,7 +49,9 @@ function setup(
     ...PILOT_STATION,
   });
   const tick = () => {
-    d.time += dt;
+    const state = d.simulation.snapshot();
+    state.tick++; state.time = state.tick * dt;
+    d.simulation.restore(state);
     s.sample(d, w, input, "PILOT VLOS");
   };
   return { w, d, input, s, tick };
@@ -272,7 +274,7 @@ test("bounds use body extent, strict camera/automation and controller faults int
   const o = setup("figure-eight", "Mock Examination");
   ready(o);
   o.s.sample(o.d, o.w, o.input, "Overview"); // no elapsed step -> no sample
-  o.d.time += dt;
+  o.d.simulation.restore({ ...o.d.simulation.snapshot(), tick: o.d.simulation.tick + 1, time: o.d.time + dt });
   o.s.sample(o.d, o.w, o.input, "Overview");
   assert.equal(o.s.state, "INCOMPLETE");
   const b = setup();
@@ -433,7 +435,7 @@ test("neutral input gates manual start and recording duration is bounded while r
   o.input.value.throttle = 0;
   assert.equal(o.s.start(o.d), true);
   const idle = setup();
-  idle.d.time = 601;
+  idle.d.simulation.restore({ ...idle.d.simulation.snapshot(), tick: 150250, time: 601 });
   idle.s.sample(idle.d, idle.w, idle.input, "PILOT VLOS");
   assert.equal(idle.s.state, "INCOMPLETE");
   assert.match(idle.s.attempt.events.at(-1)?.detail ?? "", /INCOMPLETE/);

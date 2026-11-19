@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-19",
+  "contract": "P2-v1",
+  "baselineHead": "aeeeccd617e39b0bff7c9aae717c6c7af0416946",
+  "branch": "main",
+  "phase1Bundle": "/assets/index-I7FYVFLg.js",
+  "phase2Bundle": "/assets/index-C0vYNo8f.js",
+  "phase1SourceUnchangedCount": 17,
+  "phase1SourceChangedByP2": [
+    "src/simulation/DroneDynamics.ts",
+    "src/simulation/Simulation.ts"
+  ],
+  "parameterExecutableTokensMatchBaseline": true,
+  "sourceSHA256": {
+    "src/simulation/DroneDynamics.ts": "4aeca76e4748d91a0c78a354201a56dcdb77e7401dcb284b49c48ebaef9e6e3b",
+    "src/simulation/Simulation.ts": "8448b70611327fc394d6dfcb2119cf3c73a684eada3046551a70ad29aa674ae6",
+    "src/simulation/parameters.ts": "83d42bdee511274211c03a4276329caa6adc6191adeb5a4fd5022e94a5c35c69",
+    "src/tests/physics.test.ts": "5b940053aae5374259d8683a985c334430c25d2b2640b9da2be7720acbd6b43e",
+    "scripts/phase2-scenarios.ts": "ff82d84ed710683ce600a53af815d9140d37b455e6e1d6c4aa5e89eec0c2734c",
+    "scripts/phase2-costs.ts": "cd9b47f844bc089e10cd860af5ff9aebb19c1968c222b22e986fa5a4e56189f7",
+    "scripts/phase2-browser-check.mjs": "1fed6e005239725f371bd61778e19d0af98740570e6821b8fa84e15c0d0d37db",
+    "scripts/phase2-flight-motion.mjs": "20c92e87d18b2a8bbc10f8b70e5f3df37aef65d22cbcfc719f8c97d9b74fe7a2"
+  },
+  "newSourceFiles": [
+    "src/tests/physics.test.ts",
+    "scripts/phase2-scenarios.ts",
+    "scripts/phase2-costs.ts",
+    "scripts/phase2-browser-check.mjs",
+    "scripts/phase2-flight-motion.mjs"
+  ],
+  "beforeTrace": "docs/simulation/evidence/phase-2/baseline.json",
+  "finalBundleSHA256": "bd9bdeb80dbf434d5d73f3ff82ad4cdea2e3dcb3870b0969f54976f812e2233f",
+  "preexistingStatusEntries": 25,
+  "finalStatusEntries": 31,
+  "oldFilesPreservedExceptApprovedSources": true,
+  "newDependencies": false,
+  "applicationCoreChanges": "optional physics diagnostics in existing plant, pre-tick override validation, parameter comments only"
+}

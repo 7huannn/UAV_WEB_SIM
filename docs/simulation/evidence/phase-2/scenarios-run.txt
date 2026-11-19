@@ -1,0 +1,27 @@
+{
+  "path": "docs/simulation/evidence/phase-2/scenarios.json",
+  "gates": {
+    "P2-E-F0": true,
+    "P2-F-F1-0": true,
+    "P2-F-F1-90": true,
+    "P2-F-F1-180": true,
+    "P2-F-F1-270": true,
+    "P2-F-F2-42": true,
+    "P2-F-manual-42": true,
+    "P2-F-F2-17": true,
+    "P2-F-manual-17": true,
+    "P2-F-F3-wind": true,
+    "P2-F-F3-wrap": true,
+    "P2-F-F3-halfturn": true,
+    "P2-E-F4-x": true,
+    "P2-E-F4-altitude": true,
+    "P2-E-F4-yaw": true,
+    "P2-E-manual-0": true,
+    "P2-E-manual-1.5707963267948966": true,
+    "P2-G": true,
+    "P2-G-stress": true,
+    "P2-H-calm": true,
+    "P2-H-gust": true
+  },
+  "failures": []
+}

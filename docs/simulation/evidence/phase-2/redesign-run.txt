@@ -1,0 +1,44 @@
+Captured home-desktop
+Captured exercise-selection
+Captured ready
+Captured flight
+Captured paused
+Captured aborted-result
+Captured replay
+Captured settings
+Captured calibration
+Captured criteria
+Captured test-selection
+Captured route-complete
+Captured landed
+Captured finished-result
+Captured completed-replay-mobile
+Captured reference-demo
+Captured home-1024
+Captured practice-1024
+Captured settings-1024
+Captured review-1024
+Captured home-390
+Captured practice-390
+Captured settings-390
+Captured review-390
+Captured home-683
+Captured practice-683
+Captured settings-683
+Captured review-683
+{
+  "checks": [
+    "Homepage uses one primary practice entry; no instructor or permanent destination menu",
+    "Contextual look controls preserve fixed eye, unit aircraft scale and zoom; training ground-guide toggle remains functional",
+    "Exercise enters READY without physical checks; one start action arms and starts; real keyboard climbs; pause/resume works",
+    "Legacy recordings with physical checklist fields still import unchanged; invalid imports fail without losing existing records",
+    "Aborted flight is saved to IndexedDB; replay opens, scrubs, plays, pauses, changes speed, saves personal notes and exports JSON",
+    "Context switch closes replay and restores weather; graphics and calibration remain in settings, learning criteria are accessible from home",
+    "Full figure-eight through unchanged force integrator completes every ordered gate, manual landing and shutdown, final save and responsive replay; strict exam rejects aids",
+    "Reference demo starts/pauses/resumes/stops; disconnected gamepad blocks entry with keyboard recovery; ready can return to selection; leaving active flight pauses, cancels safely or saves before returning home",
+    "Test flight and accessible help modal open; Escape restores focus",
+    "Desktop/tablet/390px mobile/200%-equivalent viewport reflow without horizontal overflow; reduced motion disables transitions"
+  ],
+  "screenshots": 28,
+  "errors": []
+}

@@ -3,6 +3,8 @@ import type { Attempt, Frame } from "./Session";
 import { channels, validController } from "./input";
 import { rules } from "./profiles";
 import { validStation } from "./pilot";
+import { validWeather, sampleWind } from "../weather/Weather";
+import { cloudReference, cloudTransportScale, interpolateEnvironment, validEnvironment, type EnvironmentSnapshot } from "../simulation/Simulation";
 export type Annotation = {
   id?: number;
   attemptId: string;
@@ -63,29 +65,6 @@ const weatherKeys = [
   "visibility",
   "timeOfDay",
 ] as const;
-const validWeather = (w: unknown) => {
-  if (!w || typeof w !== "object") return false;
-  const v = w as Record<string, number>;
-  return (
-    weatherKeys.every(
-      (k) => typeof v[k] === "number" && Number.isFinite(v[k]),
-    ) &&
-    v.wind >= 0 &&
-    v.wind <= 30 &&
-    v.gust >= 0 &&
-    v.gust <= 20 &&
-    v.turbulence >= 0 &&
-    v.turbulence <= 5 &&
-    v.cloud >= 0 &&
-    v.cloud <= 1 &&
-    v.rain >= 0 &&
-    v.rain <= 1 &&
-    v.visibility > 0 &&
-    v.visibility <= 100000 &&
-    v.timeOfDay >= 0 &&
-    v.timeOfDay <= 24
-  );
-};
 export function validateAttempt(a: Attempt) {
   if (
     !a ||
@@ -194,11 +173,15 @@ export function validateAttempt(a: Attempt) {
     )
   )
     throw Error("Missing locked reference path");
+  if (a.environment !== undefined && (!validEnvironment(a.environment) || a.environment.seed !== a.weatherSeed ||
+    !weatherKeys.every(k => a.environment!.current[k] === a.initialWeather[k])))
+    throw Error("Invalid initial environment extension");
   let last = -1;
   for (const f of a.frames) {
     if (
       !f ||
       !Number.isFinite(f.time) ||
+      f.time < 0 || f.time > 600 ||
       !Number.isFinite(f.wetness) ||
       (f.cameraPose !== undefined &&
         (!finiteArray(f.cameraPose.position, 3) ||
@@ -241,6 +224,13 @@ export function validateAttempt(a: Attempt) {
       !stringList(f.violations)
     )
       throw Error("Invalid or non-monotonic frame data");
+    if (a.environment !== undefined || f.environment !== undefined) {
+      const e = f.environment;
+      if (!a.environment || !validEnvironment(e) || e.seed !== a.weatherSeed ||
+        Math.abs(e.time - a.environment.time - f.time) > 1e-7 ||
+        e.wetness !== f.wetness || !weatherKeys.every(k => e.current[k] === f.weather[k]))
+        throw Error("Invalid frame environment extension");
+    }
     const norm = Math.hypot(...f.orientation);
     if (Math.abs(norm - 1) > 0.01) throw Error("Invalid quaternion");
     last = f.time;
@@ -287,8 +277,8 @@ export async function parseAttempt(text: string) {
     throw Error("Integrity check failed: recording has changed");
   return e;
 }
-export function replayAt(frames: Frame[], time: number): Frame | null {
-  if (!frames.length) return null;
+function frameIndex(frames: Frame[], time: number) {
+  if (!Number.isFinite(time)) throw Error("Invalid replay time");
   let lo = 0,
     hi = frames.length - 1;
   while (lo < hi) {
@@ -296,11 +286,18 @@ export function replayAt(frames: Frame[], time: number): Frame | null {
     if (frames[m].time <= time) lo = m;
     else hi = m - 1;
   }
+  return lo;
+}
+export function replayAt(frames: Frame[], time: number): Frame | null {
+  if (!frames.length) return null;
+  const lo = frameIndex(frames, time);
   const a = frames[lo],
     b = frames[Math.min(lo + 1, frames.length - 1)],
     t = Math.max(0, Math.min(1, (time - a.time) / (b.time - a.time || 1)));
+  const environment = a.environment && b.environment ? interpolateEnvironment(a.environment, b.environment, t) : undefined;
   return {
     ...a,
+    ...(environment ? { environment, weather: environment.current, wetness: environment.wetness } : {}),
     position: new Vector3(...(a.position as [number, number, number]))
       .lerp(new Vector3(...(b.position as [number, number, number])), t)
       .toArray(),
@@ -314,6 +311,39 @@ export function replayAt(frames: Frame[], time: number): Frame | null {
       .toArray(),
     time: a.time + (b.time - a.time) * t,
   };
+}
+// Legacy records lack absolute phase and transport. Cache a deterministic relative-time reconstruction,
+// never write the adapter into the sealed payload. Two float64 values per frame; bounded by import limits.
+const legacyTransport = new WeakMap<Attempt, Float64Array>();
+export function replayEnvironment(attempt: Attempt, time: number, frame = replayAt(attempt.frames, time)): EnvironmentSnapshot {
+  if (frame?.environment) return frame.environment;
+  const frames = attempt.frames;
+  let offsets = legacyTransport.get(attempt);
+  if (!offsets) {
+    offsets = new Float64Array(frames.length * 2);
+    const before = new Vector3(), after = new Vector3();
+    let lastTime = 0, x = 0, z = 0, weather = attempt.initialWeather;
+    frames.forEach((f, i) => {
+      sampleWind(weather, attempt.weatherSeed, lastTime, cloudReference, before);
+      sampleWind(f.weather, attempt.weatherSeed, f.time, cloudReference, after);
+      const dt = f.time - lastTime;
+      x += (before.x + after.x) * .5 * dt * cloudTransportScale;
+      z += (before.z + after.z) * .5 * dt * cloudTransportScale;
+      offsets![i * 2] = x; offsets![i * 2 + 1] = z;
+      lastTime = f.time; weather = f.weather;
+    });
+    legacyTransport.set(attempt, offsets);
+  }
+  const index = frames.length ? frameIndex(frames, time) : 0;
+  const next = Math.min(index + 1, frames.length - 1), a = frames[index], b = frames[next];
+  const t = a && b ? Math.max(0, Math.min(1, (time - a.time) / (b.time - a.time || 1))) : 0;
+  const selectedTime = frame?.time ?? 0;
+  return { version: 1, model: "sinusoidal-bulk-v1", seed: attempt.weatherSeed,
+    tick: Math.floor(selectedTime / attempt.fixedDt), time: selectedTime,
+    current: { ...(frame?.weather ?? attempt.initialWeather) }, target: { ...(frame?.weather ?? attempt.initialWeather) },
+    wetness: frame?.wetness ?? 0,
+    cloudOffset: a && b ? [offsets[index * 2] + (offsets[next * 2] - offsets[index * 2]) * t,
+      offsets[index * 2 + 1] + (offsets[next * 2 + 1] - offsets[index * 2 + 1]) * t] : [0, 0] };
 }
 const open = () =>
   new Promise<IDBDatabase>((resolve, reject) => {
