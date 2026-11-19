@@ -16,6 +16,8 @@ export type PilotStation = {
   initialPitch?: number;
   viewRevision?: number;
 };
+// Reference framing is a virtual camera behind and above the physical pilot station.
+const PILOT_VIEW = { back: 8.5, rise: 4.5, verticalFov: 45, pitch: -14.3 * Math.PI / 180 };
 // Edge/centre vectors use the same world coordinates as the court; this also
 // handles a rotated edge when a surveyed transform is supplied by the caller.
 export function stationFromEdge(
@@ -45,12 +47,12 @@ export function stationFromEdge(
     z,
     groundY,
     eyeHeight: 1.65,
-    verticalFov: 55,
+    verticalFov: PILOT_VIEW.verticalFov,
     edge: "front-long-edge",
-    viewRevision: 2,
+    viewRevision: 5,
     setback,
-    initialYaw: Math.atan2(center[1] + 8 * nx - z, center[0] - 8 * nz - x),
-    initialPitch: -5 * Math.PI / 180,
+    initialYaw: Math.atan2(center[1] - z, center[0] - x),
+    initialPitch: PILOT_VIEW.pitch,
     source:
       "Giả định kỹ thuật: trung điểm cạnh dài phía trước (+Z), lùi ngoài V1; chưa có khảo sát hiện trường",
     confidence: "Cần giảng viên và đơn vị có thẩm quyền xác nhận",
@@ -101,7 +103,12 @@ export function applyPilotCamera(
   yaw = s.initialYaw ?? 0,
   pitch = s.initialPitch ?? 0,
 ) {
-  camera.position.set(s.x, s.groundY + s.eyeHeight, s.z);
+  const stationYaw = s.initialYaw ?? -Math.PI / 2;
+  camera.position.set(
+    s.x - PILOT_VIEW.back * Math.cos(stationYaw),
+    s.groundY + s.eyeHeight + PILOT_VIEW.rise,
+    s.z - PILOT_VIEW.back * Math.sin(stationYaw),
+  );
   camera.fov = s.verticalFov;
   camera.zoom = 1;
   camera.up.set(0, 1, 0);

@@ -149,9 +149,12 @@ export class World {
     this.scene.add(this.groundGuide.group);
     try {
       const s = JSON.parse(localStorage.getItem("uav-pilot-station") ?? "null");
-      if (s && validFrontStation(s)) this.pilotStation = s.viewRevision === 2 ? s : {
-        ...s, verticalFov: PILOT_STATION.verticalFov, initialYaw: frontPilotStation(s.setback).initialYaw,
-        initialPitch: PILOT_STATION.initialPitch, viewRevision: 2,
+      if (s && validFrontStation(s)) this.pilotStation = s.viewRevision === 5 ? s : {
+        ...s,
+        verticalFov: PILOT_STATION.verticalFov,
+        initialYaw: frontPilotStation(s.setback).initialYaw,
+        initialPitch: PILOT_STATION.initialPitch,
+        viewRevision: 5,
       };
       // Legacy local west station is superseded; archived attempt snapshots stay untouched.
     } catch {

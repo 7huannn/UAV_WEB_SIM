@@ -91,11 +91,15 @@ test("pilot camera remains fixed under head look; bearing and perspective size f
   const c = new PerspectiveCamera(55, 1.6, 0.06, 1200);
   applyPilotCamera(c, PILOT_STATION);
   const eye = c.position.clone();
+  assert.ok(eye.toArray().every((v, i) => Math.abs(v - [0, 6.115, 25.5][i]) < 1e-12));
+  assert.ok(Math.abs(PILOT_STATION.initialYaw! + Math.PI / 2) < 1e-12);
+  assert.ok(Math.abs(PILOT_STATION.initialPitch! + 14.3 * Math.PI / 180) < 1e-12);
+  assert.ok(Math.abs(c.getWorldDirection(new Vector3()).y - Math.sin(PILOT_STATION.initialPitch!)) < 1e-12);
   applyPilotCamera(c, PILOT_STATION, -Math.PI / 2, 0);
   const projectHeight = (distance: number) => {
     c.updateMatrixWorld();
-    const a = new Vector3(0, 1.115, PILOT_STATION.z - distance).project(c),
-      b = new Vector3(0, 2.115, PILOT_STATION.z - distance).project(c);
+    const a = new Vector3(0, eye.y - 0.5, eye.z - distance).project(c),
+      b = new Vector3(0, eye.y + 0.5, eye.z - distance).project(c);
     return Math.abs(a.y - b.y);
   };
   assert.ok(Math.abs(projectHeight(10) / projectHeight(20) - 2) < 1e-6);
@@ -499,7 +503,7 @@ test("front pilot station follows court midpoint and outward edge normal, includ
   const t = stationFromEdge([10, -20], [10, 20], [0, 0], 3, -0.035);
   assert.equal(t.x, 13);
   assert.equal(t.z, 0);
-  assert.ok(Math.abs(t.initialYaw! - Math.atan2(8, -13)) < 1e-8);
+  assert.ok(Math.abs(t.initialYaw! - Math.PI) < 1e-8);
   const reversed = stationFromEdge([10, 20], [10, -20], [0, 0], 3, -0.035);
   assert.deepEqual(reversed, t);
   assert.ok(!validFrontStation({ ...s, x: 1 }));
